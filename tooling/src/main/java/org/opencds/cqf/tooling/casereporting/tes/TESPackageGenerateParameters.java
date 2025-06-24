@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.casereporting.tes;
 
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class TESPackageGenerateParameters {
@@ -15,4 +14,6 @@ public class TESPackageGenerateParameters {
     public String pathToConditionCodeValueSet; // -pathToConditionCodeValueSet (-ptccvs)
     public Set<IOUtils.Encoding> outputFileEncodings; // -encoding (-e)
     public boolean writeConditionGroupers; // -writeconditiongroupers (-wcg)
+    public boolean writeReportingSpecificationGroupers; // -writereportingspecificationgroupers (-wrsg)
+    public boolean writeAdditionalContextGroupers; // -writeadditionalcontextgroupers (-wacg)
 }

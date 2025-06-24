@@ -1,970 +1,3419 @@
 {
     "resourceType": "ValueSet",
-    "id": "2.16.840.1.113762.1.4.1146.1239-20240619",
-    "meta": {
-        "versionId": "1",
-        "lastUpdated": "2024-09-25T17:45:04.045+00:00",
-        "source": "#h7zm0Ihzx3gVtg3A",
-        "profile": [
-            "http://aphl.org/fhir/vsm/StructureDefinition/vsm-conditionvalueset",
-            "http://aphl.org/fhir/vsm/StructureDefinition/vsm-hostedvalueset",
-            "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
-            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
-            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
-        ]
-    },
-    "extension": [
-        {
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
-            "valueContactDetail": {
-                "name": "CSTE Author"
-            }
-        },
-        {
-            "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
-            "valueDate": "2024-06-19"
-        },
-        {
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
-            "valueDate": "2024-06-19"
-        },
-        {
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource",
-            "valueUri": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1239"
-        }
-    ],
-    "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1239",
-    "identifier": [
-        {
-            "system": "urn:ietf:rfc:3986",
-            "value": "urn:oid:2.16.840.1.113762.1.4.1146.1239"
-        }
-    ],
-    "version": "20240619",
-    "name": "RCKMSConditionsSNOMED",
-    "title": "RCKMS Conditions (SNOMED)",
+    "url": "http://ersd.aimsplatform.org/fhir/ValueSet/rckms-condition-codes",
+    "version": "20250229",
+    "name": "RCKMSContentCodes",
+    "title": "RCKMS Content Codes",
     "status": "active",
-    "date": "2024-06-19T01:24:12-04:00",
-    "publisher": "CSTE Steward",
-    "jurisdiction": [
-        {
-            "extension": [
-                {
-                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                    "valueCode": "unknown"
-                }
-            ]
-        }
-    ],
-    "purpose": "(Clinical Focus: This set of values contains conditions available for authoring in RCKMS as of the June 2024 content release.),(Data Element Scope: Diagnoses or conditions documented in a clinical record.),(Inclusion Criteria: Conditions included in the June 2024 content release),(Exclusion Criteria: none)",
+    "publisher": "RCKMS",
+    "description": "The Reportable Condition Knowledge Management System (RCKMS) associates a standardized code with each condition available for authoring. This workbook contains condition codes included in the June 2023 content release. Please note that while there may be overlap with concepts referenced in RCKMS reporting logic, this value set is not intended to serve as a 'trigger' for case reporting.  When implementing trigger codes for electronic case reporting, use the Reportable Condition Trigger Codes (RCTC) file.",
     "compose": {
         "include": [
             {
                 "system": "http://snomed.info/sct",
+                "version": "2024-09",
                 "concept": [
                     {
-                        "code": "10301003",
-                        "display": "Tick-borne relapsing fever (disorder)"
-                    },
-                    {
-                        "code": "111323005",
-                        "display": "Total anomalous pulmonary venous return (disorder)"
-                    },
-                    {
-                        "code": "111407006",
-                        "display": "Hemolytic uremic syndrome (disorder)"
-                    },
-                    {
-                        "code": "111811007",
-                        "display": "Mycobacterial infection (excluding tuberculosis AND leprosy) (disorder)"
-                    },
-                    {
-                        "code": "111864006",
-                        "display": "Chikungunya fever (disorder)"
-                    },
-                    {
-                        "code": "1119306006",
-                        "display": "Multisystem inflammatory syndrome in adults (disorder)"
-                    },
-                    {
-                        "code": "1149222004",
-                        "display": "Overdose (disorder)"
-                    },
-                    {
-                        "code": "115635005",
-                        "display": "Balamuthia mandrillaris (organism)"
-                    },
-                    {
-                        "code": "11999007",
-                        "display": "Inactive tuberculosis (finding)"
-                    },
-                    {
-                        "code": "1214006",
-                        "display": "Infection caused by Strongyloides (disorder)"
-                    },
-                    {
-                        "code": "1237074000",
-                        "display": "Congenital atrioventricular septal defect (disorder)"
-                    },
-                    {
-                        "code": "128869009",
-                        "display": "Infestation caused by Sarcoptes scabiei var hominis (disorder)"
-                    },
-                    {
-                        "code": "12962009",
-                        "display": "Histoplasmosis (disorder)"
-                    },
-                    {
-                        "code": "13906002",
-                        "display": "Anaplasmosis (disorder)"
-                    },
-                    {
-                        "code": "14168008",
-                        "display": "Rabies (disorder)"
-                    },
-                    {
-                        "code": "14189004",
-                        "display": "Measles (disorder)"
-                    },
-                    {
-                        "code": "14683004",
-                        "display": "Relapsing fever caused by Borrelia recurrentis (disorder)"
-                    },
-                    {
-                        "code": "15628003",
-                        "display": "Gonorrhea (disorder)"
-                    },
-                    {
-                        "code": "16541001",
-                        "display": "Yellow fever (disorder)"
-                    },
-                    {
-                        "code": "1731000119106",
-                        "display": "Atypical mycobacterial infection of lung (disorder)"
-                    },
-                    {
-                        "code": "17383000",
-                        "display": "Toxic effect of carbon monoxide (disorder)"
-                    },
-                    {
-                        "code": "18504008",
-                        "display": "Toxic shock syndrome (disorder)"
-                    },
-                    {
-                        "code": "1857005",
-                        "display": "Congenital rubella syndrome (disorder)"
-                    },
-                    {
-                        "code": "18624000",
-                        "display": "Disease caused by Rotavirus (disorder)"
-                    },
-                    {
-                        "code": "186431008",
-                        "display": "Infection caused by Clostridioides difficile (disorder)"
-                    },
-                    {
-                        "code": "186771002",
-                        "display": "Spotted fever group rickettsial disease (disorder)"
-                    },
-                    {
-                        "code": "186788009",
-                        "display": "Q fever (disorder)"
-                    },
-                    {
-                        "code": "18690003",
-                        "display": "Farmers' lung (disorder)"
-                    },
-                    {
-                        "code": "187151009",
-                        "display": "Diphyllobothriasis (disorder)"
-                    },
-                    {
-                        "code": "187192000",
-                        "display": "Toxoplasmosis (disorder)"
-                    },
-                    {
-                        "code": "190268003",
-                        "display": "Congenital hypothyroidism (disorder)"
-                    },
-                    {
-                        "code": "190687004",
-                        "display": "Phenylketonuria (disorder)"
-                    },
-                    {
-                        "code": "19265001",
-                        "display": "Tularemia (disorder)"
-                    },
-                    {
-                        "code": "198130006",
-                        "display": "Female pelvic inflammatory disease (disorder)"
-                    },
-                    {
-                        "code": "204296002",
-                        "display": "Discordant ventriculoarterial connection (disorder)"
-                    },
-                    {
-                        "code": "204339005",
-                        "display": "Congenital pulmonary valve abnormality (disorder)"
-                    },
-                    {
-                        "code": "204357006",
-                        "display": "Ebstein's anomaly of tricuspid valve (disorder)"
-                    },
-                    {
-                        "code": "20484008",
-                        "display": "Prion disease (disorder)"
-                    },
-                    {
-                        "code": "21061004",
-                        "display": "Babesiosis (disorder)"
-                    },
-                    {
-                        "code": "212962007",
-                        "display": "Drowning and non-fatal immersion (disorder)"
-                    },
-                    {
-                        "code": "216809001",
-                        "display": "Accidental poisoning caused by fertilizers (disorder)"
-                    },
-                    {
-                        "code": "218728005",
-                        "display": "Interrupted aortic arch (disorder)"
-                    },
-                    {
-                        "code": "22607003",
-                        "display": "Asbestosis (disorder)"
-                    },
-                    {
-                        "code": "233733000",
-                        "display": "Toxic pneumonitis (disorder)"
-                    },
-                    {
-                        "code": "23502006",
-                        "display": "Lyme disease (disorder)"
-                    },
-                    {
-                        "code": "23511006",
-                        "display": "Meningococcal infectious disease (disorder)"
-                    },
-                    {
-                        "code": "240370009",
-                        "display": "Cryptosporidiosis (disorder)"
-                    },
-                    {
-                        "code": "240372001",
-                        "display": "Cyclosporiasis (disorder)"
-                    },
-                    {
-                        "code": "240451000",
-                        "display": "Streptococcal toxic shock syndrome (disorder)"
-                    },
-                    {
-                        "code": "240507007",
-                        "display": "Trivittatus fever (disorder)"
-                    },
-                    {
-                        "code": "240523007",
-                        "display": "Viral hemorrhagic fever (disorder)"
-                    },
-                    {
-                        "code": "240589008",
-                        "display": "Chlamydia trachomatis infection (disorder)"
-                    },
-                    {
-                        "code": "240613006",
-                        "display": "Typhus group rickettsial disease (disorder)"
-                    },
-                    {
-                        "code": "240626005",
-                        "display": "Human ehrlichiosis (disorder)"
-                    },
-                    {
-                        "code": "240820001",
-                        "display": "Lymphatic filariasis (disorder)"
-                    },
-                    {
-                        "code": "242253008",
-                        "display": "Overdose of opiate (disorder)"
-                    },
-                    {
-                        "code": "266113007",
-                        "display": "Genital warts (disorder)"
-                    },
-                    {
-                        "code": "266123003",
-                        "display": "Bartonellosis (disorder)"
-                    },
-                    {
-                        "code": "266143009",
-                        "display": "Chancroid (disorder)"
-                    },
-                    {
-                        "code": "26726000",
-                        "display": "Legionella infection (disorder)"
-                    },
-                    {
-                        "code": "269275003",
-                        "display": "Seafood causing toxic effect (disorder)"
-                    },
-                    {
-                        "code": "276197005",
-                        "display": "Infection caused by Corynebacterium diphtheriae (disorder)"
-                    },
-                    {
-                        "code": "27836007",
-                        "display": "Pertussis (disorder)"
-                    },
-                    {
-                        "code": "283545005",
-                        "display": "Gunshot wound (disorder)"
-                    },
-                    {
-                        "code": "28867007",
-                        "display": "Granuloma inguinale (disorder)"
-                    },
-                    {
-                        "code": "293104008",
-                        "display": "Adverse reaction to component of vaccine product (disorder)"
-                    },
-                    {
-                        "code": "29422001",
-                        "display": "Coal workers' pneumoconiosis (disorder)"
-                    },
-                    {
-                        "code": "302231008",
-                        "display": "Salmonella infection (disorder)"
-                    },
-                    {
-                        "code": "328291000119103",
-                        "display": "Infection caused by Shiga toxin producing Escherichia coli (disorder)"
-                    },
-                    {
-                        "code": "33839006",
-                        "display": "Genital herpes simplex (disorder)"
-                    },
-                    {
-                        "code": "3398004",
-                        "display": "Cadmium poisoning (disorder)"
-                    },
-                    {
-                        "code": "34298002",
-                        "display": "Neonatal conjunctivitis (disorder)"
-                    },
-                    {
-                        "code": "35742006",
-                        "display": "Congenital syphilis (disorder)"
-                    },
-                    {
-                        "code": "359761005",
-                        "display": "Disease caused by Hantavirus (disorder)"
-                    },
-                    {
-                        "code": "359814004",
-                        "display": "Monkeypox (disorder)"
-                    },
-                    {
-                        "code": "36188001",
-                        "display": "Shigellosis (disorder)"
-                    },
-                    {
-                        "code": "363346000",
-                        "display": "Malignant neoplastic disease (disorder)"
-                    },
-                    {
-                        "code": "36653000",
-                        "display": "Rubella (disorder)"
-                    },
-                    {
-                        "code": "36921006",
-                        "display": "Vesicular stomatitis (disorder)"
-                    },
-                    {
-                        "code": "36989005",
-                        "display": "Mumps (disorder)"
-                    },
-                    {
-                        "code": "37131007",
-                        "display": "Pesticide poisoning (disorder)"
-                    },
-                    {
-                        "code": "38362002",
-                        "display": "Dengue (disorder)"
-                    },
-                    {
-                        "code": "388759003",
-                        "display": "Infection caused by Entamoeba histolytica (disorder)"
-                    },
-                    {
-                        "code": "38907003",
-                        "display": "Varicella (disorder)"
-                    },
-                    {
-                        "code": "38959009",
-                        "display": "Methemoglobinemia (disorder)"
-                    },
-                    {
-                        "code": "3928002",
-                        "display": "Zika virus disease (disorder)"
-                    },
-                    {
-                        "code": "397575003",
-                        "display": "Viral hepatitis, type G (disorder)"
-                    },
-                    {
-                        "code": "398102009",
-                        "display": "Acute poliomyelitis (disorder)"
-                    },
-                    {
-                        "code": "398447004",
-                        "display": "Severe acute respiratory syndrome (disorder)"
-                    },
-                    {
-                        "code": "398557001",
-                        "display": "Infection caused by non-cholerae vibrio (disorder)"
-                    },
-                    {
-                        "code": "398565003",
-                        "display": "Infection caused by Clostridium botulinum (disorder)"
-                    },
-                    {
-                        "code": "399907009",
-                        "display": "Animal bite wound (disorder)"
-                    },
-                    {
-                        "code": "404236003",
-                        "display": "Snowshoe hare virus encephalitis (disorder)"
-                    },
-                    {
-                        "code": "404237007",
-                        "display": "Keystone virus encephalitis (disorder)"
-                    },
-                    {
-                        "code": "40468003",
-                        "display": "Viral hepatitis, type A (disorder)"
-                    },
-                    {
-                        "code": "404681006",
-                        "display": "Infection caused by vancomycin resistant Staphylococcus aureus (disorder)"
-                    },
-                    {
-                        "code": "40610006",
-                        "display": "Arbovirus infection (disorder)"
-                    },
-                    {
-                        "code": "406575008",
-                        "display": "Infection caused by vancomycin resistant Enterococcus (disorder)"
-                    },
-                    {
-                        "code": "406583002",
-                        "display": "Invasive Haemophilus influenzae disease (disorder)"
-                    },
-                    {
-                        "code": "406597005",
-                        "display": "Infection caused by Nipah virus (disorder)"
-                    },
-                    {
-                        "code": "406602003",
-                        "display": "Infection caused by Staphylococcus aureus (disorder)"
-                    },
-                    {
-                        "code": "406604002",
-                        "display": "Infection caused by vancomycin intermediate Staphylococcus aureus (disorder)"
-                    },
-                    {
-                        "code": "406612005",
-                        "display": "Invasive Group B beta-hemolytic streptococcal disease (disorder)"
-                    },
-                    {
-                        "code": "406614006",
-                        "display": "Invasive Group A beta-hemolytic streptococcal disease (disorder)"
-                    },
-                    {
-                        "code": "406617004",
-                        "display": "Invasive Streptococcus pneumoniae disease (disorder)"
-                    },
-                    {
-                        "code": "407152001",
-                        "display": "Blood lead level above reference range (finding)"
-                    },
-                    {
-                        "code": "407153006",
-                        "display": "Injury due to motor vehicle accident (disorder)"
-                    },
-                    {
-                        "code": "409498004",
-                        "display": "Anthrax (disorder)"
-                    },
-                    {
-                        "code": "40956001",
-                        "display": "Guillain-Barré syndrome (disorder)"
-                    },
-                    {
-                        "code": "409617000",
-                        "display": "Ricin poisoning (disorder)"
-                    },
-                    {
-                        "code": "409636005",
-                        "display": "Complication of smallpox vaccination (disorder)"
-                    },
-                    {
-                        "code": "41040004",
-                        "display": "Complete trisomy 21 syndrome (disorder)"
-                    },
-                    {
-                        "code": "414015000",
-                        "display": "Disease caused by Orthopoxvirus (disorder)"
-                    },
-                    {
-                        "code": "41439009",
-                        "display": "Microcystis flos-aquae poisoning (disorder)"
-                    },
-                    {
-                        "code": "414488002",
-                        "display": "Infantile botulism (disorder)"
-                    },
-                    {
-                        "code": "414819007",
-                        "display": "Neonatal abstinence syndrome (disorder)"
-                    },
-                    {
-                        "code": "416707008",
-                        "display": "Powassan encephalitis virus infection (disorder)"
-                    },
-                    {
-                        "code": "416925005",
-                        "display": "Eastern equine encephalitis virus infection (disorder)"
-                    },
-                    {
-                        "code": "417093003",
-                        "display": "Disease caused by West Nile virus (disorder)"
-                    },
-                    {
-                        "code": "417192005",
-                        "display": "Saint Louis encephalitis virus infection (disorder)"
-                    },
-                    {
-                        "code": "41723001",
-                        "display": "Jamestown Canyon virus disease (disorder)"
-                    },
-                    {
-                        "code": "418182000",
-                        "display": "Disease caused by California serogroup virus (disorder)"
-                    },
-                    {
-                        "code": "419488004",
-                        "display": "Staphylococcus aureus enterotoxin B (substance)"
-                    },
-                    {
-                        "code": "42386007",
-                        "display": "Cryptococcosis (disorder)"
-                    },
-                    {
-                        "code": "4241002",
-                        "display": "Listeriosis (disorder)"
-                    },
-                    {
-                        "code": "428111003",
-                        "display": "Melioidosis (disorder)"
-                    },
-                    {
-                        "code": "428175000",
-                        "display": "Primary amebic encephalitis caused by Naegleria fowleri (disorder)"
-                    },
-                    {
-                        "code": "433202001",
-                        "display": "Surgical site infection (disorder)"
-                    },
-                    {
-                        "code": "43692000",
-                        "display": "Influenzal acute upper respiratory infection (disorder)"
-                    },
-                    {
-                        "code": "4374004",
-                        "display": "Congenital anomaly of tricuspid valve (disorder)"
-                    },
-                    {
-                        "code": "44301001",
-                        "display": "Suicide (event)"
-                    },
-                    {
-                        "code": "444664004",
-                        "display": "Genus Cronobacter (organism)"
-                    },
-                    {
-                        "code": "45170000",
-                        "display": "Encephalitis (disorder)"
-                    },
-                    {
-                        "code": "45503006",
-                        "display": "Common ventricle (disorder)"
-                    },
-                    {
-                        "code": "4639008",
-                        "display": "Glanders (disorder)"
-                    },
-                    {
-                        "code": "47523006",
-                        "display": "Western equine encephalitis (disorder)"
-                    },
-                    {
-                        "code": "4834000",
-                        "display": "Typhoid fever (disorder)"
-                    },
-                    {
-                        "code": "49049000",
-                        "display": "Parkinson's disease (disorder)"
-                    },
-                    {
                         "code": "49649001",
-                        "display": "Infection caused by Acanthamoeba (disorder)"
-                    },
-                    {
-                        "code": "50711007",
-                        "display": "Viral hepatitis type C (disorder)"
-                    },
-                    {
-                        "code": "52947006",
-                        "display": "Japanese encephalitis virus disease (disorder)"
-                    },
-                    {
-                        "code": "53648006",
-                        "display": "Disease caused by Enterovirus (disorder)"
-                    },
-                    {
-                        "code": "541131000124102",
-                        "display": "Infection caused by novel Influenza A virus variant (disorder)"
-                    },
-                    {
-                        "code": "551611000124101",
-                        "display": "Perinatal hepatitis caused by Hepatitis C virus (disorder)"
-                    },
-                    {
-                        "code": "55735004",
-                        "display": "Respiratory syncytial virus infection (disorder)"
-                    },
-                    {
-                        "code": "56717001",
-                        "display": "Tuberculosis (disorder)"
-                    },
-                    {
-                        "code": "57607007",
-                        "display": "Occupational asthma (disorder)"
-                    },
-                    {
-                        "code": "58265007",
-                        "display": "Giardiasis (disorder)"
-                    },
-                    {
-                        "code": "58718002",
-                        "display": "Rheumatic fever (disorder)"
-                    },
-                    {
-                        "code": "58750007",
-                        "display": "Plague (disorder)"
-                    },
-                    {
-                        "code": "59051007",
-                        "display": "Cysticercosis (disorder)"
-                    },
-                    {
-                        "code": "59527008",
-                        "display": "Congenital cytomegalovirus infection (disorder)"
-                    },
-                    {
-                        "code": "60498001",
-                        "display": "Congenital viral hepatitis B infection (disorder)"
-                    },
-                    {
-                        "code": "60826002",
-                        "display": "Coccidioidomycosis (disorder)"
-                    },
-                    {
-                        "code": "61094002",
-                        "display": "La Crosse encephalitis (disorder)"
-                    },
-                    {
-                        "code": "6142004",
-                        "display": "Influenza (disorder)"
-                    },
-                    {
-                        "code": "61462000",
-                        "display": "Malaria (disorder)"
-                    },
-                    {
-                        "code": "61750000",
-                        "display": "Infection caused by Angiostrongylus (disorder)"
-                    },
-                    {
-                        "code": "61959006",
-                        "display": "Common truncus arteriosus (disorder)"
-                    },
-                    {
-                        "code": "62067003",
-                        "display": "Hypoplastic left heart syndrome (disorder)"
-                    },
-                    {
-                        "code": "63650001",
-                        "display": "Cholera (disorder)"
-                    },
-                    {
-                        "code": "6415009",
-                        "display": "Human respiratory syncytial virus (organism)"
-                    },
-                    {
-                        "code": "6452009",
-                        "display": "Colorado tick fever (disorder)"
-                    },
-                    {
-                        "code": "651000146102",
-                        "display": "Middle East respiratory syndrome (disorder)"
-                    },
-                    {
-                        "code": "65154009",
-                        "display": "Infection caused by Clostridium perfringens (disorder)"
-                    },
-                    {
-                        "code": "66071002",
-                        "display": "Viral hepatitis type B (disorder)"
-                    },
-                    {
-                        "code": "661761000124109",
-                        "display": "Death associated with influenza (event)"
-                    },
-                    {
-                        "code": "66948001",
-                        "display": "Cleft palate with cleft lip (disorder)"
-                    },
-                    {
-                        "code": "67341007",
-                        "display": "Longitudinal deficiency of limb (disorder)"
-                    },
-                    {
-                        "code": "67531005",
-                        "display": "Spina bifida (disorder)"
-                    },
-                    {
-                        "code": "67924001",
-                        "display": "Smallpox (disorder)"
-                    },
-                    {
-                        "code": "69996000",
-                        "display": "Blastomycosis (disorder)"
-                    },
-                    {
-                        "code": "700372006",
-                        "display": "Urinary tract infection associated with catheter (disorder)"
-                    },
-                    {
-                        "code": "707341005",
-                        "display": "Viral hepatitis type D (disorder)"
-                    },
-                    {
-                        "code": "709018004",
-                        "display": "Infection caused by larvae of Trichinella (disorder)"
-                    },
-                    {
-                        "code": "7111000119109",
-                        "display": "Viral hepatitis type E (disorder)"
-                    },
-                    {
-                        "code": "712662001",
-                        "display": "Carbapenem resistant Enterobacteriaceae (organism)"
-                    },
-                    {
-                        "code": "715174007",
-                        "display": "Carbapenem resistant Acinetobacter baumannii (organism)"
-                    },
-                    {
-                        "code": "71695001",
-                        "display": "Complication of ventilation therapy (disorder)"
-                    },
-                    {
-                        "code": "7180009",
-                        "display": "Meningitis (disorder)"
-                    },
-                    {
-                        "code": "719590007",
-                        "display": "Influenza caused by seasonal influenza virus (disorder)"
-                    },
-                    {
-                        "code": "721763002",
-                        "display": "Infection caused by Norovirus (disorder)"
-                    },
-                    {
-                        "code": "721781004",
-                        "display": "Infection caused by Lymphocytic choriomeningitis virus (disorder)"
-                    },
-                    {
-                        "code": "726492000",
-                        "display": "Carbapenem resistant Pseudomonas aeruginosa (organism)"
-                    },
-                    {
-                        "code": "72951007",
-                        "display": "Gastroschisis (disorder)"
-                    },
-                    {
-                        "code": "7305005",
-                        "display": "Coarctation of aorta (disorder)"
-                    },
-                    {
-                        "code": "734350003",
-                        "display": "Carbapenemase-producing bacteria (organism)"
-                    },
-                    {
-                        "code": "736152001",
-                        "display": "Infection of bloodstream co-occurrent and due to central venous catheter in situ (disorder)"
-                    },
-                    {
-                        "code": "74225001",
-                        "display": "Tick paralysis (disorder)"
-                    },
-                    {
-                        "code": "74351001",
-                        "display": "Reye's syndrome (disorder)"
-                    },
-                    {
-                        "code": "7484005",
-                        "display": "Double outlet right ventricle (disorder)"
-                    },
-                    {
-                        "code": "74942003",
-                        "display": "Echinococcosis (disorder)"
-                    },
-                    {
-                        "code": "75053002",
-                        "display": "Acute febrile mucocutaneous lymph node syndrome (disorder)"
-                    },
-                    {
-                        "code": "75116005",
-                        "display": "Ornithosis (disorder)"
-                    },
-                    {
-                        "code": "75702008",
-                        "display": "Brucellosis (disorder)"
-                    },
-                    {
-                        "code": "76172008",
-                        "display": "Infection caused by Taenia (disorder)"
-                    },
-                    {
-                        "code": "76272004",
-                        "display": "Syphilis (disorder)"
-                    },
-                    {
-                        "code": "767146004",
-                        "display": "Toxic effect of arsenic and/or arsenic compound (disorder)"
-                    },
-                    {
-                        "code": "767299002",
-                        "display": "Toxic effect of mercury and/or mercury compound (disorder)"
-                    },
-                    {
-                        "code": "76902006",
-                        "display": "Tetanus (disorder)"
-                    },
-                    {
-                        "code": "77377001",
-                        "display": "Leptospirosis (disorder)"
-                    },
-                    {
-                        "code": "77506005",
-                        "display": "Infection caused by Trypanosoma cruzi (disorder)"
-                    },
-                    {
-                        "code": "788781001",
-                        "display": "Delayed allergy to red meat (finding)"
-                    },
-                    {
-                        "code": "792004",
-                        "display": "Jakob-Creutzfeldt disease (disorder)"
-                    },
-                    {
-                        "code": "80281008",
-                        "display": "Cleft lip (disorder)"
-                    },
-                    {
-                        "code": "805002",
-                        "display": "Pneumoconiosis caused by silica (disorder)"
-                    },
-                    {
-                        "code": "80612004",
-                        "display": "Leishmaniasis (disorder)"
-                    },
-                    {
-                        "code": "81004002",
-                        "display": "Leprosy (disorder)"
-                    },
-                    {
-                        "code": "82271004",
-                        "display": "Injury of head (disorder)"
-                    },
-                    {
-                        "code": "83436008",
-                        "display": "Yersiniosis (disorder)"
-                    },
-                    {
-                        "code": "840539006",
-                        "display": "Disease caused by severe acute respiratory syndrome coronavirus 2 (disorder)"
-                    },
-                    {
-                        "code": "84619001",
-                        "display": "Nongonococcal urethritis (disorder)"
-                    },
-                    {
-                        "code": "85761009",
-                        "display": "Byssinosis (disorder)"
-                    },
-                    {
-                        "code": "85904008",
-                        "display": "Paratyphoid fever (disorder)"
-                    },
-                    {
-                        "code": "86299006",
-                        "display": "Tetralogy of Fallot (disorder)"
-                    },
-                    {
-                        "code": "86406008",
-                        "display": "Human immunodeficiency virus infection (disorder)"
-                    },
-                    {
-                        "code": "86500004",
-                        "display": "Campylobacteriosis (disorder)"
-                    },
-                    {
-                        "code": "865929003",
-                        "display": "Infection caused by Candida auris (disorder)"
-                    },
-                    {
-                        "code": "87979003",
-                        "display": "Cleft palate (disorder)"
-                    },
-                    {
-                        "code": "89369001",
-                        "display": "Anencephalus (disorder)"
-                    },
-                    {
-                        "code": "895448002",
-                        "display": "Multisystem inflammatory syndrome in children (disorder)"
+                        "display": "Infection caused by Acanthamoeba (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Acanthamoeba"
+                            }
+                        ]
                     },
                     {
                         "code": "897031002",
-                        "display": "Acute flaccid myelitis (disorder)"
+                        "display": "Acute flaccid myelitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Acute Flaccid Myelitis (AFM)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "216809001",
+                        "display": "Accidental poisoning caused by fertilizers (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Agricultural Chemicals (Fertilizer) Poisoning"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "788781001",
+                        "display": "Delayed allergy to red meat (finding)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Alpha-gal Syndrome"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "388759003",
+                        "display": "Infection caused by Entamoeba histolytica (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Amebiasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "13906002",
+                        "display": "Anaplasmosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Anaplasmosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "399907009",
+                        "display": "Animal bite wound (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Animal Bite Injury"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "409498004",
+                        "display": "Anthrax (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Anthrax"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "40610006",
+                        "display": "Arbovirus infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Arboviral Disease [Other]"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "767146004",
+                        "display": "Toxic effect of arsenic and/or arsenic compound (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Arsenic Exposure and Toxicity"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "22607003",
+                        "display": "Asbestosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Asbestosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "21061004",
+                        "display": "Babesiosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Babesiosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "115635005",
+                        "display": "Balamuthia mandrillaris (organism)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Balamuthia mandrillaris Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "69996000",
+                        "display": "Blastomycosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Blastomycosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "398565003",
+                        "display": "Infection caused by Clostridium botulinum (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Botulism"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "414488002",
+                        "display": "Infantile botulism (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Botulism, Infant"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "75702008",
+                        "display": "Brucellosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Brucellosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "85761009",
+                        "display": "Byssinosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Byssinosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "3398004",
+                        "display": "Cadmium poisoning (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cadmium Exposure and Toxicity"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "418182000",
+                        "display": "Disease caused by California serogroup virus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "California Serogroup Virus Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "86500004",
+                        "display": "Campylobacteriosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Campylobacteriosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "363346000",
+                        "display": "Malignant neoplastic disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cancer"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "865929003",
+                        "display": "Infection caused by Candida auris (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Candida auris infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "734350003",
+                        "display": "Carbapenemase-producing bacteria (organism)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Carbapenemase-Producing Organisms (CPO)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "715174007",
+                        "display": "Carbapenem resistant Acinetobacter baumannii (organism)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Carbapenem-resistant Acinetobacter baumannii (CRAB)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "44591000087104",
+                        "display": "Carbapenem resistant Enterobacterales (organism)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Carbapenem-resistant Enterobacterales (CRE)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "726492000",
+                        "display": "Carbapenem resistant Pseudomonas aeruginosa (organism)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Carbapenem-resistant Pseudomonas aeruginosa (CRPA)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "17383000",
+                        "display": "Toxic effect of carbon monoxide (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Carbon Monoxide Poisoning"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "700372006",
+                        "display": "Urinary tract infection associated with catheter (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Catheter-associated Urinary Tract Infection (CAUTI)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "736152001",
+                        "display": "Infection of bloodstream co-occurrent and due to central venous catheter in situ (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Central Line-associated Bloodstream Infection (CLABSI)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "77506005",
+                        "display": "Infection caused by Trypanosoma cruzi (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Chagas Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "266143009",
+                        "display": "Chancroid (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Chancroid"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "233733000",
+                        "display": "Toxic pneumonitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Chemical Pneumonitis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "111864006",
+                        "display": "Chikungunya fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Chikungunya virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240589008",
+                        "display": "Chlamydia trachomatis infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Chlamydia trachomatis infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "63650001",
+                        "display": "Cholera (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cholera"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "186431008",
+                        "display": "Infection caused by Clostridioides difficile (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Clostridioides difficile (C. diff) infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "65154009",
+                        "display": "Infection caused by Clostridium perfringens (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Clostridium perfringens Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "29422001",
+                        "display": "Coal workers' pneumoconiosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Coal Workers’ Pneumoconiosis (CWP)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "60826002",
+                        "display": "Coccidioidomycosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Coccidioidomycosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "6452009",
+                        "display": "Colorado tick fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Colorado tick fever"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "1857005",
+                        "display": "Congenital rubella syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Congenital Rubella Syndrome (CRS)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "840539006",
+                        "display": "Disease caused by severe acute respiratory syndrome coronavirus 2 (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "COVID-19"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "792004",
+                        "display": "Jakob-Creutzfeldt disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Creutzfeldt-Jakob Disease (CJD) and Variant Creutzfeldt-Jakob Disease (vCJD)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "42386007",
+                        "display": "Cryptococcosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cryptococcosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240370009",
+                        "display": "Cryptosporidiosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cryptosporidiosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240372001",
+                        "display": "Cyclosporiasis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cyclosporiasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "59051007",
+                        "display": "Cysticercosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cysticercosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "38362002",
+                        "display": "Dengue (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Dengue Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "276197005",
+                        "display": "Infection caused by Corynebacterium diphtheriae (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Diphtheria"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "212962007",
+                        "display": "Drowning and non-fatal immersion (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Drowning and Submersion"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "1149222004",
+                        "display": "Overdose (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Drug Overdose and Poisoning, Non-opioid"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "416925005",
+                        "display": "Eastern equine encephalitis virus infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Eastern equine encephalitis virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240626005",
+                        "display": "Human ehrlichiosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Ehrlichiosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "45170000",
+                        "display": "Encephalitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Encephalitis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "18690003",
+                        "display": "Farmers' lung (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Farmer's Lung"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "58265007",
+                        "display": "Giardiasis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Giardiasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "4639008",
+                        "display": "Glanders (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Glanders"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "15628003",
+                        "display": "Gonorrhea (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Gonorrhea"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "28867007",
+                        "display": "Granuloma inguinale (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Granuloma Inguinale (Donovanosis)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "40956001",
+                        "display": "Guillain-Barré syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Guillain-Barré Syndrome"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "283545005",
+                        "display": "Gunshot wound (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Firearm-related injury"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "81004002",
+                        "display": "Leprosy (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hansen's disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "359761005",
+                        "display": "Disease caused by Hantavirus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hantavirus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "82271004",
+                        "display": "Injury of head (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Head Injury"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "111407006",
+                        "display": "Hemolytic uremic syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hemolytic uremic syndrome (HUS)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "40468003",
+                        "display": "Viral hepatitis, type A (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hepatitis A Virus infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "66071002",
+                        "display": "Viral hepatitis type B (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hepatitis B Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "60498001",
+                        "display": "Congenital viral hepatitis B infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hepatitis B Virus Infection, Perinatal"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "50711007",
+                        "display": "Viral hepatitis type C (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hepatitis C Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "7111000119109",
+                        "display": "Viral hepatitis type E (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hepatitis E Virus infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "397575003",
+                        "display": "Viral hepatitis, type G (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hepatitis G Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "33839006",
+                        "display": "Genital herpes simplex (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Herpes, Genital"
+                            }
+                        ]
                     },
                     {
                         "code": "91576008",
-                        "display": "Congenital herpes simplex (disorder)"
+                        "display": "Congenital herpes simplex (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Herpes, Neonatal"
+                            }
+                        ]
                     },
                     {
-                        "code": "93614002",
-                        "display": "Infection caused by Baylisascaris procyonis (disorder)"
+                        "code": "12962009",
+                        "display": "Histoplasmosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Histoplasmosis"
+                            }
+                        ]
                     },
                     {
-                        "code": "95821001",
-                        "display": "Neonatal hearing loss (disorder)"
+                        "code": "86406008",
+                        "display": "Human immunodeficiency virus infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "HIV Infection or AIDS"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "719590007",
+                        "display": "Influenza caused by seasonal influenza virus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Influenza-Associated Hospitalizations"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "6142004",
+                        "display": "Influenza (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Influenza-associated pediatric mortality"
+                            }
+                        ]
                     },
                     {
                         "code": "95891005",
-                        "display": "Influenza-like illness (finding)"
+                        "display": "Influenza-like illness (finding)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Influenza-like Illness (ILI)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "406583002",
+                        "display": "Invasive Haemophilus influenzae disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Invasive Haemophilus Influenzae Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "406617004",
+                        "display": "Invasive Streptococcus pneumoniae disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Invasive Pneumococcal Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "52947006",
+                        "display": "Japanese encephalitis virus disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Japanese encephalitis virus (JEV) disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "75053002",
+                        "display": "Acute febrile mucocutaneous lymph node syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Kawasaki Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "407152001",
+                        "display": "Blood lead level above reference range (finding)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Lead in Blood"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "26726000",
+                        "display": "Legionella infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Legionellosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "80612004",
+                        "display": "Leishmaniasis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Leishmaniasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "77377001",
+                        "display": "Leptospirosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Leptospirosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "4241002",
+                        "display": "Listeriosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Listeriosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "14683004",
+                        "display": "Relapsing fever caused by Borrelia recurrentis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Louse-borne relapsing fever (LBRF)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "23502006",
+                        "display": "Lyme disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Lyme disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240820001",
+                        "display": "Lymphatic filariasis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Lymphatic Filariasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "61462000",
+                        "display": "Malaria (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Malaria"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "14189004",
+                        "display": "Measles (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Measles"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "428111003",
+                        "display": "Melioidosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Melioidosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "7180009",
+                        "display": "Meningitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Meningitis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "23511006",
+                        "display": "Meningococcal infectious disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Meningococcal disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "767299002",
+                        "display": "Toxic effect of mercury and/or mercury compound (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Mercury Exposure and Toxicity"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "651000146102",
+                        "display": "Middle East respiratory syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Middle East Respiratory Syndrome (MERS)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "359814004",
+                        "display": "Monkeypox (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Mpox"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "407153006",
+                        "display": "Injury due to motor vehicle accident (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Motor Vehicle Injury"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "895448002",
+                        "display": "Multisystem inflammatory syndrome in children (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Multisystem Inflammatory Syndrome in Children (MIS-C)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "36989005",
+                        "display": "Mumps (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Mumps"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "428175000",
+                        "display": "Primary amebic encephalitis caused by Naegleria fowleri (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Naegleria fowleri Primary Amebic Meningoencephalitis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "406597005",
+                        "display": "Infection caused by Nipah virus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Nipah Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "83436008",
+                        "display": "Yersiniosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Non-pestis Yersiniosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "53648006",
+                        "display": "Disease caused by Enterovirus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Non-Polio Enterovirus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "18504008",
+                        "display": "Toxic shock syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Non-Streptococcal Toxic\u202fShock Syndrome"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "111811007",
+                        "display": "Mycobacterial infection (excluding tuberculosis AND leprosy) (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Nontuberculous Mycobacteria Infection, Extrapulmonary"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "1731000119106",
+                        "display": "Atypical mycobacterial infection of lung (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Nontuberculous Mycobacteria Infection, Pulmonary"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "721763002",
+                        "display": "Infection caused by Norovirus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Norovirus Infections"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "541131000124102",
+                        "display": "Infection caused by novel Influenza A virus variant (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Novel Influenza A Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "34298002",
+                        "display": "Neonatal conjunctivitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Ophthalmia Neonatorum"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "242253008",
+                        "display": "Overdose of opiate (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Opioid Overdose and Poisoning"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "414015000",
+                        "display": "Disease caused by Orthopoxvirus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Orthopoxvirus Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "49049000",
+                        "display": "Parkinson's disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Parkinson's disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "27836007",
+                        "display": "Pertussis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Pertussis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "37131007",
+                        "display": "Pesticide poisoning (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Pesticide Related Illness or injury"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "58750007",
+                        "display": "Plague (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Plague"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "398102009",
+                        "display": "Acute poliomyelitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Poliovirus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "416707008",
+                        "display": "Powassan encephalitis virus infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Powassan virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "75116005",
+                        "display": "Ornithosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Psittacosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "186788009",
+                        "display": "Q fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Q fever"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "14168008",
+                        "display": "Rabies (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Rabies (Human)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "55735004",
+                        "display": "Respiratory syncytial virus infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Respiratory Syncytial Virus (RSV)-Associated Mortality"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "74351001",
+                        "display": "Reye's Syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Reye's Syndrome"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "58718002",
+                        "display": "Rheumatic fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Rheumatic Fever"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "409617000",
+                        "display": "Ricin poisoning (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Ricin Poisoning "
+                            }
+                        ]
+                    },
+                    {
+                        "code": "18624000",
+                        "display": "Disease caused by Rotavirus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Rotavirus Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "36653000",
+                        "display": "Rubella (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Rubella"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "85904008",
+                        "display": "Paratyphoid fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "S. Paratyphi Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "4834000",
+                        "display": "Typhoid fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "S. Typhi Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "302231008",
+                        "display": "Salmonella infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Salmonellosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "128869009",
+                        "display": "Infestation caused by Sarcoptes scabiei var hominis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Scabies"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "269275003",
+                        "display": "Seafood causing toxic effect (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Seafood Poisoning"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "398447004",
+                        "display": "Severe acute respiratory syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Severe Acute Respiratory Syndrome (SARS)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "36188001",
+                        "display": "Shigellosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Shigellosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "805002",
+                        "display": "Pneumoconiosis caused by silica (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Silicosis or pneumoconiosis due to dust containing silica"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "67924001",
+                        "display": "Smallpox (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Smallpox"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "186771002",
+                        "display": "Spotted fever group rickettsial disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Spotted Fever Rickettsiosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "417192005",
+                        "display": "Saint Louis encephalitis virus infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "St. Louis Encephalitis Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "419488004",
+                        "display": "Staphylococcus aureus enterotoxin B (substance)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Staphylococcal Enterotoxin B Poisoning"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "406602003",
+                        "display": "Infection caused by Staphylococcus aureus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Staphylococcus aureus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "328291000119103",
+                        "display": "Infection caused by Shiga toxin producing Escherichia coli (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Shiga toxin-producing Escherichia coli (STEC) infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "406614006",
+                        "display": "Invasive Group A beta-hemolytic streptococcal disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Streptococcal disease, invasive, Group A"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240451000",
+                        "display": "Streptococcal toxic shock syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Streptococcal Toxic Shock Syndrome"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "44301001",
+                        "display": "Suicide (event)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Suicide"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "433202001",
+                        "display": "Surgical site infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Surgical Site Infection (SSI)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "76272004",
+                        "display": "Syphilis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Syphilis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "35742006",
+                        "display": "Congenital syphilis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Syphilis, Congenital"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "76172008",
+                        "display": "Infection caused by Taenia (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Taeniasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "76902006",
+                        "display": "Tetanus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Tetanus"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "10301003",
+                        "display": "Tick-borne relapsing fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Tickborne relapsing fever (TBRF)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "187192000",
+                        "display": "Toxoplasmosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Toxoplasmosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "709018004",
+                        "display": "Infection caused by larvae of Trichinella (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Trichinellosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "56717001",
+                        "display": "Tuberculosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Tuberculosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "11999007",
+                        "display": "Inactive tuberculosis (finding)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Tuberculosis, Latent Infection (LTBI)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "19265001",
+                        "display": "Tularemia (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Tularemia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240613006",
+                        "display": "Typhus group rickettsial disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Typhus Fever"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "293104008",
+                        "display": "Adverse reaction to component of vaccine product (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Vaccine Adverse Event"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "409636005",
+                        "display": "Complication of smallpox vaccination (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Vaccinia Disease or Adverse Event"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "406604002",
+                        "display": "Infection caused by vancomycin intermediate Staphylococcus aureus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Vancomycin-intermediate Staphylococcus aureus (VISA)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "406575008",
+                        "display": "Infection caused by vancomycin resistant enterococcus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Vancomycin-resistant Enterococci (VRE) Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "404681006",
+                        "display": "Infection caused by vancomycin resistant Staphylococcus aureus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Vancomycin-resistant Staphylococcus aureus (VRSA)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "38907003",
+                        "display": "Varicella (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Varicella"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "71695001",
+                        "display": "Complication of ventilation therapy (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Ventilator-associated Event (VAE)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "36921006",
+                        "display": "Vesicular stomatitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Vesicular Stomatitis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "398557001",
+                        "display": "Infection caused by non-cholerae vibrio (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Vibriosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240523007",
+                        "display": "Viral hemorrhagic fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Viral Hemorrhagic Fever (VHF)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "417093003",
+                        "display": "Disease caused by West Nile virus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "West Nile Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "47523006",
+                        "display": "Western equine encephalitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Western equine encephalitis virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "57607007",
+                        "display": "Occupational asthma (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Work-related Asthma (WRA)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "16541001",
+                        "display": "Yellow fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Yellow fever"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "3928002",
+                        "display": "Zika virus disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Zika Virus Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "89369001",
+                        "display": "Anencephalus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Anencephaly"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "61750000",
+                        "display": "Infection caused by Angiostrongylus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Angiostrongyliasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "266123003",
+                        "display": "Bartonellosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Bartonellosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "93614002",
+                        "display": "Infection caused by Baylisascaris procyonis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Baylisascariasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "80281008",
+                        "display": "Cleft lip (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cleft Lip Alone"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "87979003",
+                        "display": "Cleft palate (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cleft Palate Alone"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "66948001",
+                        "display": "Cleft palate with cleft lip (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cleft Lip with Cleft Palate"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "41439009",
+                        "display": "Microcystis flos-aquae poisoning (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cyanobacteria And Cyanotoxin Poisoning"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "187151009",
+                        "display": "Diphyllobothriasis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Diphyllobothriasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "41040004",
+                        "display": "Complete trisomy 21 syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Down Syndrome"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "74942003",
+                        "display": "Echinococcosis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Echinococcosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "72951007",
+                        "display": "Gastroschisis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Gastroschisis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "266113007",
+                        "display": "Genital warts (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Genital Warts"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "551611000124101",
+                        "display": "Perinatal hepatitis caused by Hepatitis C virus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hepatitis C Virus Infection, Perinatal"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "707341005",
+                        "display": "Viral hepatitis type D (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hepatitis D Virus Infection"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "20484008",
+                        "display": "Prion disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Prion Disease (Human)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "95821001",
+                        "display": "Neonatal hearing loss (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Infant Hearing Loss"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "661761000124109 ",
+                        "display": "Death associated with influenza (event)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Influenza-Associated Mortality"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "41723001",
+                        "display": "Jamestown Canyon virus disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Jamestown Canyon virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "404237007",
+                        "display": "Keystone virus encephalitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Keystone virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "61094002",
+                        "display": "La Crosse encephalitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "La Crosse virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "67341007",
+                        "display": "Longitudinal deficiency of limb (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Limb Reduction"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "721781004",
+                        "display": "Infection caused by Lymphocytic choriomeningitis virus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Lymphocytic Choriomeningitis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "38959009",
+                        "display": "Methemoglobinemia (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Methemoglobinemia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "1119306006",
+                        "display": "Multisystem inflammatory syndrome in adults (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Multisystem Inflammatory Syndrome in Adults (MIS-A)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "84619001",
+                        "display": "Nongonococcal urethritis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Nongonococcal Urethritis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "198130006",
+                        "display": "Female pelvic inflammatory disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Pelvic Inflammatory Disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "190687004",
+                        "display": "Phenylketonuria (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Phenylketonuria"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "190268003",
+                        "display": "Congenital hypothyroidism (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Primary Congenital Hypothyroidism"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "404236003",
+                        "display": "Snowshoe hare virus encephalitis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Snowshoe hare virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "67531005",
+                        "display": "Spina bifida (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Spina Bifida"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "406612005",
+                        "display": "Invasive Group B beta-hemolytic streptococcal disease (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Streptococcal disease, invasive, Group B"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "1214006",
+                        "display": "Infection caused by Strongyloides (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Strongyloidiasis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "74225001",
+                        "display": "Tick paralysis (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Tick Paralysis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "240507007",
+                        "display": "Trivittatus fever (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Trivittatus virus disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "43692000",
+                        "display": "Influenzal acute upper respiratory infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Influenza"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "6415009",
+                        "display": "Human respiratory syncytial virus (organism)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Respiratory Syncytial Virus (RSV)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "414819007",
+                        "display": "Neonatal abstinence syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Neonatal Abstinence Syndrome"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "444664004",
+                        "display": "Genus Cronobacter (organism)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Invasive Cronobacter Infection Among Infants"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "59527008",
+                        "display": "Congenital cytomegalovirus infection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Congenital cytomegalovirus (cCMV) infection and disease"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "1237074000",
+                        "display": "Congenital atrioventricular septal defect (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Atrioventricular septal defect (Endocardial cushion defect)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "7305005",
+                        "display": "Coarctation of aorta (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Coarctation of the Aorta"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "7484005",
+                        "display": "Double outlet right ventricle (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Double Outlet Right Ventricle (DORV)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "204357006",
+                        "display": "Ebstein's anomaly of tricuspid valve (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Ebstein Anomaly"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "62067003",
+                        "display": "Hypoplastic left heart syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hypoplastic Left Heart Syndrome (HLHS)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "218728005",
+                        "display": "Interrupted aortic arch (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Interrupted Aortic Arch"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "204339005",
+                        "display": "Congenital pulmonary valve abnormality (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Pulmonary Valve Atresia and Stenosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "45503006",
+                        "display": "Common ventricle (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Single Ventricle"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "86299006",
+                        "display": "Tetralogy of Fallot (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Tetralogy of Fallot (TOF)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "111323005",
+                        "display": "Total anomalous pulmonary venous return (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Total Anomalous Pulmonary Venous Connection (TAPVC)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "204296002",
+                        "display": "Discordant ventriculoarterial connection (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Transposition of the Great Arteries (TGA)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "4374004",
+                        "display": "Congenital anomaly of tricuspid valve (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Tricuspid Valve Atresia and Stenosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "61959006",
+                        "display": "Common truncus arteriosus (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Truncus Arteriosus (Common Truncus)"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "7183006",
+                        "display": "Anophthalmos (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Anophthalmia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "57436000",
+                        "display": "Congenital absence of external ear (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Anotia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "18546004",
+                        "display": "Congenital stenosis of aortic valve (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Aortic valve stenosis"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "405752007",
+                        "display": "Congenital atrial septal defect (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Atrial septal defect"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "61758007",
+                        "display": "Exstrophy of urinary bladder sequence (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Bladder Exstrophy"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "204508009",
+                        "display": "Choanal atresia (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Choanal Atresia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "20815007",
+                        "display": "Exstrophy of cloaca sequence (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Cloacal Exstrophy"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "253900005",
+                        "display": "Congenital posterior urethral valves (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Congenital Posterior Urethral Valves"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "55999004",
+                        "display": "Encephalocele (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Encephalocele"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "190745006",
+                        "display": "Galactosemia (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Galactosemia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "416010008",
+                        "display": "Hypospadias (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Hypospadias"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "61142002",
+                        "display": "Microphthalmos (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Microphthalmia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "35045004",
+                        "display": "Microtia (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Microtia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "32659003",
+                        "display": "Congenital hypoplasia of kidney (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Renal Agenesis and Hypoplasia"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "21111006",
+                        "display": "Complete trisomy 13 syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Trisomy 13"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "51500006",
+                        "display": "Complete trisomy 18 syndrome (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Trisomy 18"
+                            }
+                        ]
+                    },
+                    {
+                        "code": "768552007",
+                        "display": "Congenital ventricular septal defect (disorder)",
+                        "designation": [
+                            {
+                                "use": {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "synonym",
+                                    "display": "Synonym"
+                                },
+                                "value": "Ventricular septal defect"
+                            }
+                        ]
                     }
                 ]
             }
