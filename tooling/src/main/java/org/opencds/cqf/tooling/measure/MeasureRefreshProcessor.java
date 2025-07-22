@@ -19,6 +19,7 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StringType;
+import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
 
 public class MeasureRefreshProcessor {
 
@@ -32,6 +33,7 @@ public class MeasureRefreshProcessor {
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode");
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition");
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
+        clearMeasureExtensions(measureToUse, CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL);
         clearRelatedArtifacts(measureToUse);
 
     	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, compiledLibrary, options);
@@ -105,9 +107,9 @@ public class MeasureRefreshProcessor {
 
     private void setEffectiveDataRequirementsReference(Measure measureToUse) {
         Extension effDataReqExtension = new Extension();
-        effDataReqExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
-        effDataReqExtension.setId("effective-data-requirements");
-        effDataReqExtension.setValue(new Reference().setReference("#effective-data-requirements"));
+        effDataReqExtension.setUrl(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL);
+        effDataReqExtension.setId(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER);
+        effDataReqExtension.setValue(new Reference().setReference("#" + CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
         measureToUse.addExtension(effDataReqExtension);
     }
 
