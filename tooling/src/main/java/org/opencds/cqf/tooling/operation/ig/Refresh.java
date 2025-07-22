@@ -10,6 +10,7 @@ import org.hl7.fhir.r5.model.*;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.constants.CqfmConstants;
+import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
 import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,14 +75,32 @@ public abstract class Refresh {
    }
 
    public void attachModuleDefinitionLibrary(MetadataResource resource, Library moduleDefinitionLibrary) {
-      String effectiveDataReq = "effective-data-requirements";
-      resource.getContained().removeIf(
-              res -> res.getId().equalsIgnoreCase("#" + effectiveDataReq));
+      resource.getContained().removeIf(res -> res.getId()
+              .equalsIgnoreCase("#" + CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
       moduleDefinitionLibrary.setExtension(Collections.emptyList());
-      resource.addContained(moduleDefinitionLibrary.setId(effectiveDataReq));
-      resource.addExtension()
-              .setUrl(CqfmConstants.EFFECTIVE_DATA_REQS_EXT_URL)
-              .setValue(new Reference("#" + effectiveDataReq)).setId(effectiveDataReq);
+      resource.addContained(moduleDefinitionLibrary.setId(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
+      ensureSingleEffectiveDataRequirementsReference(resource);
+   }
+
+   private void ensureSingleEffectiveDataRequirementsReference(MetadataResource resource) {
+      List<Extension> matchingExtensions = resource.getExtension().stream()
+              .filter(ext -> CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL.equals(ext.getUrl()))
+              .collect(Collectors.toList());
+
+      if (matchingExtensions.isEmpty()) {
+         // Add a new extension
+         Extension newExtension = new Extension()
+                 .setUrl(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL)
+                 .setValue(new StringType("#" + CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
+         newExtension.setId(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER);
+         resource.addExtension(newExtension);
+      } else if (matchingExtensions.size() > 1) {
+         // Keep the first, remove the rest
+         Extension oneToKeep = matchingExtensions.get(0);
+         resource.getExtension()
+                 .removeIf(ext ->
+                         CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL.equals(ext.getUrl()) && ext != oneToKeep);
+      }
    }
 
    public void addProfiles(MetadataResource resource, String... profiles) {
