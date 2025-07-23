@@ -236,7 +236,6 @@ public class LibraryProcessor extends BaseProcessor {
             var translatorOptions = getCqlProcessor().getCqlTranslatorOptions();
             var formats = translatorOptions.getFormats();
             CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
-            attachment.setUrlElement(null);
             if (info != null) {
                 if (info.getElm() != null && emptyIfNull(formats).contains(Format.XML)) {
                     sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
