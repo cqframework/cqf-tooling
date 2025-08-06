@@ -83,6 +83,9 @@ public abstract class Refresh {
    }
 
    private void ensureSingleEffectiveDataRequirementsReference(MetadataResource resource) {
+      // Remove STU4 extensions
+      resource.getExtension().removeIf(ext -> CqfmConstants.EFFECTIVE_DATA_REQS_EXT_URL.equals(ext.getUrl()));
+
       List<Extension> matchingExtensions = resource.getExtension().stream()
               .filter(ext -> CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL.equals(ext.getUrl()))
               .collect(Collectors.toList());
