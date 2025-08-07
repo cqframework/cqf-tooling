@@ -200,6 +200,10 @@ public class CqlProcessor {
      * @return
      */
     public CqlSourceFileInformation getFileInformation(String filename) {
+        if (filename == null) {
+            return null;
+        }
+
         if (fileMap == null) {
             throw new IllegalStateException("CQL File map is not available, execute has not been called");
         }
