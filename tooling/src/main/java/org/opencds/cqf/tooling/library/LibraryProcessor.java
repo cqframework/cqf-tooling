@@ -379,7 +379,7 @@ public class LibraryProcessor extends BaseProcessor {
                 Attachment att = new Attachment();
                 att.setContentType("text/cql");
                 att.setData(TextFile.fileToBytes(f));
-                att.setUrl(f.getAbsolutePath());
+                att.setUrl(this.parentContext.getCanonicalBase() + "/Library-" + f.getName());
                 return att;
             }
         }
