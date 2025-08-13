@@ -111,7 +111,6 @@ public class MeasureRefreshProcessor {
     private void setEffectiveDataRequirementsReference(Measure measureToUse) {
         Extension effDataReqExtension = new Extension();
         effDataReqExtension.setUrl(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL);
-        effDataReqExtension.setId(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER);
         effDataReqExtension.setValue(new CanonicalType("#" + CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
         measureToUse.addExtension(effDataReqExtension);
     }
