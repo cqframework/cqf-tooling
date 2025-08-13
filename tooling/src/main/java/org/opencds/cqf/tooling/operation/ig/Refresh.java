@@ -94,7 +94,7 @@ public abstract class Refresh {
          // Add a new extension
          Extension newExtension = new Extension()
                  .setUrl(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL)
-                 .setValue(new StringType("#" + CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
+                 .setValue(new CanonicalType("#" + CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
          newExtension.setId(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER);
          resource.addExtension(newExtension);
       } else if (matchingExtensions.size() > 1) {

@@ -10,6 +10,7 @@ import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
+import org.cqframework.cql.elm.requirements.fhir.utilities.SpecificationLevel;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
@@ -53,19 +54,21 @@ public class MeasureRefreshProcessor {
     private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary compiledLibrary, CqlCompilerOptions options){
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
+        dqReqTrans.setSpecificationLevel(SpecificationLevel.QM_STU_1);
         return dqReqTrans.gatherDataRequirements(libraryManager, compiledLibrary, options, expressionList, true);
     }
 
     private void setPopulationDataRequirements(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary compiledLibrary, CqlCompilerOptions options) {
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
+        dqReqTrans.setSpecificationLevel(SpecificationLevel.QM_STU_1);
         measureToUse.getGroup().forEach(groupMember -> groupMember.getPopulation().forEach(population -> {
             if (population.hasId()) { // Requirement for computable measures
                 var popMDL = dqReqTrans.gatherDataRequirements(libraryManager, compiledLibrary, options, Collections.singleton(population.getCriteria().getExpression()), false);
                 var mdlID = population.getId() + "-effectiveDataRequirements";
                 popMDL.setId(mdlID);
                 setEffectiveDataRequirements(measureToUse, popMDL);
-                population.getExtension().removeAll(population.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/artifact-reference"));
-                population.addExtension("http://hl7.org/fhir/StructureDefinition/artifact-reference", new StringType("#" + mdlID));
+                population.getExtension().removeAll(population.getExtensionsByUrl(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL));
+                population.addExtension(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL, new CanonicalType("#" + mdlID));
             }
         }));
     }
@@ -109,7 +112,7 @@ public class MeasureRefreshProcessor {
         Extension effDataReqExtension = new Extension();
         effDataReqExtension.setUrl(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_EXT_URL);
         effDataReqExtension.setId(CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER);
-        effDataReqExtension.setValue(new Reference().setReference("#" + CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
+        effDataReqExtension.setValue(new CanonicalType("#" + CrmiConstants.EFFECTIVE_DATA_REQUIREMENTS_IDENTIFIER));
         measureToUse.addExtension(effDataReqExtension);
     }
 
