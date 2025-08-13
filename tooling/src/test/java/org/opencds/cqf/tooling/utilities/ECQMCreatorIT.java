@@ -81,9 +81,9 @@ public class ECQMCreatorIT {
             Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/" + measureLibraryName +".cql", "ecqm-content-r4-2021/input/resources/measure/"+ measureLibraryName +".json");
             assertTrue(null != measure);
             // Extract data requirements from the measure:
-            Extension e = measure.getExtensionByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
+            Extension e = measure.getExtensionByUrl("http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements");
             assertTrue(null != e);
-            Library effectiveDataRequirements = (Library)measure.getContained(e.getValueReference().getReference());
+            Library effectiveDataRequirements = (Library)measure.getContained(e.getValueCanonicalType().getValue());
             assertTrue(null != effectiveDataRequirements);
             drs.addAll(effectiveDataRequirements.getDataRequirement());
 

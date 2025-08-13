@@ -85,7 +85,9 @@ public class R4MeasureProcessor extends MeasureProcessor {
                 filePath = getMeasurePath(measurePath);
                 fileEncoding = encoding;
             }
-            cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, params.fhirContext);
+            if (this.params.shouldApplySoftwareSystemStamp) {
+                cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, params.fhirContext);
+            }
             // Issue 96
             // Passing the includeVersion here to handle not using the version number in the filename
             if (new File(filePath).exists()) {
