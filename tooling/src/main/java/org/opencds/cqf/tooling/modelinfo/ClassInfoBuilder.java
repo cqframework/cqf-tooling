@@ -82,14 +82,14 @@ public abstract class ClassInfoBuilder {
         }
     }
 
-    private String resolveModelName(String url) throws Exception {
+    private String resolveModelName(String url) {
         // Strips off the identifier and type name
         String model = getHead(getHead(url));
         if (this.settings.urlToModel.containsKey(model)) {
             return this.settings.urlToModel.get(model);
         }
 
-        throw new Exception("Couldn't resolve model name for url: " + url);
+        throw new IllegalArgumentException("Couldn't resolve model name for url: " + url);
     }
 
     private String resolveTypeName(String url) throws Exception {
@@ -143,6 +143,12 @@ public abstract class ClassInfoBuilder {
         String typeName = sd.getName() == null ? capitalizePath(typeId) : sd.getName();
         if (this.settings.modelPrefix != null && typeName.startsWith(this.settings.modelPrefix)) {
             typeName = typeName.substring(this.settings.modelPrefix.length());
+        }
+        else {
+            String modelName = resolveModelName(sd.getUrl());
+            if (modelName != null && typeName.startsWith(modelName)) {
+                typeName = typeName.substring(modelName.length());
+            }
         }
         typeName = mapTypeName(typeName);
         return typeName;
@@ -556,7 +562,7 @@ public abstract class ClassInfoBuilder {
         return this.buildTypeSpecifier(this.getQualifier(typeName), this.unQualify(typeName));
     }
 
-    private String resolveMappedTypeName(String url) throws Exception {
+    private String resolveMappedTypeName(String url) {
         if (url != null) {
             String modelName = resolveModelName(url);
             String typeName = getTypeNameFromUrl(url);
@@ -635,12 +641,22 @@ public abstract class ClassInfoBuilder {
 
     private String resolveMappedTypeName(String modelName, TypeRefComponent typeRef) {
         if (typeRef.hasCode() && typeRef.getCode() != null) {
-            return resolveMappedTypeName(modelName, typeRef.getCode());
+            if (this.settings.flatten) {
+                return resolveMappedTypeName(modelName, typeRef.getCode());
+            }
+            else {
+                if (!typeRef.getCode().startsWith("http://hl7.org/fhirpath/")) {
+                    return resolveMappedTypeName("http://hl7.org/fhir/StructureDefinition/" + typeRef.getCode());
+                }
+                else {
+                    return resolveMappedTypeName(modelName, typeRef.getCode());
+                }
+            }
         }
 
         Extension typeExtension = typeRef.getCodeElement().getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type");
         if (typeExtension != null) {
-            return resolveMappedTypeName(modelName, typeExtension.getValue().toString());
+            return resolveMappedTypeName(typeExtension.getValue().toString());
         }
 
         throw new IllegalArgumentException("Could not determine mapping for null type code");
@@ -841,6 +857,8 @@ public abstract class ClassInfoBuilder {
                 String requiredBindingName = getRequiredBindingName(ed);
                 if (requiredBindingName != null) {
                     typeName = requiredBindingName;
+                    // NOTE: Always use FHIR as the model name here, since they are base specification defined
+                    modelName = "FHIR";
                     requiredBindingName = getTypeName(modelName, typeName);
                     if (!requiredBindingTypeNames.contains(requiredBindingName)) {
                         requiredBindingTypeNames.add(requiredBindingName);
@@ -1151,7 +1169,7 @@ public abstract class ClassInfoBuilder {
     // On return, index will be updated to the index of the next element to be
     // processed
     // This visit should not be used on the root element of a structure definition
-    private ClassInfoElement visitElementDefinition(String modelName, String pathRoot,
+    private ClassInfoElement visitElementDefinition(String modelName, String baseTypeName, String pathRoot,
             List<ElementDefinition> eds, AtomicReference<Integer> index, SliceInfo sliceInfo, SliceList slices)
             throws Exception {
         ElementDefinition ed = eds.get(index.get());
@@ -1200,7 +1218,7 @@ public abstract class ClassInfoBuilder {
             ElementDefinition e = eds.get(index.get());
             if (isNextAContinuationOfElement(id, path, e)) {
                 SliceList elementSlices = new SliceList();
-                ClassInfoElement cie = this.visitElementDefinition(modelName, pathRoot, eds, index, sliceInfo, elementSlices);
+                ClassInfoElement cie = this.visitElementDefinition(modelName, baseTypeName, pathRoot, eds, index, sliceInfo, elementSlices);
                 if (cie != null && !(cie.getElementType() == null && cie.getElementTypeSpecifier() == null)) {
                     elements.add(cie);
                 }
@@ -1227,8 +1245,12 @@ public abstract class ClassInfoBuilder {
             if (typeDefinition != null && (isBackboneElement(typeDefinition) || isElement(typeDefinition))) {
                 String typeName = this.capitalizePath(path);
 
+                String baseModelName = getQualifier(baseTypeName);
+
                 ClassInfo componentClassInfo = new ClassInfo().withNamespace(modelName).withName(typeName).withLabel(null)
-                        .withBaseType(modelName + (isBackboneElement(typeDefinition) ? ".BackboneElement" : ".Element"))
+                        .withBaseType(baseModelName.equals(modelName)
+                                ? (modelName + (isBackboneElement(typeDefinition) ? ".BackboneElement" : ".Element"))
+                                : this.getTypeName(baseModelName, typeName))
                         .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
 
                 this.typeInfos.put(this.getTypeName(modelName, typeName), componentClassInfo);
@@ -1394,7 +1416,7 @@ public abstract class ClassInfoBuilder {
     // This approach uses the base type to guide the walk, which requires navigating
     // the derived profiles
     private ClassInfo buildClassInfo(String modelName, StructureDefinition sd) throws Exception {
-        if (modelName == null) {
+        if (modelName == null || !this.settings.flatten) {
             modelName = this.resolveModelName(sd.getUrl());
         }
         String typeName = getTypeName(sd);
@@ -1417,15 +1439,18 @@ public abstract class ClassInfoBuilder {
         List<ClassInfoElement> elements = new ArrayList<>();
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         String id = path; // Id starts with the Type
-        // TODO: Switch to differential here, but several of the primitive types declare "value" elements of type string when this happens? (positiveInt, markdown, among others)
         List<ElementDefinition> eds = sd.getSnapshot().getElement();
         SliceList elementSlices = null;
+
+        String baseDefinition = sd.getBaseDefinition();
+        String baseTypeName = (isStructureDefinitionResource(sd) && this.settings.flatten)
+                ? resolveBaseTypeName(sd.getType()) : resolveTypeName(baseDefinition);
 
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
             if (isNextAContinuationOfElement(id, path, e)) {
                 elementSlices = new SliceList();
-                ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, index, null, elementSlices);
+                ClassInfoElement cie = this.visitElementDefinition(modelName, baseTypeName, path, eds, index, null, elementSlices);
                 if (cie != null && !(cie.getElementType() == null && cie.getElementTypeSpecifier() == null)) {
                     elements.add(cie);
                 }
@@ -1441,12 +1466,8 @@ public abstract class ClassInfoBuilder {
             }
         }
 
-        String baseDefinition = sd.getBaseDefinition();
-        String baseTypeName = isStructureDefinitionResource(sd)
-                ? resolveBaseTypeName(sd.getType()) : resolveTypeName(baseDefinition);
-
         if (baseTypeName != null && !this.typeInfos.containsKey(baseTypeName)) {
-            StructureDefinition baseSd = this.structureDefinitions.get(unQualify(baseTypeName));
+            StructureDefinition baseSd = this.structureDefinitions.get(getTail(baseDefinition));
             buildClassInfo(modelName, baseSd);
         }
 

@@ -54,6 +54,7 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
             {
                 put("FHIR.base64Binary", "System.String");
                 put("FHIR.boolean", "System.Boolean");
+                put("FHIR.canonical", "System.String");
                 put("FHIR.code", "System.String");
                 put("FHIR.date", "System.Date");
                 put("FHIR.dateTime", "System.DateTime");
