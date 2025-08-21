@@ -35,11 +35,6 @@ public class QuestionnaireBundler extends AbstractBundler {
         return TYPE_QUESTIONNAIRE;
     }
 
-    @Override
-    protected int persistFilesFolder(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
-        //do nothing
-        return 0;
-    }
 
     @Override
     protected Set<String> getPaths(FhirContext fhirContext) {
