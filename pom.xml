@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf</groupId>
     <artifactId>tooling-parent</artifactId>
-    <version>3.9.1-SNAPSHOT</version>
+    <version>3.9.1</version>
 
     <packaging>pom</packaging>
 
