@@ -13,7 +13,9 @@
     <version>3.9.1</version>
     <packaging>jar</packaging>
 
+    <name>CQF Tooling UI</name>
     <description>CQF Tooling UI</description>
+    <url>https://github.com/cqframework/cqf-tooling/tree/master/tooling-ui</url>
 
     <dependencies>
         <dependency>
