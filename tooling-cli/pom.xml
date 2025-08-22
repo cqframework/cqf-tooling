@@ -6,11 +6,11 @@
     <parent>
         <groupId>org.opencds.cqf</groupId>
         <artifactId>tooling-parent</artifactId>
-        <version>3.9.1-SNAPSHOT</version>
+        <version>3.9.1</version>
     </parent>
 
     <artifactId>tooling-cli</artifactId>
-    <version>3.9.1-SNAPSHOT</version>
+    <version>3.9.1</version>
     <packaging>jar</packaging>
 
     <description>CQF Tooling CLI</description>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>org.opencds.cqf</groupId>
             <artifactId>tooling</artifactId>
-            <version>3.9.1-SNAPSHOT</version>
+            <version>3.9.1</version>
         </dependency>
 
         <dependency>
