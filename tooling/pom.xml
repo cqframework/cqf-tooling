@@ -13,6 +13,10 @@
     <version>3.9.1</version>
     <packaging>jar</packaging>
 
+    <name>CQF Tooling Core</name>
+    <description>CQF Tooling core processes</description>
+    <url>https://github.com/cqframework/cqf-tooling/tree/master/tooling</url>
+
     <dependencies>
         <dependency>
             <groupId>org.jvnet.jaxb2_commons</groupId>
