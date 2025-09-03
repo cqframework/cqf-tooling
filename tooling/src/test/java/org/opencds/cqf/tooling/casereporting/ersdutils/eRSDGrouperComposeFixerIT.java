@@ -26,7 +26,7 @@ public class eRSDGrouperComposeFixerIT {
         Bundle fixedBundle = fixComposeInGroupers(new String[] {
             "-e=json",
             "-op=src/test/resources/casereporting/ersdutils/output",
-            "-p=src/test/resources/casereporting/ersdutils/eRSDv2_specification_bundle.json"
+            "-p=src/test/resources/casereporting/ersdutils/eRSDv3_specification_bundle.json"
 //            "-p=src/test/resources/casereporting/ersdutils/eRSD-for-grouper-url-fix.json"
         });
 
