@@ -2,19 +2,6 @@ package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.cqframework.fhir.utilities.exception.IGInitializationException;
@@ -22,10 +9,14 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
+import org.opencds.cqf.tooling.common.SoftwareSystem;
+import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,7 +37,7 @@ public class BundleUtils {
     @SafeVarargs
     public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, Boolean addBundleTimestamp, List<Object>... identifiers) {
         for (IBaseResource resource : resources) {
-            if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().equals("")) {
+            if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().isEmpty()) {
                 ResourceUtils.setIgId(id.replace("-bundle", "-" + UUID.randomUUID()), resource, false);
                 resource.setId(resource.getClass().getSimpleName() + "/" + resource.getIdElement().getIdPart());
             }
@@ -149,22 +140,22 @@ public class BundleUtils {
 //            .collect(Collectors.toList());
     }
 
-    public static void stampDstu3BundleEntriesWithSoftwareSystems(org.hl7.fhir.dstu3.model.Bundle bundle, List<CqfmSoftwareSystem> softwareSystems, FhirContext fhirContext, String rootDir) {
+    public static void stampDstu3BundleEntriesWithSoftwareSystems(org.hl7.fhir.dstu3.model.Bundle bundle, List<SoftwareSystem> softwareSystems, FhirContext fhirContext, String rootDir) {
         for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.dstu3.model.Resource resource = entry.getResource();
             if ((resource.fhirType().equals("Library")) || (resource.fhirType().equals("Measure"))) {
-                org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper cqfmSoftwareSystemHelper = new org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper(rootDir);
-                cqfmSoftwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.dstu3.model.DomainResource) resource, softwareSystems, fhirContext);
+                org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper softwareSystemHelper = new org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper(rootDir);
+                softwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.dstu3.model.DomainResource) resource, softwareSystems, fhirContext);
             }
         }
     }
 
-    public static void stampR4BundleEntriesWithSoftwareSystems(org.hl7.fhir.r4.model.Bundle bundle, List<CqfmSoftwareSystem> softwareSystems, FhirContext fhirContext, String rootDir) {
+    public static void stampR4BundleEntriesWithSoftwareSystems(org.hl7.fhir.r4.model.Bundle bundle, List<SoftwareSystem> softwareSystems, FhirContext fhirContext, String rootDir) {
         for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.r4.model.Resource resource = entry.getResource();
             if ((resource.fhirType().equals("Library")) || ((resource.fhirType().equals("Measure")))) {
-                org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper cqfmSoftwareSystemHelper = new org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper(rootDir);
-                cqfmSoftwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.r4.model.DomainResource) resource, softwareSystems, fhirContext);
+                SoftwareSystemHelper softwareSystemHelper = new SoftwareSystemHelper(rootDir);
+                softwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.r4.model.DomainResource) resource, softwareSystems, fhirContext);
             }
         }
     }
@@ -231,7 +222,8 @@ public class BundleUtils {
         ArrayList <Resource> resourceArrayList = new ArrayList<>();
         for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
-            if (entryResource != null) {
+            // TODO: How to handle nested bundles? Recursively or skip? Skipping for now...
+            if (entryResource != null && !(entryResource instanceof Bundle)) {
                 resourceArrayList.add(entryResource);
             }
         }

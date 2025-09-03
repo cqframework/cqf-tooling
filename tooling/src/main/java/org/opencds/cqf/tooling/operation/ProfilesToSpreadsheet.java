@@ -94,7 +94,7 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
 
     private List<String> createHeaderNameList() {
         List<String> headerNameList = new ArrayList<String>() {{
-            add("QI Core Profile");
+            add(modelName + " Profile");
             add("Id");
             add("Conformance");
             add("ValueSet");
@@ -155,7 +155,10 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
 
         currentCell = currentRow.createCell(cellCount++);
         if ((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
-                null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y")) {
+                null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y") ||
+                null != bo.getBindingObjectExtension() && bo.getBindingObjectExtension().equalsIgnoreCase("qicore-keyElement") ||
+                bo.getCardinalityMin() > 0
+        ) {
             currentCell.setCellValue("Needed");
         }
     }

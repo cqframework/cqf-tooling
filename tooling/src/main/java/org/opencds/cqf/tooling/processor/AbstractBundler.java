@@ -113,7 +113,7 @@ public abstract class AbstractBundler {
      * @param fhirUri                 The FHIR server URI.
      * @param encoding                The encoding type for processing resources.
      */
-    public void bundleResources(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
+    public void bundleResources(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                 Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                 FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding, Boolean verboseMessaging) {
         logger.info("\r\n[Bundling " + getResourceBundlerType() + "s]\r\n");
@@ -147,7 +147,7 @@ public abstract class AbstractBundler {
             }
 
             for (Map.Entry<String, IBaseResource> resourceEntry : resourcesMap.entrySet()) {
-                String resourceId = "";
+                String resourceId;
 
                 if (resourceEntry.getValue() != null) {
                     resourceId = resourceEntry.getValue()
@@ -203,20 +203,10 @@ public abstract class AbstractBundler {
                         shouldPersist = shouldPersist
                                 & ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
 
-                        String cqlFileName = IOUtils.formatFileName(primaryLibraryName, IOUtils.Encoding.CQL, fhirContext);
-
-                        String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
-
-                        if (cqlLibrarySourcePath == null) {
-                            failedExceptionMessages.put(resourceSourcePath, String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
-                            //exit from task:
-                            return null;
-                        }
-
                         if (includeTerminology) {
                             //throws CQLTranslatorException if failed with severe errors, which will be logged and reported it in the final summary
                             try {
-                                ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                                ValueSetsProcessor.bundleValueSets(primaryLibrary, fhirContext, resources, encoding, includeDependencies);
                             } catch (CqlTranslatorException cqlTranslatorException) {
                                 cqlTranslatorErrorMessages.put(primaryLibraryName, cqlTranslatorException.getErrors());
                             }
@@ -225,7 +215,7 @@ public abstract class AbstractBundler {
                         if (includeDependencies) {
                             if (libraryProcessor == null) libraryProcessor = new LibraryProcessor();
                             try {
-                                libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
+                                libraryProcessor.bundleLibraryDependencies(primaryLibrary, fhirContext, resources, encoding, includeVersion);
                             } catch (Exception bre) {
                                 failedExceptionMessages.put(resourceSourcePath, getResourceBundlerType() + " will not be bundled because Library Dependency bundling failed: " + bre.getMessage());
                                 //exit from task:
@@ -248,9 +238,11 @@ public abstract class AbstractBundler {
 
                             persistBundle(bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
 
-                            bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
-                                    primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
-                                    includeVersion, addBundleTimestamp, cqlTranslatorErrorMessages);
+                            // It's not clear at all why this is happening... we've already persisted the bundle? Why write out all the bundle files??
+                            // And if we _do_ need to write out the bundle files, why go through the whole assembling process again? Just write out the resources in the bundle we already have, right?
+                            //bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
+                            //        primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
+                            //        includeVersion, addBundleTimestamp, cqlTranslatorErrorMessages);
 
                             //If user supplied a fhir server url, inform them of total # of files to be persisted to the server:
                             if (fhirUri != null && !fhirUri.isEmpty()) {
@@ -269,7 +261,7 @@ public abstract class AbstractBundler {
 
 
                     } catch (Exception e) {
-                        String failMsg = "";
+                        String failMsg;
                         if (e.getMessage() != null) {
                             failMsg = e.getMessage();
                         } else {
@@ -314,7 +306,7 @@ public abstract class AbstractBundler {
      * @param cqlTranslatorErrorMessages A map containing CQL translator error messages for each library.
      * @return A StringBuilder containing the generated summary message.
      */
-    private StringBuilder generateBundleProcessSummary(ArrayList<String> refreshedLibraryNames, FhirContext fhirContext,
+    private StringBuilder generateBundleProcessSummary(List<String> refreshedLibraryNames, FhirContext fhirContext,
                                                        String fhirUri, Boolean verboseMessaging, Map<String, Integer> persistedFileReport,
                                                        List<String> bundledResources, Map<String, String> failedExceptionMessages,
                                                        Map<String, List<CqlCompilerException>> cqlTranslatorErrorMessages) {

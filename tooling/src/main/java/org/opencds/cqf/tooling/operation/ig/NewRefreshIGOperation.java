@@ -5,6 +5,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -143,21 +144,21 @@ public class NewRefreshIGOperation extends Operation {
       }
    }
 
-   private org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper r4CqfmSoftwareSystemHelper;
-   private org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper dstu3CqfmSoftwareSystemHelper;
+   private SoftwareSystemHelper r4CqfmSoftwareSystemHelper;
+   private org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper dstu3SoftwareSystemHelper;
    private void applySoftwareSystemStamp (FhirContext fhirContext, IBaseResource resource) {
       if (Boolean.TRUE.equals(this.params.shouldApplySoftwareSystemStamp)) {
          if (resource instanceof org.hl7.fhir.r4.model.DomainResource) {
             if (r4CqfmSoftwareSystemHelper == null) {
-               r4CqfmSoftwareSystemHelper = new org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper();
+               r4CqfmSoftwareSystemHelper = new SoftwareSystemHelper();
             }
             r4CqfmSoftwareSystemHelper.ensureCQFToolingExtensionAndDevice(
                     (org.hl7.fhir.r4.model.DomainResource) resource, fhirContext);
          } else if (resource instanceof org.hl7.fhir.dstu3.model.DomainResource) {
-            if (dstu3CqfmSoftwareSystemHelper == null) {
-               dstu3CqfmSoftwareSystemHelper = new org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper();
+            if (dstu3SoftwareSystemHelper == null) {
+               dstu3SoftwareSystemHelper = new org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper();
             }
-            dstu3CqfmSoftwareSystemHelper.ensureCQFToolingExtensionAndDevice(
+            dstu3SoftwareSystemHelper.ensureCQFToolingExtensionAndDevice(
                     (org.hl7.fhir.dstu3.model.DomainResource) resource, fhirContext);
          } else {
             logger.warn("CqfmSoftwareSystemHelper not supported for version {}",

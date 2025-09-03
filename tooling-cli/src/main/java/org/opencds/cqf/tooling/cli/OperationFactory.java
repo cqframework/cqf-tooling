@@ -1,5 +1,10 @@
 package org.opencds.cqf.tooling.cli;
 
+//import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
+import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
+import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
+import org.opencds.cqf.tooling.terminology.*;
+import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -219,6 +224,8 @@ class OperationFactory {
                 return new QICoreElementsToSpreadsheet();
             case "StripGeneratedContent":
                 return new StripGeneratedContentOperation();
+            case "SpreadsheetValidateVSandCS":
+                return new SpreadsheetValidateVSandCS();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }

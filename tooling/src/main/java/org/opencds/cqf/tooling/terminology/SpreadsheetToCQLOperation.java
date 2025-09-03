@@ -26,7 +26,7 @@ public class SpreadsheetToCQLOperation extends Operation {
     private StringBuilder result = new StringBuilder();
 
     private String getHeader(Row header, int columnIndex) {
-        if (header != null) {
+        if (header != null && SpreadsheetHelper.getCellAsString(header, columnIndex) != null) {
             return SpreadsheetHelper.getCellAsString(header, columnIndex).trim();
         }
         else {

@@ -7,6 +7,8 @@ import org.testng.annotations.BeforeMethod;
 
 import ca.uhn.fhir.context.FhirContext;
 
+import java.io.IOException;
+
 public abstract class LibraryProcessorTest extends RefreshTest {
     private LibraryProcessor libraryProcessor;
 
@@ -29,12 +31,12 @@ public abstract class LibraryProcessorTest extends RefreshTest {
     }
 
     protected void runRefresh(String targetDirectory, String libraryResourcePath, String cqlResourcePath,
-            boolean versioned) {
+            boolean versioned) throws IOException {
         runRefresh(targetDirectory, libraryResourcePath, null, cqlResourcePath, versioned);
     }
 
     protected void runRefresh(String targetDirectory, String libraryResourcePath, String libraryOutputDirectoryPath,
-            String cqlResourcePath, boolean versioned) {
+            String cqlResourcePath, boolean versioned) throws IOException {
         RefreshLibraryParameters params = new RefreshLibraryParameters();
         params.encoding = Encoding.JSON;
         params.fhirContext = getFhirContext();
@@ -48,7 +50,7 @@ public abstract class LibraryProcessorTest extends RefreshTest {
     }
 
     protected void runRefresh(String targetDirectory, String libraryResourcePath, String libraryOutputDirectoryPath,
-                              String cqlResourcePath, boolean versioned, boolean shouldApplySoftwareSystemStamp) {
+                              String cqlResourcePath, boolean versioned, boolean shouldApplySoftwareSystemStamp) throws IOException {
         RefreshLibraryParameters params = new RefreshLibraryParameters();
         params.encoding = Encoding.JSON;
         params.fhirContext = getFhirContext();

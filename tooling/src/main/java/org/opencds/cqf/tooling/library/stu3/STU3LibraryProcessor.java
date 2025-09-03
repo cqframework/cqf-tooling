@@ -1,30 +1,24 @@
 package org.opencds.cqf.tooling.library.stu3;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
-
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
 import org.hl7.fhir.convertors.conv30_50.VersionConvertor_30_50;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.util.*;
 
 public class STU3LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
     private FhirContext fhirContext;
-    private static CqfmSoftwareSystemHelper cqfmHelper;
+    private static SoftwareSystemHelper softwareSystemHelper;
 
     /*
     Refresh all library resources in the given libraryPath
@@ -32,16 +26,16 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     protected List<String> refreshLibraries(String libraryPath, Boolean shouldApplySoftwareSystemStamp) {
         return refreshLibraries(libraryPath, null, shouldApplySoftwareSystemStamp);
     }
-    
+
     /*
     Refresh all library resources in the given libraryPath and write to the given outputDirectory
      */
     protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Boolean shouldApplySoftwareSystemStamp) {
         File file = new File(libraryPath);
-        Map<String, String> fileMap = new HashMap<String, String>();
+        Map<String, String> fileMap = new HashMap<>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
         if (file.isDirectory()) {
-            for (File libraryFile : file.listFiles()) {
+            for (File libraryFile : Objects.requireNonNull(file.listFiles())) {
                 if(IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
                     loadLibrary(fileMap, libraries, libraryFile);
                 }
@@ -51,7 +45,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
             loadLibrary(fileMap, libraries, file);
         }
 
-        List<String> refreshedLibraryNames = new ArrayList<String>();
+        List<String> refreshedLibraryNames = new ArrayList<>();
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
         VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
@@ -62,7 +56,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
                 cleanseRelatedArtifactReferences(library);
 
                 if (shouldApplySoftwareSystemStamp) {
-                    cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+                    softwareSystemHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
                 }
 
                 String outputPath = filePath;
@@ -102,7 +96,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
                 if (resourceReference.contains("Library/")) {
                     resourceReference = resourceReference.substring(resourceReference.lastIndexOf("Library/"));
                 }
-      
+
                 if (resourceReference.contains("|")) {
                     if (this.versioned) {
                         String curatedResourceReference = resourceReference.replace("|", "-");
@@ -143,7 +137,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         fhirContext = params.fhirContext;
         versioned = params.versioned;
 
-        STU3LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
+        STU3LibraryProcessor.softwareSystemHelper = new SoftwareSystemHelper(rootDir);
 
         if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
             return refreshLibraries(libraryPath, params.libraryOutputDirectory, params.shouldApplySoftwareSystemStamp);

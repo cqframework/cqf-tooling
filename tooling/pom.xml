@@ -6,12 +6,16 @@
     <parent>
         <groupId>org.opencds.cqf</groupId>
         <artifactId>tooling-parent</artifactId>
-        <version>3.7.0-SNAPSHOT</version>
+        <version>3.10.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>tooling</artifactId>
-    <version>3.7.0-SNAPSHOT</version>
+    <version>3.10.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+
+    <name>CQF Tooling Core</name>
+    <description>CQF Tooling core processes</description>
+    <url>https://github.com/cqframework/cqf-tooling/tree/master/tooling</url>
 
     <dependencies>
         <dependency>
@@ -136,7 +140,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.18.0</version>
         </dependency>
         <dependency>
             <groupId>com.jakewharton.fliptables</groupId>
@@ -161,7 +165,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.1.0</version>
+            <version>${poi.version}</version>
         </dependency>
 
         <!-- Narrative Generation -->
@@ -174,7 +178,6 @@
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>4.0.1</version>
         </dependency>
 
         <dependency>
@@ -233,10 +236,13 @@
             <version>2.22.0</version>
         </dependency>
 
-        <!-- FHIR DAL -->
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cqf-fhir</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cqf-fhir-npm</artifactId>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
@@ -392,6 +398,12 @@
                 <groupId>org.eclipse.jetty.http2</groupId>
                 <artifactId>http2-hpack</artifactId>
                 <version>${jetty.version}</version>
+            </dependency>
+            <!-- Define correct version for nested poi dependency -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

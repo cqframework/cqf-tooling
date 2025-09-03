@@ -32,7 +32,17 @@ Executable jars are produced by the CI system on Maven Central: [Download execut
 
 This can be run with `java -jar tooling-cli-2.0.0.jar -VsacXlsxToValueSetBatch`
 
-Documentation of the various operations is provided in the [Main](src/main/java/org/opencds/cqf/tooling/Main.java) class.
+### Documentation
+Various operation documentation can be found in the individual operation `README` files.
+- [Bundling](tooling/src/main/java/org/opencds/cqf/tooling/operations/bundle/README.md)
+- [Date Roller](tooling/src/main/java/org/opencds/cqf/tooling/operations/dateroller/README.md)
+- [Library generation and updating](tooling/src/main/java/org/opencds/cqf/tooling/operations/library/README.md)
+- [MAT resource extraction](tooling/src/main/java/org/opencds/cqf/tooling/operations/mat/README.md)
+- [Process Accelerator Kit](tooling/src/main/java/org/opencds/cqf/tooling/operations/acceleratorkit/README.md)
+- [Profile Conformance](tooling/src/main/java/org/opencds/cqf/tooling/operations/validation/README.md)
+- [Valueset generator](tooling/src/main/java/org/opencds/cqf/tooling/operations/valueset/generate/config/README.md)
+- [Valueset $expand](tooling/src/main/java/org/opencds/cqf/tooling/operations/valueset/expansion/README.md)
+
 
 ## Commit Policy
 
@@ -47,12 +57,12 @@ Merges to `master` trigger a deployment to the Maven Snapshots repositories. Onc
 To release a new version of the tooling:
 1. Update master to be a release version (and all the reviews, bug fixes, etc. that that requires)
    1. Regression test against IGs known to use CQF Tooling
-2. Passed Travis Build = ready for release
-3. Create a Github Release (which creates a tag at the current commit of master)
+2. Passed CI Build = ready for release
+3. Use the following command to release from your local build (releases are not automatic)
+   1. `mvn deploy -DskipTests=true -Dmaven.test.skip=true -T 4 -B -P release`
+4. Create a Github Release (specify a tag of vX.X.X (e.g. v3.9.1) pointing at master to be created on release)
    1. Choose the "Auto-generate release notes" option
-4. Travis does the release to Maven
-   1. Ensure binaries are published to https://oss.sonatype.org/#view-repositories;public~browsestorage~org/opencds/cqf/tooling
-5. Update master to vNext-SNAPSHOT
+5. Update master version to vNext-SNAPSHOT (e.g. v3.10.0-SNAPSHOT)
 6. Close all issues included in the release
 
 ## Getting Help

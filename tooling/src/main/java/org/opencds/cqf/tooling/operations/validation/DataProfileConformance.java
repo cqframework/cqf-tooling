@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.operations.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
@@ -9,16 +10,11 @@ import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.*;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.opencds.cqf.tooling.constants.Validation;
 import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
@@ -29,13 +25,7 @@ import org.opencds.cqf.tooling.utilities.NpmUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Operation(name = "ProfileConformance")
@@ -129,7 +119,7 @@ public class DataProfileConformance implements ExecutableOperation {
               new InMemoryTerminologyServerValidationSupport(fhirContext),
               new SnapshotGeneratingValidationSupport(fhirContext));
 
-      CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(supportChain);
+      IValidationSupport cachingValidationSupport = new ValidationSupportChain(supportChain);
       validator = fhirContext.newValidator();
       validator.setValidateAgainstStandardSchema(false);
       validator.setValidateAgainstStandardSchematron(false);

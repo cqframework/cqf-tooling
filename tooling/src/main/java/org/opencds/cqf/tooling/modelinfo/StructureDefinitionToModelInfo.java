@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.modelinfo;
 
+import ca.uhn.fhir.context.FhirContext;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.Marshaller;
@@ -7,6 +8,7 @@ import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
+import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.modelinfo.fhir.FHIRClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.fhir.FHIRModelInfoBuilder;
@@ -39,6 +41,12 @@ public class StructureDefinitionToModelInfo extends Operation {
     private boolean useCQLPrimitives = false;
     private boolean includeMetadata = true;
 
+    private boolean createSliceElements = false;
+
+    private boolean flatten = false;
+
+    private boolean buildSettings = false;
+
     /*
     // NOTE: This documentation is present in the Main.java class for the tooling as well, keep these in sync
 
@@ -48,8 +56,11 @@ public class StructureDefinitionToModelInfo extends Operation {
           [-resourcePaths | -rp]
           [-modelName | -mn]
           [-modelVersion | -mv]
-          (-useCqlPrimitives | ucp)
+          (-useCqlPrimitives | -ucp)
           (-includeMetadata | -im)
+          (-createSliceElements | -cse)
+          (-flatten | -f)
+          (-buildSettings | -bs)
           (-outputpath | -op)
         "
 
@@ -113,6 +124,11 @@ public class StructureDefinitionToModelInfo extends Operation {
             -modelName="QICore"
             -modelVersion="6.0.0"
 
+        Arguments for producing USCore 7.0.0 Model Info
+           -resourcePaths="4.0.1;US-Core/7.0.0"
+           -modelName="USCore"
+           -modelVersion="7.0.0"
+
         NOTE: Once the ModelInfo is produced, there is a bug in the Jackson XML deserializer that requires that the xsi:type attribute be the first
         attribute in an element with polymorphic child elements. In a regex-search/replace, the following command will address this issue on the
         resulting ModelInfo file:
@@ -145,8 +161,11 @@ public class StructureDefinitionToModelInfo extends Operation {
                 // Yes, would need to be an extension definition on the ImplementationGuide...
                 case "modelname": case "mn": modelName = value; break; // -modelname (-mn)
                 case "modelversion": case "mv": modelVersion = value; break; // -modelversion (-mv)
-                case "usecqlprimitives": case "ucp": useCQLPrimitives = value.toLowerCase().equals("true") ? true : false; break;
-                case "includemetadata": case "im": includeMetadata = value.toLowerCase().equals("true") ? true : false; break;
+                case "usecqlprimitives": case "ucp": useCQLPrimitives = value.equalsIgnoreCase("true"); break;
+                case "includemetadata": case "im": includeMetadata = value.equalsIgnoreCase("true"); break;
+                case "createsliceelements": case "cse": createSliceElements = value.equalsIgnoreCase("true"); break;
+                case "flatten": case "f": flatten = value.equalsIgnoreCase("true"); break;
+                case "buildsettings": case "bs": buildSettings = value.equalsIgnoreCase("true"); break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -162,88 +181,103 @@ public class StructureDefinitionToModelInfo extends Operation {
             }
         }
 
-        ModelInfoBuilder miBuilder;
-        ModelInfo mi;
-
-        if (modelName.equals("FHIR")) {
-            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
-            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
-            ciBuilder.settings.includeMetaData = this.includeMetadata;
-            Map<String, TypeInfo> typeInfos = ciBuilder.build();
-            ciBuilder.afterBuild();
-
-            String fhirHelpersPath = IOUtils.concatFilePath(this.getOutputPath(),
-                    modelName + "Helpers-" + modelVersion + ".cql");
-            miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos, atlas, fhirHelpersPath);
-            mi = miBuilder.build();
-        }
-        else if (modelName.equals("USCore")) {
-            ClassInfoBuilder ciBuilder = new USCoreClassInfoBuilder(atlas.getStructureDefinitions());
-            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
-            ciBuilder.settings.includeMetaData = this.includeMetadata;
-            Map<String, TypeInfo> typeInfos = ciBuilder.build();
-            ciBuilder.afterBuild();
-
-            String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
-                    modelName + "Helpers-" + modelVersion + ".cql");
-            miBuilder = new USCoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
-            mi = miBuilder.build();
-        }
-        else if (modelName.equals("QICore")) {
-            ClassInfoBuilder ciBuilder = new QICoreClassInfoBuilder(atlas.getStructureDefinitions());
-            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
-            ciBuilder.settings.includeMetaData = this.includeMetadata;
-            Map<String, TypeInfo> typeInfos = ciBuilder.build();
-            ciBuilder.afterBuild();
-
-            String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
-                    modelName + "Helpers-" + modelVersion + ".cql");
-            miBuilder = new QICoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
-            mi = miBuilder.build();
-        }
-        else if (modelName.equals("QUICK")) {
-            ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(atlas.getStructureDefinitions());
-            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
-            ciBuilder.settings.includeMetaData = this.includeMetadata;
-            Map<String, TypeInfo> typeInfos = ciBuilder.build();
-            ciBuilder.afterBuild();
-
-            miBuilder = new QuickModelInfoBuilder(modelVersion, typeInfos.values());
-            mi = miBuilder.build();
+        if (this.buildSettings) {
+            SettingsBuilder sb = new SettingsBuilder(atlas);
+            Bundle result = sb.build();
+            IOUtils.writeBundle(result, getOutputPath(), IOUtils.Encoding.JSON, FhirContext.forR4Cached());
         }
         else {
-            //should blowup
-            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
-            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
-            ciBuilder.settings.includeMetaData = this.includeMetadata;
-            Map<String, TypeInfo> typeInfos = ciBuilder.build();
-            miBuilder = new ModelInfoBuilder(typeInfos.values());
-            mi = miBuilder.build();
-        }
 
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class,
-                    ConversionInfo.class);
+            ModelInfoBuilder miBuilder;
+            ModelInfo mi;
 
-            JAXBElement<ModelInfo> jbe = new JAXBElement<ModelInfo>(
-                    new QName("urn:hl7-org:elm-modelinfo:r1", "modelInfo"), ModelInfo.class, null, mi);
+            if (modelName.equals("FHIR")) {
+                ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
+                ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+                ciBuilder.settings.includeMetaData = this.includeMetadata;
+                ciBuilder.settings.createSliceElements = this.createSliceElements;
+                ciBuilder.settings.flatten = this.flatten;
+                Map<String, TypeInfo> typeInfos = ciBuilder.build();
+                ciBuilder.afterBuild();
 
-            // Create Marshaller
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+                String fhirHelpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                        modelName + "Helpers-" + modelVersion + ".cql");
+                miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos, atlas, fhirHelpersPath);
+                mi = miBuilder.build();
+            } else if (modelName.equals("USCore")) {
 
-            // Print XML String to Console
-            StringWriter sw = new StringWriter();
+                ClassInfoBuilder ciBuilder = new USCoreClassInfoBuilder(atlas.getStructureDefinitions());
+                ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+                ciBuilder.settings.includeMetaData = this.includeMetadata;
+                ciBuilder.settings.createSliceElements = this.createSliceElements;
+                ciBuilder.settings.flatten = this.flatten;
+                Map<String, TypeInfo> typeInfos = ciBuilder.build();
+                ciBuilder.afterBuild();
 
-            //Write XML to StringWriter
+                String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                        modelName + "Helpers-" + modelVersion + ".cql");
+                miBuilder = new USCoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
+                mi = miBuilder.build();
+            } else if (modelName.equals("QICore")) {
+                ClassInfoBuilder ciBuilder = new QICoreClassInfoBuilder(atlas.getStructureDefinitions());
+                ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+                ciBuilder.settings.includeMetaData = this.includeMetadata;
+                ciBuilder.settings.createSliceElements = this.createSliceElements;
+                ciBuilder.settings.flatten = this.flatten;
+                Map<String, TypeInfo> typeInfos = ciBuilder.build();
+                ciBuilder.afterBuild();
 
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            jaxbMarshaller.marshal(jbe, sw);
+                String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                        modelName + "Helpers-" + modelVersion + ".cql");
+                miBuilder = new QICoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
+                mi = miBuilder.build();
+            } else if (modelName.equals("QUICK")) {
+                ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(atlas.getStructureDefinitions());
+                ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+                ciBuilder.settings.includeMetaData = this.includeMetadata;
+                ciBuilder.settings.createSliceElements = this.createSliceElements;
+                ciBuilder.settings.flatten = this.flatten;
+                Map<String, TypeInfo> typeInfos = ciBuilder.build();
+                ciBuilder.afterBuild();
 
-            String fileName = modelName.toLowerCase() + "-" + "modelinfo" + "-" + modelVersion + ".xml";
-            writeOutput(fileName, sw.toString());
-        } catch (Exception e) {
-            logger.error("error: {}", e.getMessage());
-            e.printStackTrace();
+                miBuilder = new QuickModelInfoBuilder(modelVersion, typeInfos.values());
+                mi = miBuilder.build();
+            } else {
+                //should blowup
+                ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
+                ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+                ciBuilder.settings.includeMetaData = this.includeMetadata;
+                ciBuilder.settings.createSliceElements = this.createSliceElements;
+                ciBuilder.settings.flatten = this.flatten;
+                Map<String, TypeInfo> typeInfos = ciBuilder.build();
+                miBuilder = new ModelInfoBuilder(typeInfos.values());
+                mi = miBuilder.build();
+            }
+
+            try {
+                JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class,
+                        ConversionInfo.class);
+
+                JAXBElement<ModelInfo> jbe = new JAXBElement<ModelInfo>(
+                        new QName("urn:hl7-org:elm-modelinfo:r1", "modelInfo"), ModelInfo.class, null, mi);
+
+                // Create Marshaller
+                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+                // Print XML String to Console
+                StringWriter sw = new StringWriter();
+
+                //Write XML to StringWriter
+
+                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                jaxbMarshaller.marshal(jbe, sw);
+
+                String fileName = modelName.toLowerCase() + "-" + "modelinfo" + "-" + modelVersion + ".xml";
+                writeOutput(fileName, sw.toString());
+            } catch (Exception e) {
+                logger.error("error: {}", e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
