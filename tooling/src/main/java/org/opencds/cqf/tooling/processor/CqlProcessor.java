@@ -432,7 +432,20 @@ public class CqlProcessor {
                     //result.extension.addAll(requirementsLibrary.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode"));
 
                     // Extract relatedArtifact data (models, libraries, code systems, and value sets)
-                    result.relatedArtifacts.addAll(requirementsLibrary.getRelatedArtifact());
+                    for (RelatedArtifact relatedArtifact : requirementsLibrary.getRelatedArtifact()) {
+                        // NOTE: see similar logic in MeasureRefreshProcessor.removeModelInfoDependencies
+                        if (relatedArtifact.hasResource() && (
+                                relatedArtifact.getResource().startsWith("http://hl7.org/fhir/Library/QICore-ModelInfo")
+                                    || relatedArtifact.getResource().startsWith("http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo")
+                                    || relatedArtifact.getResource().startsWith("http://hl7.org/fhir/Library/USCore-ModelInfo")
+                        )) {
+                            // Do not report dependencies on model info loaded from the translator, or
+                            // from CQF Common (because these should be loaded from Using CQL now)
+                            continue;
+                        }
+
+                        result.relatedArtifacts.add(relatedArtifact);
+                    }
 
                     // Extract parameter data and validate result types are supported types
                     result.parameters.addAll(requirementsLibrary.getParameter());
