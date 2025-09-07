@@ -140,10 +140,6 @@ public class PackageMeasure extends Package<Measure> {
 
         if (isIncludeTests() && testPackage != null) {
             logger.info("Packaging {} Tests...", testPackage.getTests().size());
-            if (testPackage.getGroup() != null) {
-                IOUtils.writeResource(testPackage.getGroup(), measureFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext(),
-                        true, "Group-" + testPackage.getGroup().getIdElement().getIdPart());
-            }
             testPackage.getTests().forEach(
                     test -> {
                         dependencies.addAll(BundleUtils.getR4ResourcesFromBundle((Bundle) test));
@@ -151,6 +147,11 @@ public class PackageMeasure extends Package<Measure> {
                                 getFhirContext(), test.getIdElement().getIdPart());
                     }
             );
+            if (testPackage.getGroup() != null) {
+                dependencies.add(testPackage.getGroup());
+                IOUtils.writeResource(testPackage.getGroup(), measureFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext(),
+                        true, "Group-" + testPackage.getGroup().getIdElement().getIdPart());
+            }
         }
 
         dependencies.add(mainArtifact);
