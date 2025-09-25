@@ -2,8 +2,10 @@ package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
+import org.opencds.cqf.tooling.measure.MeasureBundler;
 import org.opencds.cqf.tooling.packaging.PackageMeasures;
 import org.opencds.cqf.tooling.packaging.PackagePlanDefinitions;
+import org.opencds.cqf.tooling.plandefinition.PlanDefinitionBundler;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireBundler;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -24,38 +26,48 @@ public class IGBundleProcessor {
     LibraryProcessor libraryProcessor;
     CDSHooksProcessor cdsHooksProcessor;
 
-    public IGBundleProcessor(Boolean verboseMessaging, LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
+    public IGBundleProcessor(Boolean verboseMessaging, LibraryProcessor libraryProcessor,
+            CDSHooksProcessor cdsHooksProcessor) {
         this.verboseMessaging = verboseMessaging;
         this.libraryProcessor = libraryProcessor;
         this.cdsHooksProcessor = cdsHooksProcessor;
     }
 
-    public void bundleIg(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding, Boolean includeELM,
-                         Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
-                         FhirContext fhirContext, String fhirUri) {
+    public void bundleIg(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding,
+            Boolean includeELM,
+            Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned,
+            Boolean addBundleTimestamp,
+            FhirContext fhirContext, String fhirUri) {
 
-//        new MeasureBundler().bundleResources(refreshedLibraryNames,
-//                igPath, binaryPaths, includeDependencies, includeTerminology,
-//                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-//                fhirUri, encoding, verboseMessaging);
-        new PackageMeasures(igPath, fhirContext, includeDependencies, includeTerminology, includePatientScenarios, fhirUri);
-//        new PlanDefinitionBundler(this.libraryProcessor, this.cdsHooksProcessor).bundleResources(refreshedLibraryNames,
-//                igPath, binaryPaths, includeDependencies, includeTerminology,
-//                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-//                fhirUri, encoding, verboseMessaging);
-        new PackagePlanDefinitions(igPath, fhirContext, includeDependencies, includeTerminology, includePatientScenarios, fhirUri);
+        // new MeasureBundler().bundleResources(refreshedLibraryNames,
+        //         igPath, binaryPaths, includeDependencies, includeTerminology,
+        //         includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
+        //         fhirUri, encoding, verboseMessaging);
+
+        new PackageMeasures(igPath, fhirContext, includeDependencies, includeTerminology, includePatientScenarios,
+                fhirUri);
+
+        // new PlanDefinitionBundler(this.libraryProcessor, this.cdsHooksProcessor).bundleResources(refreshedLibraryNames,
+        //         igPath, binaryPaths, includeDependencies, includeTerminology,
+        //         includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
+        //         fhirUri, encoding, verboseMessaging);
+
+        new PackagePlanDefinitions(igPath, fhirContext, includeDependencies, includeTerminology,
+                includePatientScenarios, fhirUri);
+
         new QuestionnaireBundler(this.libraryProcessor).bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
                 fhirUri, encoding, verboseMessaging);
 
-        //run collected post calls last:
-        if (HttpClientUtils.hasPostTasksInQueue()) {
-            logger.info("[Persisting Files to {}]", fhirUri);
-            HttpClientUtils.postTaskCollection();
+        // run collected post calls last:
+        if (HttpClientUtils.hasHttpRequestTasksInQueue()) {
+            logger.info("\n\r[Persisting Files to " + fhirUri + "]\n\r");
+            HttpClientUtils.executeHttpRequestTaskCollection();
         }
 
-        // run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)
+        // run cleanup (maven runs all ci tests sequentially and static member variables
+        // could retain values from previous tests)
         IOUtils.cleanUp();
         ResourceUtils.cleanUp();
     }

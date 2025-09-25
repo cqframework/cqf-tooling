@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.Json;
+import com.github.tomakehurst.wiremock.matching.UrlPathPattern;
 import com.google.gson.*;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,75 +35,78 @@ import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.*;
+
 public class RefreshIGOperationTest extends RefreshTest {
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-	public RefreshIGOperationTest() {
-		super(FhirContext.forCached(FhirVersionEnum.R4));
-	}
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private static final String EXCEPTIONS_OCCURRED_LOADING_IG_FILE = "Exceptions occurred loading IG file";
-	private static final String EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE = "Exceptions occurred initializing refresh from ini file";
-	private final String ID = "id";
-	private final String ENTRY = "entry";
-	private final String RESOURCE = "resource";
-	private final String RESOURCE_TYPE = "resourceType";
-	private final String BUNDLE_TYPE = "Bundle";
-	private final String LIB_TYPE = "Library";
-	private final String MEASURE_TYPE = "Measure";
+    public RefreshIGOperationTest() {
+        super(FhirContext.forCached(FhirVersionEnum.R4));
+    }
 
-	private final String INI_LOC = Path.of("target","refreshIG","ig.ini").toString();
+    private static final String EXCEPTIONS_OCCURRED_LOADING_IG_FILE = "Exceptions occurred loading IG file";
+    private static final String EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE = "Exceptions occurred initializing refresh from ini file";
+    private final String ID = "id";
+    private final String ENTRY = "entry";
+    private final String RESOURCE = "resource";
+    private final String RESOURCE_TYPE = "resourceType";
+    private final String BUNDLE_TYPE = "Bundle";
+    private final String LIB_TYPE = "Library";
+    private final String MEASURE_TYPE = "Measure";
 
-	private static final String[] NEW_REFRESH_IG_LIBRARY_FILE_NAMES = {
-			"GMTPInitialExpressions.json", "GMTPInitialExpressions.json",
-			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
-	};
+    private final String INI_LOC = Path.of("target", "refreshIG", "ig.ini").toString();
+
+    private static final String[] NEW_REFRESH_IG_LIBRARY_FILE_NAMES = {
+            "GMTPInitialExpressions.json", "GMTPInitialExpressions.json",
+            "MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
+    };
 
     private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIG";
-	private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
-	private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
+    private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
+    private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
 
-	// Store the original standard out before changing it.
-	private final PrintStream originalStdOut = System.out;
-	private ByteArrayOutputStream console = new ByteArrayOutputStream();
+    // Store the original standard out before changing it.
+    private final PrintStream originalStdOut = System.out;
+    private ByteArrayOutputStream console = new ByteArrayOutputStream();
 
-	@BeforeClass
-	public void init() {
-		// This overrides the default max string length for Jackson (which wiremock uses under the hood).
-		var constraints = StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build();
-		Json.getObjectMapper().getFactory().setStreamReadConstraints(constraints);
-	}
+    @BeforeClass
+    public void init() {
+        // This overrides the default max string length for Jackson (which wiremock uses under the hood).
+        var constraints = StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build();
+        Json.getObjectMapper().getFactory().setStreamReadConstraints(constraints);
+    }
 
-	@BeforeMethod
-	public void setUp() throws Exception {
-		IOUtils.resourceDirectories = new ArrayList<String>();
-		IOUtils.clearDevicePaths();
-		System.setOut(new PrintStream(this.console));
+    @BeforeMethod
+    public void setUp() throws Exception {
+        IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.clearDevicePaths();
+        System.setOut(new PrintStream(this.console));
 
-		// Delete directories
-		deleteDirectory("target" + File.separator + "refreshIG");
-		deleteDirectory("target" + File.separator + "NewRefreshIG");
+        // Delete directories
+        deleteDirectory("target" + File.separator + "refreshIG");
+        deleteDirectory("target" + File.separator + "NewRefreshIG");
 
-		deleteTempINI();
-	}
+        deleteTempINI();
+    }
 
-	/**
-	 * Attempts to delete a directory if it exists.
-	 * @param path The path to the directory to delete.
-	 */
-	private void deleteDirectory(String path) {
-		File dir = new File(path);
-		if (dir.exists()) {
-			try {
-				FileUtils.deleteDirectory(dir);
-			} catch (IOException e) {
-				System.err.println("Failed to delete directory: " + path + " - " + e.getMessage());
-			}
-		}
-	}
+    /**
+     * Attempts to delete a directory if it exists.
+     *
+     * @param path The path to the directory to delete.
+     */
+    private void deleteDirectory(String path) {
+        File dir = new File(path);
+        if (dir.exists()) {
+            try {
+                FileUtils.deleteDirectory(dir);
+            } catch (IOException e) {
+                System.err.println("Failed to delete directory: " + path + " - " + e.getMessage());
+            }
+        }
+    }
 
-	@Test
-    public void testNewRefreshOperation() throws IOException {
-		copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "testfiles/NewRefreshIG");
+    @Test
+    public void testNewRefreshOperation() throws Exception {
+        copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "testfiles/NewRefreshIG");
         File folder = new File(TARGET_OUTPUT_FOLDER_PATH);
         assertTrue(folder.exists(), "Folder should be present");
         File jsonFile = new File(folder, "ig.ini");
