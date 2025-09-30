@@ -1,6 +1,6 @@
 # cqf-tooling
 
-[![Maven Central](https://maven-badges.sml.io/maven-central/org.opencds.cqf/tooling/badge.svg)](https://maven-badges.sml.io/maven-central/org.opencds.cqf/tooling) [![Build Status](https://www.travis-ci.com/cqframework/cqf-tooling.svg?branch=master)](https://www.travis-ci.com/cqframework/cqf-tooling) [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.fhir.org/#narrow/stream/179220-cql)
+[![Maven Central](https://maven-badges.sml.io/sonatype-central/org.opencds.cqf/tooling/badge.svg)](https://maven-badges.sml.io/sonatype-central/org.opencds.cqf/tooling) [![Build Status](https://www.travis-ci.com/cqframework/cqf-tooling.svg?branch=master)](https://www.travis-ci.com/cqframework/cqf-tooling) [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.fhir.org/#narrow/stream/179220-cql)
 
 Tooling for CQL and IG Authors
 
