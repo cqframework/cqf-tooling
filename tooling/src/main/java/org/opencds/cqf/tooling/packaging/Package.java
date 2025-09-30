@@ -79,18 +79,23 @@ public abstract class Package<T extends IBaseResource> {
         var primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(
                 ResourceUtils.getPrimaryLibraryUrl(mainArtifact, fhirContext));
         if (getPrimaryLibrary() == null) { // we want to save the primary library for the artifact being bundled not dependency libraries
+            if (primaryLibrary == null && mainArtifact.getIdElement() != null && mainArtifact.getIdElement().getValue() != null) {
+                logger.warn("Unable to resolve primary library for artifact {}", mainArtifact.getIdElement().getValue());
+            }
             setPrimaryLibrary(primaryLibrary);
         }
 
         var missingDependencies = new HashSet<String>();
         if (includeDependencies) {
-            dependencies.add(primaryLibrary);
-            var dependencyLibraries = ResourceUtils.getDepLibraryResources(
-                    primaryLibrary, fhirContext, true, false, missingDependencies);
-            dependencies.addAll(dependencyLibraries.values());
+            if (primaryLibrary != null) {
+                dependencies.add(primaryLibrary);
+                var dependencyLibraries = ResourceUtils.getDepLibraryResources(
+                        primaryLibrary, fhirContext, true, false, missingDependencies);
+                dependencies.addAll(dependencyLibraries.values());
+            }
         }
 
-        if (includeTerminology) {
+        if (includeTerminology && primaryLibrary != null) {
             var dependencyValueSets = ResourceUtils.getDepValueSetResources(
                     primaryLibrary, fhirContext, true, missingDependencies);
             dependencies.addAll(dependencyValueSets.values());
