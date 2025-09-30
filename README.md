@@ -1,6 +1,6 @@
 # cqf-tooling
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf/tooling/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf/tooling) [![Build Status](https://www.travis-ci.com/cqframework/cqf-tooling.svg?branch=master)](https://www.travis-ci.com/cqframework/cqf-tooling) [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.fhir.org/#narrow/stream/179220-cql)
+[![Maven Central](https://maven-badges.sml.io/maven-central/org.opencds.cqf/tooling/badge.svg)](https://maven-badges.sml.io/maven-central/org.opencds.cqf/tooling) [![Build Status](https://www.travis-ci.com/cqframework/cqf-tooling.svg?branch=master)](https://www.travis-ci.com/cqframework/cqf-tooling) [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.fhir.org/#narrow/stream/179220-cql)
 
 Tooling for CQL and IG Authors
 
@@ -30,7 +30,7 @@ mvn exec:java \
 
 Executable jars are produced by the CI system on Maven Central: [Download executable jar](https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.opencds.cqf&a=tooling-cli&v=LATEST)
 
-This can be run with `java -jar tooling-cli-2.0.0.jar -VsacXlsxToValueSetBatch`
+This can be run with `java -jar tooling-cli-3.10.0.jar -VsacXlsxToValueSetBatch`
 
 ### Documentation
 Various operation documentation can be found in the individual operation `README` files.
