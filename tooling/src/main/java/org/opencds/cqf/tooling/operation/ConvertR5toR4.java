@@ -60,7 +60,7 @@ public class ConvertR5toR4 extends Operation {
     // COMMAND LINE ARGUMENTS - OPTIONAL
     private String encoding = "json";                       // -encoding (-e)
     private String bundleId = UUID.randomUUID().toString(); // -bundleid (-bid)
-    private String bundleType = "collection";               // -type (-t)
+    private String bundleType = "transaction";              // -type (-t)
     private String outputFileName = null;                   // -outputfilename (-ofn)
 
     private void extractOptionsFromArgs(String[] args) {
