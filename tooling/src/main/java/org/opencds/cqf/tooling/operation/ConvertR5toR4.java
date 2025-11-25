@@ -1,30 +1,23 @@
 package org.opencds.cqf.tooling.operation;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
-import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.util.BundleBuilder;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.util.BundleBuilder;
-import jakarta.annotation.Nonnull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ConvertR5toR4 extends Operation {
 
@@ -61,12 +54,12 @@ public class ConvertR5toR4 extends Operation {
     private void extractOptionsFromArgs(String[] args) {
         for (String arg : args) {
             if (arg.equals("-ConvertR5toR4")) continue;
-            String[] flagAndValue = arg.split("=");
+            var flagAndValue = arg.split("=");
             if (flagAndValue.length < 2) {
                 throw new IllegalArgumentException("Invalid argument: " + arg);
             }
-            String flag = flagAndValue[0];
-            String value = flagAndValue[1];
+            var flag = flagAndValue[0];
+            var value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "bundleid":
@@ -123,12 +116,12 @@ public class ConvertR5toR4 extends Operation {
             throw new IllegalArgumentException(String.format("The path [%s] to the resource directory is required", pathToDirectory));
         }
 
-        File resourceDirectory = new File(pathToDirectory);
+        var resourceDirectory = new File(pathToDirectory);
         if (!resourceDirectory.isDirectory()) {
             throw new RuntimeException(String.format("The specified path [%s] to resource files is not a directory", pathToDirectory));
         }
 
-        File[] resources = resourceDirectory.listFiles();
+        var resources = resourceDirectory.listFiles();
         if (resources == null || resources.length == 0) {
             throw new RuntimeException(String.format("The specified path [%s] to resource files is empty", pathToDirectory));
         }
@@ -143,12 +136,12 @@ public class ConvertR5toR4 extends Operation {
         validatePathToDirectory();
         validateBundleType();
 
-        BundleTypeEnum bundleType = BundleUtils.getBundleType(this.bundleType);
+        var bundleType = BundleUtils.getBundleType(this.bundleType);
         if (bundleType == null) {
             logger.error("Invalid bundle type: {}", this.bundleType);
         }
         else {
-            IBaseBundle bundle = convertResources(
+            var bundle = convertResources(
                     bundleId,
                     bundleType,
                     IOUtils.readResources(
@@ -167,22 +160,22 @@ public class ConvertR5toR4 extends Operation {
 
     private IBaseBundle convertResources(String bundleId, BundleTypeEnum type,
                                          @Nonnull List<IBaseResource> resourcesToConvert) {
-      List<org.hl7.fhir.r4.model.Resource> convertedResources = new ArrayList<>();
-      for (IBaseResource resource: resourcesToConvert){
+      var convertedResources = new ArrayList<org.hl7.fhir.r4.model.Resource>();
+      for (var resource : resourcesToConvert){
         if (resource instanceof org.hl7.fhir.r5.model.Resource) {
             convertedResources.add(ResourceAndTypeConverter.r5ToR4Resource(resource));
         }
       }
 
-      FhirContext context = FhirContextCache.getContext("r4");
-      BundleBuilder builder = new BundleBuilder(context);
+      var context = FhirContextCache.getContext("r4");
+      var builder = new BundleBuilder(context);
       if (type == BundleTypeEnum.COLLECTION) {
          convertedResources.forEach(builder::addCollectionEntry);
       }
       else {
          convertedResources.forEach(builder::addTransactionUpdateEntry);
       }
-      IBaseBundle bundle = builder.getBundle();
+      var bundle = builder.getBundle();
       bundle.setId(bundleId == null ? UUID.randomUUID().toString() : bundleId);
       return bundle;
     }
