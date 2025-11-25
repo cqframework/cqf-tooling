@@ -16,6 +16,7 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -25,29 +26,23 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 public class ConvertR5toR4 extends Operation {
 
-    public enum AllowedBundleType {
-        COLLECTION(BundleTypeEnum.COLLECTION),
-        TRANSACTION(BundleTypeEnum.TRANSACTION);
-
-        private final BundleTypeEnum reference;
-        AllowedBundleType(BundleTypeEnum reference) {
-            this.reference = reference;
-        }
-
-
-    }
+    public static final List<BundleTypeEnum> ALLOWED_BUNDLE_TYPES = List.of(
+            BundleTypeEnum.COLLECTION,
+            BundleTypeEnum.TRANSACTION
+    );
 
     public static Boolean isBundleTypeAllowed(String bundleType) {
-        return Arrays.stream(AllowedBundleType.values())
-                .anyMatch(e -> e.name().equalsIgnoreCase(bundleType));
+        if (bundleType == null) {
+            return false;
+        }
+        return ALLOWED_BUNDLE_TYPES.stream()
+                .anyMatch(bt -> bt.name().equalsIgnoreCase(bundleType));
     }
 
     public static List<String> allowedBundleTypes() {
-        return Arrays.stream(AllowedBundleType.values())
+        return ALLOWED_BUNDLE_TYPES.stream()
                 .map(Enum::name)
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
@@ -134,11 +129,10 @@ public class ConvertR5toR4 extends Operation {
         }
 
         File[] resources = resourceDirectory.listFiles();
-        if (resources == null) {
+        if (resources == null || resources.length == 0) {
             throw new RuntimeException(String.format("The specified path [%s] to resource files is empty", pathToDirectory));
         }
     }
-
 
     @Override
     public void execute(String[] args) {
@@ -163,7 +157,7 @@ public class ConvertR5toR4 extends Operation {
 
             IOUtils.writeResource(
                     bundle,
-                    getOutputPath() == null ? pathToDirectory : getOutputPath(),
+                    getOutputPath(),
                     IOUtils.Encoding.parse(encoding),
                     FhirContextCache.getContext("r4"),
                     true,
@@ -173,23 +167,19 @@ public class ConvertR5toR4 extends Operation {
 
     private IBaseBundle convertResources(String bundleId, BundleTypeEnum type,
                                          @Nonnull List<IBaseResource> resourcesToConvert) {
-      VersionConvertor_40_50 versionConverter4050 = new VersionConvertor_40_50(new BaseAdvisor_40_50(true));
-
       List<org.hl7.fhir.r4.model.Resource> convertedResources = new ArrayList<>();
       for (IBaseResource resource: resourcesToConvert){
         if (resource instanceof org.hl7.fhir.r5.model.Resource) {
-            convertedResources.add(versionConverter4050.convertResource((org.hl7.fhir.r5.model.Resource)resource));
+            convertedResources.add(ResourceAndTypeConverter.r5ToR4Resource(resource));
         }
       }
 
       FhirContext context = FhirContextCache.getContext("r4");
       BundleBuilder builder = new BundleBuilder(context);
       if (type == BundleTypeEnum.COLLECTION) {
-         builder.setType(type.getCode());
          convertedResources.forEach(builder::addCollectionEntry);
       }
       else {
-         builder.setType("transaction");
          convertedResources.forEach(builder::addTransactionUpdateEntry);
       }
       IBaseBundle bundle = builder.getBundle();
