@@ -30,7 +30,6 @@
     <modules>
         <module>tooling</module>
         <module>tooling-cli</module>
-        <module>tooling-ui</module>
     </modules>
 
     <licenses>
