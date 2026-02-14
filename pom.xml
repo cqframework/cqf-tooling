@@ -28,6 +28,7 @@
     <url>https://github.com/cqframework/cqf-tooling/tree/master</url>
 
     <modules>
+        <module>tooling-core</module>
         <module>tooling</module>
         <module>tooling-cli</module>
     </modules>

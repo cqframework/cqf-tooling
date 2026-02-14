@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opencds.cqf</groupId>
+        <artifactId>tooling-parent</artifactId>
+        <version>3.11.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>tooling-core</artifactId>
+    <version>3.11.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>CQF Tooling Core</name>
+    <description>Shared infrastructure for CQF Tooling — operation framework, FHIR utilities, and common types</description>
+    <url>https://github.com/cqframework/cqf-tooling/tree/master/tooling-core</url>
+
+    <dependencies>
+        <!-- HAPI FHIR -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-dstu3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-r5</artifactId>
+        </dependency>
+
+        <!-- CQL ELM (for VersionedIdentifier in CanonicalUtils) -->
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm</artifactId>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Utilities -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.18.0</version>
+        </dependency>
+
+        <!-- Help menu table formatting -->
+        <dependency>
+            <groupId>com.jakewharton.fliptables</groupId>
+            <artifactId>fliptables</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+    </dependencies>
+</project>
