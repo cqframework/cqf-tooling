@@ -14,7 +14,6 @@ import org.apache.commons.lang3.Validate;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -471,28 +470,9 @@ public class ResourceUtils {
       return valueSetDefs;
    }
 
-   public static CqlTranslatorOptions getTranslatorOptions(String folder) {
-      String optionsFileName = IOUtils.concatFilePath(folder,"cql-options.json");
-      CqlTranslatorOptions options;
-      File file = new File(optionsFileName);
-      if (file.exists()) {
-         options = CqlTranslatorOptionsMapper.fromFile(file.getAbsolutePath());
-         logger.debug("cql-options loaded from: {}", file.getAbsolutePath());
-      }
-      else {
-         options = CqlTranslatorOptions.defaultOptions();
-         if (!options.getFormats().contains(CqlTranslatorOptions.Format.XML)) {
-            options.getFormats().add(CqlTranslatorOptions.Format.XML);
-         }
-         logger.debug("cql-options not found. Using default options.");
-      }
-
-      return options;
-   }
-
    public static CqlTranslator getCQLCqlTranslator(String cqlContentPath) throws CqlTranslatorException {
       String folder = IOUtils.getParentDirectoryPath(cqlContentPath);
-      CqlTranslatorOptions options = ResourceUtils.getTranslatorOptions(folder);
+      CqlTranslatorOptions options = TranslatorUtils.getTranslatorOptions(folder);
       ModelManager modelManager = new ModelManager();
       LibraryManager libraryManager = new LibraryManager(modelManager);
       libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());

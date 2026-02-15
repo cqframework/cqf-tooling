@@ -20,7 +20,7 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.opencds.cqf.tooling.utilities.TranslatorUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -280,7 +280,7 @@ public class CqlProcessor {
     private void translateFolder(String folder) {
         System.out.printf("Translating CQL source in folder %s%n", folder);
 
-        CqlTranslatorOptions options = ResourceUtils.getTranslatorOptions(folder);
+        CqlTranslatorOptions options = TranslatorUtils.getTranslatorOptions(folder);
 
         // Setup
         // Construct DefaultLibrarySourceProvider

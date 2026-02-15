@@ -18,6 +18,7 @@ import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.opencds.cqf.tooling.utilities.TranslatorUtils;
 import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public class LibraryRefresh implements ExecutableOperation {
 
       try {
          modelManager = new ModelManager();
-         translatorOptions = ResourceUtils.getTranslatorOptions(pathToCql);
+         translatorOptions = TranslatorUtils.getTranslatorOptions(pathToCql);
          libraryManager = new LibraryManager(modelManager, translatorOptions.getCqlCompilerOptions());
          libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(pathToCql)));
          libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());

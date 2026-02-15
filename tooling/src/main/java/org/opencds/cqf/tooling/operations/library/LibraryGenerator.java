@@ -24,7 +24,7 @@ import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.opencds.cqf.tooling.utilities.TranslatorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class LibraryGenerator implements ExecutableOperation {
    @Override
    public void execute() {
       fhirContext = FhirContextCache.getContext(version);
-      translatorOptions = ResourceUtils.getTranslatorOptions(pathToCqlContent);
+      translatorOptions = TranslatorUtils.getTranslatorOptions(pathToCqlContent);
       ModelManager modelManager = new ModelManager();
       LibraryManager libraryManager = new LibraryManager(modelManager, translatorOptions.getCqlCompilerOptions());
       File cqlContent = new File(pathToCqlContent);
