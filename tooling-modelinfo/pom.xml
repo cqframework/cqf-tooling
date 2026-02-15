@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opencds.cqf</groupId>
+        <artifactId>tooling-parent</artifactId>
+        <version>3.11.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>tooling-modelinfo</artifactId>
+    <version>3.11.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>CQF Tooling ModelInfo</name>
+    <description>ModelInfo generation from FHIR StructureDefinitions — FHIR, QICore, US Core, and QUICK model support</description>
+    <url>https://github.com/cqframework/cqf-tooling/tree/master/tooling-modelinfo</url>
+
+    <dependencies>
+        <!-- Core infrastructure -->
+        <dependency>
+            <groupId>org.opencds.cqf</groupId>
+            <artifactId>tooling-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- HAPI FHIR -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+        </dependency>
+
+        <!-- CQL ELM ModelInfo (org.hl7.elm_modelinfo.r1) -->
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>model</artifactId>
+        </dependency>
+
+        <!-- JAXB for ModelInfo serialization -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+        </dependency>
+
+        <!-- HTML parsing (QuickPageGenerator) -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.15.3</version>
+        </dependency>
+
+        <!-- HTML entity escaping (QuickPageGenerator) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+</project>

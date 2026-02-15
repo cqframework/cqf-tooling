@@ -30,6 +30,7 @@
     <modules>
         <module>tooling-core</module>
         <module>tooling-terminology</module>
+        <module>tooling-modelinfo</module>
         <module>tooling</module>
         <module>tooling-cli</module>
     </modules>
