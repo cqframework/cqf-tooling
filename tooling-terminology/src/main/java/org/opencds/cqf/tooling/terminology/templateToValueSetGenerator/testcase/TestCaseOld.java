@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase;
 
 
-import org.hl7.fhir.DataElement;
+import org.hl7.fhir.dstu3.model.DataElement;
 
 public class TestCaseOld {
 

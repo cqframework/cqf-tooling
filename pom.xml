@@ -29,6 +29,7 @@
 
     <modules>
         <module>tooling-core</module>
+        <module>tooling-terminology</module>
         <module>tooling</module>
         <module>tooling-cli</module>
     </modules>
@@ -229,6 +230,13 @@
                 <groupId>com.sun.xml.fastinfoset</groupId>
                 <artifactId>FastInfoset</artifactId>
                 <version>1.2.18</version>
+            </dependency>
+
+            <!-- Pin Apache POI base version to match poi-ooxml -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
             </dependency>
 
             <dependency>

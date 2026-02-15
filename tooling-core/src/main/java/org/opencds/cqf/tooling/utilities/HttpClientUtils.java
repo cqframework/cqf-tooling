@@ -164,7 +164,7 @@ public class HttpClientUtils {
 
         //Transaction bundles get posted to /fhir but other resources get posted to /fhir/resourceType ie fhir/Group
         String fhirServer = fhirServerUrl;
-        if (!BundleUtils.resourceIsTransactionBundle(resource)) {
+        if (!isTransactionBundle(resource)) {
             fhirServer = fhirServer +
                     (fhirServerUrl.endsWith("/") ? resource.fhirType()
                             : "/" + resource.fhirType());
@@ -558,5 +558,17 @@ public class HttpClientUtils {
                 throw new ClientProtocolException("Unexpected response status: " + status);
             }
         };
+    }
+
+    private static boolean isTransactionBundle(IBaseResource resource) {
+        if (resource == null) return false;
+        if (resource instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            return ((org.hl7.fhir.dstu3.model.Bundle) resource).getType()
+                    .equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
+        } else if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
+            return ((org.hl7.fhir.r4.model.Bundle) resource).getType()
+                    .equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+        }
+        return false;
     }
 }

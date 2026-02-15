@@ -36,10 +36,23 @@
             <artifactId>hapi-fhir-structures-r5</artifactId>
         </dependency>
 
+        <!-- FHIR version conversion (ResourceAndTypeConverter) -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-converter</artifactId>
+        </dependency>
+
         <!-- CQL ELM (for VersionedIdentifier in CanonicalUtils) -->
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm</artifactId>
+        </dependency>
+
+        <!-- HTTP client (HttpClientUtils) -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
         </dependency>
 
         <!-- Logging -->

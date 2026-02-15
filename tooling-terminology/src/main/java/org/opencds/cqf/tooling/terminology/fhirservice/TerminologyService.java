@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.terminology.fhirservice;
 
-import org.hl7.fhir.CodeableConcept;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Parameters;

@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling.terminology.fhirservice;
 
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
-import org.hl7.fhir.CodeableConcept;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
