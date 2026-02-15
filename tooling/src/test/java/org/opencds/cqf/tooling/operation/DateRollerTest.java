@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,7 +31,7 @@ public class DateRollerTest {
 
     @BeforeMethod
     public void setup() throws Exception {
-        IOUtils.clearDevicePaths();
+        ResourceDiscovery.clearDevicePaths();
         File originalDirectory = new File(Objects.requireNonNull(DateRollerTest.class.getResource("dateRoller")).getPath());
         File testRootDirectory = new File(testFilePathRoot);
         if (testRootDirectory.exists()) {

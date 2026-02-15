@@ -15,6 +15,7 @@ import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessorTest;
 import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,7 +31,7 @@ public class CqlOptionsLibraryProcessorTest extends LibraryProcessorTest {
     @BeforeMethod
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearDevicePaths();
+        ResourceDiscovery.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshLibraries" + separator + "cqloptions");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);

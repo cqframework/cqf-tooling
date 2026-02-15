@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public abstract class Package<T extends IBaseResource> {
     }
 
     public void resolvePrimaryLibraryDependencies(IBaseResource mainArtifact, FhirContext fhirContext, LinkedHashSet<IBaseResource> dependencies) {
-        var primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(
+        var primaryLibrary = ResourceDiscovery.getLibraryUrlMap(fhirContext).get(
                 ResourceUtils.getPrimaryLibraryUrl(mainArtifact, fhirContext));
         if (getPrimaryLibrary() == null) { // we want to save the primary library for the artifact being bundled not dependency libraries
             setPrimaryLibrary(primaryLibrary);

@@ -12,6 +12,7 @@ import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 
 import java.io.File;
 import java.util.*;
@@ -51,7 +52,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
 
         if (file == null || !file.exists()) {
-            for (String path : IOUtils.getLibraryPaths(this.fhirContext)) {
+            for (String path : ResourceDiscovery.getLibraryPaths(this.fhirContext)) {
                 loadLibrary(fileMap, libraries, new File(path));
             }
         }

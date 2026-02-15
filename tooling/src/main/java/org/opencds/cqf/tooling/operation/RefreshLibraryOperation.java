@@ -6,6 +6,7 @@ import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
 import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshLibraryArgumentProcessor;
+import org.opencds.cqf.tooling.utilities.CqlIOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
@@ -60,7 +61,7 @@ public class RefreshLibraryOperation extends Operation {
         try {
             if(params.libraryPath.isEmpty()) {
                 try {
-                    params.libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(params.cqlContentPath, params.fhirContext);
+                    params.libraryPath = CqlIOUtils.getLibraryPathAssociatedWithCqlFileName(params.cqlContentPath, params.fhirContext);
                 } catch (Exception e) {
                     LogUtils.putException(params.cqlContentPath, e);
                     LogUtils.warn(params.cqlContentPath);

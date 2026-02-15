@@ -6,6 +6,7 @@ import org.opencds.cqf.tooling.processor.AbstractBundler;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,12 +24,12 @@ public class MeasureBundler extends AbstractBundler {
     }
     @Override
     protected String getSourcePath(FhirContext fhirContext, Map.Entry<String, IBaseResource> resourceEntry) {
-        return IOUtils.getMeasurePathMap(fhirContext).get(resourceEntry.getKey());
+        return ResourceDiscovery.getMeasurePathMap(fhirContext).get(resourceEntry.getKey());
     }
 
     @Override
     protected Map<String, IBaseResource> getResources(FhirContext fhirContext) {
-        return IOUtils.getMeasures(fhirContext);
+        return ResourceDiscovery.getMeasures(fhirContext);
     }
 
     @Override
@@ -38,7 +39,7 @@ public class MeasureBundler extends AbstractBundler {
 
     @Override
     protected Set<String> getPaths(FhirContext fhirContext) {
-        return IOUtils.getMeasurePaths(fhirContext);
+        return ResourceDiscovery.getMeasurePaths(fhirContext);
     }
 
     //so far only the Measure Bundle process needs to persist extra files:

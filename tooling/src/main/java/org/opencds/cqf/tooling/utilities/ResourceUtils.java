@@ -313,11 +313,11 @@ public class ResourceUtils {
       List<String> libraryUrls = getLibraryDependencies(resource, fhirContext);
 
       for (String libraryUrl : libraryUrls) {
-         IBaseResource library = IOUtils.getLibraryUrlMap(fhirContext).get(libraryUrl);
+         IBaseResource library = ResourceDiscovery.getLibraryUrlMap(fhirContext).get(libraryUrl);
          if (library == null) {
             var id = CanonicalUtils.getId(libraryUrl);
             var version = CanonicalUtils.getVersion(libraryUrl);
-            library = IOUtils.getLibraries(fhirContext).get(id);
+            library = ResourceDiscovery.getLibraries(fhirContext).get(id);
             if (library != null) {
                var libraryVersion = ResourceUtils.getVersion(library, fhirContext);
                if (libraryVersion != null && !libraryVersion.equals(version)) {
@@ -364,11 +364,11 @@ public class ResourceUtils {
       if (includeDependencies) {
          List<String> libraryUrls = getLibraryDependencies(resource, fhirContext);
          for (String url : libraryUrls) {
-            IBaseResource library = IOUtils.getLibraryUrlMap(fhirContext).get(url);
+            IBaseResource library = ResourceDiscovery.getLibraryUrlMap(fhirContext).get(url);
             if (library == null) {
                var id = CanonicalUtils.getId(url);
                var version = CanonicalUtils.getVersion(url);
-               library = IOUtils.getLibraries(fhirContext).get(id);
+               library = ResourceDiscovery.getLibraries(fhirContext).get(id);
                if (library != null) {
                   var libraryVersion = ResourceUtils.getVersion(library, fhirContext);
                   if (libraryVersion != null && !libraryVersion.equals(version)) {
@@ -412,7 +412,7 @@ public class ResourceUtils {
       Set<String> dependencies = new HashSet<>(valueSetDefIDs);
 
       if (includeDependencies) {
-         List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
+         List<String> dependencyCqlPaths = CqlIOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
          for (String path : dependencyCqlPaths) {
             Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
             dependencies.addAll(dependencyValueSets.keySet());
@@ -497,7 +497,7 @@ public class ResourceUtils {
       LibraryManager libraryManager = new LibraryManager(modelManager);
       libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
       libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(folder)));
-      return  IOUtils.translate(new File(cqlContentPath), libraryManager);
+      return  CqlIOUtils.translate(new File(cqlContentPath), libraryManager);
    }
 
    private static Map<String, org.hl7.elm.r1.Library> cachedElm = new HashMap<>();
@@ -818,7 +818,7 @@ public class ResourceUtils {
                      activityDefinitionId = activityDefinitionReference.replace("ActivityDefinition/", "activitydefinition-").replace("_", "-");
                   }
 
-                  for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
+                  for (String path : ResourceDiscovery.getActivityDefinitionPaths(fhirContext)) {
                      if (path.contains(activityDefinitionId)) {
                         activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
                         break;
@@ -834,7 +834,7 @@ public class ResourceUtils {
 
                String activityDefinitionReference = (String)referenceChild;
 
-               for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
+               for (String path : ResourceDiscovery.getActivityDefinitionPaths(fhirContext)) {
                   if (path.contains(activityDefinitionReference)) {
                      activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
                   }

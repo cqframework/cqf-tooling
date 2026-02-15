@@ -17,6 +17,7 @@ import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +76,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 	@BeforeMethod
 	public void setUp() throws Exception {
 		IOUtils.resourceDirectories = new ArrayList<String>();
-		IOUtils.clearDevicePaths();
+		ResourceDiscovery.clearDevicePaths();
 		System.setOut(new PrintStream(this.console));
 
 		// Delete directories
@@ -258,7 +259,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 		FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
 
 		// get list of measures resulting from execution
-		Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
+		Map<String, IBaseResource> measures = ResourceDiscovery.getMeasures(fhirContext);
 
 		// loop through measure, verify each has all resources from multiple files
 		// bundled into single file using id/resourceType as lookup:
@@ -347,7 +348,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 		}
 
 		// run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)
-		IOUtils.cleanUp();
+		ResourceDiscovery.cleanUp();
 		ResourceUtils.cleanUp();
 	}
 

@@ -14,6 +14,7 @@ import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.File;
@@ -52,7 +53,7 @@ public class R4MeasureProcessor extends MeasureProcessor {
         var measures = new ArrayList<org.hl7.fhir.r5.model.Measure>();
 
         if (file == null || !file.exists()) {
-            for (var path : IOUtils.getMeasurePaths(params.fhirContext)) {
+            for (var path : ResourceDiscovery.getMeasurePaths(params.fhirContext)) {
                 loadMeasure(fileMap, measures, new File(path));
             }
         }

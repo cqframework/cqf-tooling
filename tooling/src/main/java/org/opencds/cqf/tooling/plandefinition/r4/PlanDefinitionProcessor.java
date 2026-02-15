@@ -7,6 +7,7 @@ import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshPlanDefinitionParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class PlanDefinitionProcessor extends org.opencds.cqf.tooling.plandefinit
         var planDefinitions = new ArrayList<org.hl7.fhir.r5.model.PlanDefinition>();
 
         if (file == null || !file.exists()) {
-            for (var path : IOUtils.getPlanDefinitionPaths(params.fhirContext)) {
+            for (var path : ResourceDiscovery.getPlanDefinitionPaths(params.fhirContext)) {
                 loadPlanDefinition(fileMap, planDefinitions, new File(path));
             }
         }

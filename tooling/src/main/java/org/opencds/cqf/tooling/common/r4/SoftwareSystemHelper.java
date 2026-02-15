@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.common.BaseSoftwareSystemHelper;
 import org.opencds.cqf.tooling.common.SoftwareSystem;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.constants.CqfConstants;
 import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class SoftwareSystemHelper extends BaseSoftwareSystemHelper {
             Device device = null;
             String deviceOutputPath = getRootDir() + devicePath;
             IOUtils.Encoding deviceOutputEncoding = IOUtils.Encoding.JSON;
-            for (String path : IOUtils.getDevicePaths(fhirContext)) {
+            for (String path : ResourceDiscovery.getDevicePaths(fhirContext)) {
                 DomainResource resourceInPath;
                 if (path.endsWith("xml")) {
                     deviceOutputEncoding = IOUtils.Encoding.XML;

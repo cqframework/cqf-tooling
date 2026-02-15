@@ -137,9 +137,9 @@ public abstract class AbstractBundler {
 
         try {
             final Map<String, IBaseResource> resourcesMap = new ConcurrentHashMap<>(getResources(fhirContext));
-            final Map<String, IBaseResource> libraryUrlMap = new ConcurrentHashMap<>(IOUtils.getLibraryUrlMap(fhirContext));
-            final Map<String, IBaseResource> libraries = new ConcurrentHashMap<>(IOUtils.getLibraries(fhirContext));
-            final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(IOUtils.getLibraryPathMap(fhirContext));
+            final Map<String, IBaseResource> libraryUrlMap = new ConcurrentHashMap<>(ResourceDiscovery.getLibraryUrlMap(fhirContext));
+            final Map<String, IBaseResource> libraries = new ConcurrentHashMap<>(ResourceDiscovery.getLibraries(fhirContext));
+            final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(ResourceDiscovery.getLibraryPathMap(fhirContext));
 
             if (resourcesMap.isEmpty()) {
                 logger.info("[INFO] No " + getResourceBundlerType() + "s found. Continuing...");
@@ -471,7 +471,7 @@ public abstract class AbstractBundler {
         if (cqlFileName.toLowerCase().startsWith("library-")) {
             cqlFileName = cqlFileName.substring(8);
         }
-        String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
+        String cqlLibrarySourcePath = ResourceDiscovery.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 

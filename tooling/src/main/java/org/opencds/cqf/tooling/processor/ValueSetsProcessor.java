@@ -6,6 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.util.HashMap;
@@ -69,7 +70,7 @@ public class ValueSetsProcessor {
     }
 
     private static void IntitializeCachedValueSets(FhirContext fhirContext) {
-        List<String> allValueSetPaths = IOUtils.getTerminologyPaths(fhirContext).stream().collect(Collectors.toList());
+        List<String> allValueSetPaths = ResourceDiscovery.getTerminologyPaths(fhirContext).stream().collect(Collectors.toList());
         List<IBaseResource> allValueSets = IOUtils.readResources(allValueSetPaths, fhirContext); 
             
         cachedValueSets = ValueSetsProcessor.copyToUrls(allValueSets, fhirContext);

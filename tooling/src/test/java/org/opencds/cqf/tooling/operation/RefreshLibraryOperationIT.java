@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.testng.annotations.BeforeMethod;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -22,7 +23,7 @@ public class RefreshLibraryOperationIT extends RefreshTest {
     @BeforeMethod
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearDevicePaths();
+        ResourceDiscovery.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshLibraries");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);

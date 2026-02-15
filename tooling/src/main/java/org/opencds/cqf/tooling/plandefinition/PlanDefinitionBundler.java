@@ -6,6 +6,7 @@ import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.processor.AbstractBundler;
 import org.opencds.cqf.tooling.processor.CDSHooksProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,17 +20,17 @@ public class PlanDefinitionBundler extends AbstractBundler {
 
     @Override
     protected Set<String> getPaths(FhirContext fhirContext) {
-        return IOUtils.getPlanDefinitionPaths(fhirContext);
+        return ResourceDiscovery.getPlanDefinitionPaths(fhirContext);
     }
 
     @Override
     protected String getSourcePath(FhirContext fhirContext, Map.Entry<String, IBaseResource> resourceEntry) {
-        return IOUtils.getPlanDefinitionPathMap(fhirContext).get(resourceEntry.getKey());
+        return ResourceDiscovery.getPlanDefinitionPathMap(fhirContext).get(resourceEntry.getKey());
     }
 
     @Override
     protected Map<String, IBaseResource> getResources(FhirContext fhirContext) {
-        return IOUtils.getPlanDefinitions(fhirContext);
+        return ResourceDiscovery.getPlanDefinitions(fhirContext);
     }
 
     @Override

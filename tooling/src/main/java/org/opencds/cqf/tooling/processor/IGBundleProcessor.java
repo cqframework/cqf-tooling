@@ -8,6 +8,7 @@ import org.opencds.cqf.tooling.questionnaire.QuestionnaireBundler;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class IGBundleProcessor {
         }
 
         // run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)
-        IOUtils.cleanUp();
+        ResourceDiscovery.cleanUp();
         ResourceUtils.cleanUp();
     }
 

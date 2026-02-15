@@ -13,6 +13,7 @@ import org.opencds.cqf.tooling.packaging.TestPackage;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,8 +72,8 @@ public class PackagePlanDefinition extends org.opencds.cqf.tooling.packaging.Pac
         if (mainArtifact.hasAction()) {
             var definitionRefs = new ArrayList<String>();
             getDefinitionReferences(mainArtifact.getAction(), definitionRefs);
-            var planDefinitions = IOUtils.getPlanDefinitions(getFhirContext());
-            var activityDefinitions = IOUtils.getActivityDefinitions(getFhirContext());
+            var planDefinitions = ResourceDiscovery.getPlanDefinitions(getFhirContext());
+            var activityDefinitions = ResourceDiscovery.getActivityDefinitions(getFhirContext());
             for (var definitionRef : definitionRefs) {
                 var id = CanonicalUtils.getId(definitionRef);
                 if (planDefinitions.containsKey(id)) {
