@@ -26,7 +26,7 @@
 
         <dependency>
             <groupId>org.opencds.cqf</groupId>
-            <artifactId>tooling</artifactId>
+            <artifactId>tooling-ig</artifactId>
             <version>${project.version}</version>
         </dependency>
 
