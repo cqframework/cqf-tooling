@@ -4,11 +4,11 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import org.hl7.fhir.r4.model.DateType;
-
+@SuppressWarnings("checkstyle:MemberName")
 public class OrganizationalMetaData {
 
     private String canonicalUrlBase;
@@ -36,31 +36,28 @@ public class OrganizationalMetaData {
         }
         valueSet.setUrl(canonicalUrlBase + "/ValueSet/" + valueSet.getId());
         valueSet.setCopyright(copyright);
-        valueSet.addJurisdiction(
-                new CodeableConcept().addCoding(new Coding().setSystem(JURISDICTION_URL).setCode(jurisdiction))
-        );
+        valueSet.addJurisdiction(new CodeableConcept()
+                .addCoding(new Coding().setSystem(JURISDICTION_URL).setCode(jurisdiction)));
         valueSet.setPublisher(publisher);
 
         if (outputVersion.equalsIgnoreCase("r4")) {
-           if (approvalDate != null) {
+            if (approvalDate != null) {
                 valueSet.addExtension(new Extension().setUrl(APPROVAL_DATE_URL).setValue(new DateType(approvalDate)));
             }
             if (effectiveDate != null) {
                 valueSet.addExtension(new Extension().setUrl(EFFECTIVE_DATE_URL).setValue(new DateType(effectiveDate)));
             }
             if (lastReviewDate != null) {
-                valueSet.addExtension(new Extension().setUrl(LAST_REVIEW_DATE_URL).setValue(new DateType(lastReviewDate)));
+                valueSet.addExtension(
+                        new Extension().setUrl(LAST_REVIEW_DATE_URL).setValue(new DateType(lastReviewDate)));
             }
         }
         if (authorName != null || authorTelecomSystem != null || authorTelecomValue != null) {
-            ContactDetail authorDetail =
-                    new ContactDetail()
-                            .setName(authorName)
-                            .addTelecom(
-                                    new ContactPoint()
-                                            .setSystem(ContactPoint.ContactPointSystem.fromCode(authorTelecomSystem))
-                                            .setValue(authorTelecomValue)
-                            );
+            ContactDetail authorDetail = new ContactDetail()
+                    .setName(authorName)
+                    .addTelecom(new ContactPoint()
+                            .setSystem(ContactPoint.ContactPointSystem.fromCode(authorTelecomSystem))
+                            .setValue(authorTelecomValue));
             if (outputVersion.equalsIgnoreCase("r4")) {
                 valueSet.addExtension(new Extension().setUrl(AUTHOR_URL).setValue(authorDetail));
             }

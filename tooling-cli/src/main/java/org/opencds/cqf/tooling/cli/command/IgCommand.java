@@ -10,16 +10,21 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
-@Command(name = "ig", description = "Implementation Guide operations", mixinStandardHelpOptions = true, subcommands = {
-    IgCommand.Refresh.class,
-    IgCommand.RefreshLegacy.class,
-    IgCommand.Scaffold.class,
-    IgCommand.Test.class,
-    IgCommand.Bundle.class,
-})
+@Command(
+        name = "ig",
+        description = "Implementation Guide operations",
+        mixinStandardHelpOptions = true,
+        subcommands = {
+            IgCommand.Refresh.class,
+            IgCommand.RefreshLegacy.class,
+            IgCommand.Scaffold.class,
+            IgCommand.Test.class,
+            IgCommand.Bundle.class,
+        })
 public class IgCommand implements Runnable {
 
-    @Spec CommandSpec spec;
+    @Spec
+    CommandSpec spec;
 
     @Override
     public void run() {

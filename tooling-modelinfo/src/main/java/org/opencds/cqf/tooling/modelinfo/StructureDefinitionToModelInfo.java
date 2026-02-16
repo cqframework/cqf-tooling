@@ -4,6 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.Marshaller;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.file.Paths;
+import java.util.Map;
+import javax.xml.namespace.QName;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
@@ -21,14 +28,6 @@ import org.opencds.cqf.tooling.modelinfo.uscore.USCoreModelInfoBuilder;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.file.Paths;
-import java.util.Map;
 
 public class StructureDefinitionToModelInfo extends Operation {
 
@@ -154,19 +153,50 @@ public class StructureDefinitionToModelInfo extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "inputpath": case "ip": inputPath = value; break; // -inputpath (-ip)
-                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "resourcepaths": case "rp": resourcePaths = value; break; // -resourcepaths (-rp)
-                // TODO : Can we autodetect this from the structure defintions?
-                // Yes, would need to be an extension definition on the ImplementationGuide...
-                case "modelname": case "mn": modelName = value; break; // -modelname (-mn)
-                case "modelversion": case "mv": modelVersion = value; break; // -modelversion (-mv)
-                case "usecqlprimitives": case "ucp": useCQLPrimitives = value.equalsIgnoreCase("true"); break;
-                case "includemetadata": case "im": includeMetadata = value.equalsIgnoreCase("true"); break;
-                case "createsliceelements": case "cse": createSliceElements = value.equalsIgnoreCase("true"); break;
-                case "flatten": case "f": flatten = value.equalsIgnoreCase("true"); break;
-                case "buildsettings": case "bs": buildSettings = value.equalsIgnoreCase("true"); break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                case "inputpath":
+                case "ip":
+                    inputPath = value;
+                    break; // -inputpath (-ip)
+                case "outputpath":
+                case "op":
+                    setOutputPath(value);
+                    break; // -outputpath (-op)
+                case "resourcepaths":
+                case "rp":
+                    resourcePaths = value;
+                    break; // -resourcepaths (-rp)
+                    // TODO : Can we autodetect this from the structure defintions?
+                    // Yes, would need to be an extension definition on the ImplementationGuide...
+                case "modelname":
+                case "mn":
+                    modelName = value;
+                    break; // -modelname (-mn)
+                case "modelversion":
+                case "mv":
+                    modelVersion = value;
+                    break; // -modelversion (-mv)
+                case "usecqlprimitives":
+                case "ucp":
+                    useCQLPrimitives = value.equalsIgnoreCase("true");
+                    break;
+                case "includemetadata":
+                case "im":
+                    includeMetadata = value.equalsIgnoreCase("true");
+                    break;
+                case "createsliceelements":
+                case "cse":
+                    createSliceElements = value.equalsIgnoreCase("true");
+                    break;
+                case "flatten":
+                case "f":
+                    flatten = value.equalsIgnoreCase("true");
+                    break;
+                case "buildsettings":
+                case "bs":
+                    buildSettings = value.equalsIgnoreCase("true");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 
@@ -185,8 +215,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             SettingsBuilder sb = new SettingsBuilder(atlas);
             Bundle result = sb.build();
             IOUtils.writeBundle(result, getOutputPath(), IOUtils.Encoding.JSON, FhirContext.forR4Cached());
-        }
-        else {
+        } else {
 
             ModelInfoBuilder miBuilder;
             ModelInfo mi;
@@ -200,8 +229,8 @@ public class StructureDefinitionToModelInfo extends Operation {
                 Map<String, TypeInfo> typeInfos = ciBuilder.build();
                 ciBuilder.afterBuild();
 
-                String fhirHelpersPath = IOUtils.concatFilePath(this.getOutputPath(),
-                        modelName + "Helpers-" + modelVersion + ".cql");
+                String fhirHelpersPath =
+                        IOUtils.concatFilePath(this.getOutputPath(), modelName + "Helpers-" + modelVersion + ".cql");
                 miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos, atlas, fhirHelpersPath);
                 mi = miBuilder.build();
             } else if (modelName.equals("USCore")) {
@@ -214,8 +243,8 @@ public class StructureDefinitionToModelInfo extends Operation {
                 Map<String, TypeInfo> typeInfos = ciBuilder.build();
                 ciBuilder.afterBuild();
 
-                String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
-                        modelName + "Helpers-" + modelVersion + ".cql");
+                String helpersPath =
+                        IOUtils.concatFilePath(this.getOutputPath(), modelName + "Helpers-" + modelVersion + ".cql");
                 miBuilder = new USCoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
                 mi = miBuilder.build();
             } else if (modelName.equals("QICore")) {
@@ -227,8 +256,8 @@ public class StructureDefinitionToModelInfo extends Operation {
                 Map<String, TypeInfo> typeInfos = ciBuilder.build();
                 ciBuilder.afterBuild();
 
-                String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
-                        modelName + "Helpers-" + modelVersion + ".cql");
+                String helpersPath =
+                        IOUtils.concatFilePath(this.getOutputPath(), modelName + "Helpers-" + modelVersion + ".cql");
                 miBuilder = new QICoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
                 mi = miBuilder.build();
             } else if (modelName.equals("QUICK")) {
@@ -243,7 +272,7 @@ public class StructureDefinitionToModelInfo extends Operation {
                 miBuilder = new QuickModelInfoBuilder(modelVersion, typeInfos.values());
                 mi = miBuilder.build();
             } else {
-                //should blowup
+                // should blowup
                 ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
                 ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
                 ciBuilder.settings.includeMetaData = this.includeMetadata;
@@ -255,8 +284,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             }
 
             try {
-                JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class,
-                        ConversionInfo.class);
+                JAXBContext jaxbContext =
+                        JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class, ConversionInfo.class);
 
                 JAXBElement<ModelInfo> jbe = new JAXBElement<ModelInfo>(
                         new QName("urn:hl7-org:elm-modelinfo:r1", "modelInfo"), ModelInfo.class, null, mi);
@@ -267,7 +296,7 @@ public class StructureDefinitionToModelInfo extends Operation {
                 // Print XML String to Console
                 StringWriter sw = new StringWriter();
 
-                //Write XML to StringWriter
+                // Write XML to StringWriter
 
                 jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
                 jaxbMarshaller.marshal(jbe, sw);

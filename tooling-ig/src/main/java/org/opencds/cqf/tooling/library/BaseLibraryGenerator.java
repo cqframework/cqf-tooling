@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.library;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -7,10 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
@@ -19,12 +18,11 @@ import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends BaseNarrativeProvider<?>> extends Operation {
+public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends BaseNarrativeProvider<?>>
+        extends Operation {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseLibraryGenerator.class);
 
@@ -48,18 +46,20 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
     private Map<String, String> elmMap = new HashMap<>();
     private Map<String, L> libraryMap = new HashMap<>();
 
-    //instead of processLibrary this would be refreshLibrary or refreshMeasure
+    // instead of processLibrary this would be refreshLibrary or refreshMeasure
     public abstract void processLibrary(String id, CqlTranslator translator);
+
     public abstract void output();
 
     @Override
     public void execute(String[] args) {
         buildArgs(args);
         setRelevantCqlFiles();
-        
+
         modelManager = new ModelManager();
-        sourceProvider = new DefaultLibrarySourceProvider(new File(pathToCQLContent).getParentFile().toPath());
-        //sourceProvider = new GenericLibrarySourceProvider(pathToCqlContentDir);
+        sourceProvider = new DefaultLibrarySourceProvider(
+                new File(pathToCQLContent).getParentFile().toPath());
+        // sourceProvider = new GenericLibrarySourceProvider(pathToCqlContentDir);
         libraryManager = new LibraryManager(modelManager);
         libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
 
@@ -114,14 +114,13 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
                 case "-outputpath":
                 case "-op":
                     setOutputPath(value);
-                    break;        
+                    break;
             }
         }
 
-        if(pathToCQLContent == null)
-        {
+        if (pathToCQLContent == null) {
             throw new IllegalArgumentException("The path to the CQL Content is required");
-        }  
+        }
     }
 
     private void setRelevantCqlFiles() {
@@ -130,32 +129,32 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         // And we've been given an output file
         // Shouldn't we _only_ be processing that file?
         File cqlContent = new File(pathToCQLContent);
-        cqlFiles = new File[] { cqlContent };
-/*
-        cqlContentDir = cqlContent.getParentFile();
-        pathToCqlContentDir = cqlContentDir.getPath();
-        if (!cqlContentDir.isDirectory()) {
-            throw new IllegalArgumentException("The specified path to library files is not a directory");
-        }
-        String cql = getCql(cqlContent);
-        ArrayList<String> dependencyLibraries = getIncludedLibraries(cql);
-        File[] allCqlContentFiles = cqlContentDir.listFiles();
-        if (allCqlContentFiles == null) {
-            return;
-        }
-        else if (allCqlContentFiles.length == 0) {
-            return;
-        }
-        ArrayList<File> dependencyLibrarieFiles = new ArrayList<>();
-        dependencyLibrarieFiles.add(cqlContent);
-        for (File cqlFile : allCqlContentFiles) {
-            if (dependencyLibraries.contains(cqlFile.getName().replace(".cql", ""))) {
-                dependencyLibrarieFiles.add(cqlFile);
-            }
+        cqlFiles = new File[] {cqlContent};
+        /*
+                cqlContentDir = cqlContent.getParentFile();
+                pathToCqlContentDir = cqlContentDir.getPath();
+                if (!cqlContentDir.isDirectory()) {
+                    throw new IllegalArgumentException("The specified path to library files is not a directory");
+                }
+                String cql = getCql(cqlContent);
+                ArrayList<String> dependencyLibraries = getIncludedLibraries(cql);
+                File[] allCqlContentFiles = cqlContentDir.listFiles();
+                if (allCqlContentFiles == null) {
+                    return;
+                }
+                else if (allCqlContentFiles.length == 0) {
+                    return;
+                }
+                ArrayList<File> dependencyLibrarieFiles = new ArrayList<>();
+                dependencyLibrarieFiles.add(cqlContent);
+                for (File cqlFile : allCqlContentFiles) {
+                    if (dependencyLibraries.contains(cqlFile.getName().replace(".cql", ""))) {
+                        dependencyLibrarieFiles.add(cqlFile);
+                    }
 
-        }
-        cqlFiles = dependencyLibrarieFiles.toArray(new File[0]);
-*/
+                }
+                cqlFiles = dependencyLibrarieFiles.toArray(new File[0]);
+        */
     }
 
     private void translateCqlFiles() {
@@ -167,8 +166,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             cqlMap.put(translator.toELM().getIdentifier().getId(), getCql(cqlFile));
             if (encoding.equals("json")) {
                 elmMap.put(translator.toELM().getIdentifier().getId(), translator.toJson());
-            }
-            else {
+            } else {
                 elmMap.put(translator.toELM().getIdentifier().getId(), translator.toXml());
             }
         }
@@ -197,8 +195,11 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
                 ArrayList<String> errors = new ArrayList<>();
                 for (CqlCompilerException error : translator.getErrors()) {
                     TrackBack tb = error.getLocator();
-                    String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
-                            tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
+                    String lines = tb == null
+                            ? "[n/a]"
+                            : String.format(
+                                    "[%d:%d, %d:%d]",
+                                    tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
                     System.err.printf("%s %s%n", lines, error.getMessage());
                     errors.add(lines + error.getMessage());
                 }
@@ -220,11 +221,17 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         ArrayList<String> relatedArtifacts = new ArrayList<>();
 
         if (includeDefinitionIndex >= 0) {
-            String[] includedDefsAndBelow = cql.substring(includeDefinitionIndex).split("\\n");
+            String[] includedDefsAndBelow =
+                    cql.substring(includeDefinitionIndex).split("\\n");
 
             while (includedDefsAndBelow[index].startsWith("include")) {
-                String includedLibraryName = includedDefsAndBelow[index].replace("include ", "").split(" version ")[0];
-                String includedLibraryVersion = includedDefsAndBelow[index].replace("include ", "").split(" version ")[1].replaceAll("\'", "").split(" called")[0];
+                String includedLibraryName =
+                        includedDefsAndBelow[index].replace("include ", "").split(" version ")[0];
+                String includedLibraryVersion = includedDefsAndBelow[index]
+                        .replace("include ", "")
+                        .split(" version ")[1]
+                        .replaceAll("\'", "")
+                        .split(" called")[0];
                 String includedLibraryId = includedLibraryName + "-" + includedLibraryVersion;
                 relatedArtifacts.add(includedLibraryId);
                 index++;
@@ -276,7 +283,9 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         this.operationName = operationName;
     }
 
-    protected String getEncoding() { return encoding; }
+    protected String getEncoding() {
+        return encoding;
+    }
 
     protected Map<String, L> getLibraryMap() {
         return libraryMap;

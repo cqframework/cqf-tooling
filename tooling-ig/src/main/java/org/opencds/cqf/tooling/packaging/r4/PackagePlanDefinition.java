@@ -1,6 +1,12 @@
 package org.opencds.cqf.tooling.packaging.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
@@ -18,22 +24,23 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class PackagePlanDefinition extends org.opencds.cqf.tooling.packaging.Package<PlanDefinition> {
 
     private static final Logger logger = LoggerFactory.getLogger(PackagePlanDefinition.class);
     private final String planDefinitionFilePath;
 
-    public PackagePlanDefinition(String igRoot, FhirContext fhirContext, String planDefinitionFilePath, boolean includeDependencies, boolean includeTerminology, boolean includeTests, String fhirServerUrl) {
+    public PackagePlanDefinition(
+            String igRoot,
+            FhirContext fhirContext,
+            String planDefinitionFilePath,
+            boolean includeDependencies,
+            boolean includeTerminology,
+            boolean includeTests,
+            String fhirServerUrl) {
         super(igRoot, fhirContext, includeDependencies, includeTerminology, includeTests, fhirServerUrl);
         this.planDefinitionFilePath = planDefinitionFilePath;
-        // If the package operation is run separately from the refresh operation, we need to initialize the directory paths
+        // If the package operation is run separately from the refresh operation, we need to initialize the directory
+        // paths
         if (IOUtils.resourceDirectories.isEmpty()) {
             // TODO: this should be smarter... ideally the IGRepository interface should be leveraged for data retrieval
             var parent = Paths.get(planDefinitionFilePath).getParent().toString();
@@ -117,57 +124,80 @@ public class PackagePlanDefinition extends org.opencds.cqf.tooling.packaging.Pac
 
         var planDefinitionId = mainArtifact.getIdElement().getIdPart();
         logger.info("Packaging PlanDefinition {}...", planDefinitionId);
-        var planDefinitionOutputPath = IOUtils.concatFilePath(getBundleOutputPath(),
-                "plandefinition", planDefinitionId);
+        var planDefinitionOutputPath =
+                IOUtils.concatFilePath(getBundleOutputPath(), "plandefinition", planDefinitionId);
         IOUtils.initializeDirectory(planDefinitionOutputPath);
 
-        var planDefinitionFilesOutputPath = IOUtils.concatFilePath(planDefinitionOutputPath,
-                planDefinitionId + "-files");
+        var planDefinitionFilesOutputPath =
+                IOUtils.concatFilePath(planDefinitionOutputPath, planDefinitionId + "-files");
         IOUtils.initializeDirectory(planDefinitionFilesOutputPath);
         IOUtils.writeResource(mainArtifact, planDefinitionFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext());
-        IOUtils.writeResource(getPrimaryLibrary(), planDefinitionFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext());
+        IOUtils.writeResource(
+                getPrimaryLibrary(), planDefinitionFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext());
 
         // Is this correct? Do we just exclude the dependencies from the bundle?
         if (isIncludeDependencies()) {
             logger.info("Packaging Dependencies...");
             var libraryDependencyBundleId = "library-deps-" + planDefinitionId + "-bundle";
-            IOUtils.writeBundle(createDependencyLibraryBundle(libraryDependencyBundleId, dependencies),
-                    planDefinitionFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext(), libraryDependencyBundleId);
+            IOUtils.writeBundle(
+                    createDependencyLibraryBundle(libraryDependencyBundleId, dependencies),
+                    planDefinitionFilesOutputPath,
+                    IOUtils.Encoding.JSON,
+                    getFhirContext(),
+                    libraryDependencyBundleId);
         }
 
         // Is this correct? Do we just exclude the dependencies from the bundle?
         if (isIncludeTerminology()) {
             logger.info("Packaging Terminology...");
             var valueSetDependencyBundleId = "valuesets-" + planDefinitionId + "-bundle";
-            IOUtils.writeBundle(createDependencyValueSetBundle(valueSetDependencyBundleId, dependencies),
-                    planDefinitionFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext(), valueSetDependencyBundleId);
+            IOUtils.writeBundle(
+                    createDependencyValueSetBundle(valueSetDependencyBundleId, dependencies),
+                    planDefinitionFilesOutputPath,
+                    IOUtils.Encoding.JSON,
+                    getFhirContext(),
+                    valueSetDependencyBundleId);
         }
 
-        IOUtils.writeResources(getActivityDefinitions(dependencies), planDefinitionFilesOutputPath,
-                IOUtils.Encoding.JSON, getFhirContext());
-        var cqlFileOutputPath = IOUtils.concatFilePath(planDefinitionFilesOutputPath,
-                ((Library) getPrimaryLibrary()).getIdPart() + ".cql");
+        IOUtils.writeResources(
+                getActivityDefinitions(dependencies),
+                planDefinitionFilesOutputPath,
+                IOUtils.Encoding.JSON,
+                getFhirContext());
+        var cqlFileOutputPath = IOUtils.concatFilePath(
+                planDefinitionFilesOutputPath, ((Library) getPrimaryLibrary()).getIdPart() + ".cql");
         IOUtils.writeCqlToFile(ResourceUtils.getCqlFromR4Library((Library) getPrimaryLibrary()), cqlFileOutputPath);
 
         if (isIncludeTests() && testPackage != null) {
             logger.info("Packaging {} Tests...", testPackage.getTests().size());
             if (testPackage.getGroup() != null) {
-                IOUtils.writeResource(testPackage.getGroup(), planDefinitionFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext(),
-                        true, "Group-" + testPackage.getGroup().getIdElement().getIdPart());
+                IOUtils.writeResource(
+                        testPackage.getGroup(),
+                        planDefinitionFilesOutputPath,
+                        IOUtils.Encoding.JSON,
+                        getFhirContext(),
+                        true,
+                        "Group-" + testPackage.getGroup().getIdElement().getIdPart());
             }
-            testPackage.getTests().forEach(
-                    test -> {
-                        dependencies.addAll(BundleUtils.getR4ResourcesFromBundle((Bundle) test));
-                        IOUtils.writeBundle(test, planDefinitionFilesOutputPath, IOUtils.Encoding.JSON,
-                                getFhirContext(), test.getIdElement().getIdPart());
-                    }
-            );
+            testPackage.getTests().forEach(test -> {
+                dependencies.addAll(BundleUtils.getR4ResourcesFromBundle((Bundle) test));
+                IOUtils.writeBundle(
+                        test,
+                        planDefinitionFilesOutputPath,
+                        IOUtils.Encoding.JSON,
+                        getFhirContext(),
+                        test.getIdElement().getIdPart());
+            });
         }
 
         dependencies.add(mainArtifact);
         var packageBundle = createArtifactPackageBundle(planDefinitionId, dependencies);
-        IOUtils.writeBundle(packageBundle, planDefinitionOutputPath,
-                IOUtils.Encoding.JSON, getFhirContext(), planDefinitionId + "-bundle");
+        IOUtils.writeBundle(
+                packageBundle,
+                planDefinitionOutputPath,
+                IOUtils.Encoding.JSON,
+                getFhirContext(),
+                planDefinitionId + "-bundle");
 
         if (getFhirClient() != null) {
             logger.info("Loading package to FHIR Server: {}", getFhirServerUrl());
@@ -181,7 +211,8 @@ public class PackagePlanDefinition extends org.opencds.cqf.tooling.packaging.Pac
         logger.info("Finished Packaging PlanDefinition {}...", planDefinitionId);
     }
 
-    private void getDefinitionReferences(List<PlanDefinition.PlanDefinitionActionComponent> actions, List<String> references) {
+    private void getDefinitionReferences(
+            List<PlanDefinition.PlanDefinitionActionComponent> actions, List<String> references) {
         for (var action : actions) {
             if (action.hasDefinition() && action.getDefinition() instanceof CanonicalType) {
                 // Assuming either a PlanDefinition or ActivityDefinition - others will be ignored during resolution
@@ -198,17 +229,22 @@ public class PackagePlanDefinition extends org.opencds.cqf.tooling.packaging.Pac
     }
 
     private Bundle createDependencyLibraryBundle(String id, Set<IBaseResource> dependencies) {
-        var libraries = dependencies.stream().filter(
-                dependency -> dependency instanceof Library).collect(Collectors.toList());
+        var libraries = dependencies.stream()
+                .filter(dependency -> dependency instanceof Library)
+                .collect(Collectors.toList());
         return BundleUtils.bundleR4Artifacts(id, libraries, null, true);
     }
 
     private Bundle createDependencyValueSetBundle(String id, Set<IBaseResource> dependencies) {
-        var valueSets = dependencies.stream().filter(dependency -> dependency instanceof ValueSet).collect(Collectors.toList());
+        var valueSets = dependencies.stream()
+                .filter(dependency -> dependency instanceof ValueSet)
+                .collect(Collectors.toList());
         return BundleUtils.bundleR4Artifacts(id, valueSets, null, true);
     }
 
     private List<IBaseResource> getActivityDefinitions(Set<IBaseResource> dependencies) {
-        return dependencies.stream().filter(dependency -> dependency instanceof ActivityDefinition).collect(Collectors.toList());
+        return dependencies.stream()
+                .filter(dependency -> dependency instanceof ActivityDefinition)
+                .collect(Collectors.toList());
     }
 }

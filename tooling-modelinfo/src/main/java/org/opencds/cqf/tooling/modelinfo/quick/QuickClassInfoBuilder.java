@@ -1,8 +1,6 @@
 package org.opencds.cqf.tooling.modelinfo.quick;
 
-
 import java.util.Map;
-
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder;
 
@@ -21,17 +19,17 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                     || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension"))
                     && !this.settings.cqlTypeMappings.containsKey("QUICK." + x.getName()))
             );
-        
+
         System.out.println("Building Quick Resources");
-        this.buildFor("QUICK", 
-            (x -> x.getKind() == StructureDefinitionKind.RESOURCE 
+        this.buildFor("QUICK",
+            (x -> x.getKind() == StructureDefinitionKind.RESOURCE
                 && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.CONSTRAINT)
                 && (x.getUrl().startsWith("http://hl7.org/fhir/us/qicore")))
         );
         */
 
-        //this.buildFor("QUICK", "Resource");
-        //this.buildFor("QUICK", "DomainResource");
+        // this.buildFor("QUICK", "Resource");
+        // this.buildFor("QUICK", "DomainResource");
         this.buildFor("QUICK", "qicore-adverseevent");
         this.buildFor("QUICK", "qicore-patient");
         this.buildFor("QUICK", "qicore-allergyintolerance");

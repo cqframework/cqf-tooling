@@ -27,7 +27,9 @@ public class CommonMetaData {
 
     public CommonMetaData addCodeSystemMeta(String identifier, String url, String version) {
         if (!codeSystemMetaMap.containsKey(url)) {
-            codeSystemMetaMap.put(url, new CodeSystemMeta().setIdentifier(identifier).setUrl(url).setVersion(version));
+            codeSystemMetaMap.put(
+                    url,
+                    new CodeSystemMeta().setIdentifier(identifier).setUrl(url).setVersion(version));
         }
 
         return this;
@@ -43,7 +45,12 @@ public class CommonMetaData {
 
     public CommonMetaData addValueSetMeta(String identifier, String metaPageName, String codeListPageName) {
         if (!codeSystemMetaMap.containsKey(identifier)) {
-            valueSetMetaMap.put(identifier, new ValueSetMeta().setIdentifier(identifier).setMetaPageName(metaPageName).setCodeListPageName(codeListPageName));
+            valueSetMetaMap.put(
+                    identifier,
+                    new ValueSetMeta()
+                            .setIdentifier(identifier)
+                            .setMetaPageName(metaPageName)
+                            .setCodeListPageName(codeListPageName));
         }
 
         return this;
@@ -114,5 +121,4 @@ public class CommonMetaData {
             return this;
         }
     }
-
 }

@@ -3,7 +3,6 @@ package org.opencds.cqf.tooling.terminology;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -112,85 +111,93 @@ public class GenericValueSetGenerator extends Operation {
 
             if (flag.equals("-pathtospreadsheet") || flag.equals("-pts")) {
                 pathToSpreadsheet = value;
-            }
-            else if (flag.equals("-encoding") || flag.equals("-e")) {
+            } else if (flag.equals("-encoding") || flag.equals("-e")) {
                 encoding = value;
-            }
-            else if (flag.equals("-outputpath") || flag.equals("-op")) {
+            } else if (flag.equals("-outputpath") || flag.equals("-op")) {
                 setOutputPath(value);
-            }
-            else {
+            } else {
                 String[] sheetRowCol = value == null ? null : value.split(":");
 
                 if (sheetRowCol != null && sheetRowCol.length < 3) {
-                    throw new IllegalArgumentException("The following arg must include the sheet#:row#:column# format: " + arg);
+                    throw new IllegalArgumentException(
+                            "The following arg must include the sheet#:row#:column# format: " + arg);
                 }
 
                 switch (flag.replace("-", "").toLowerCase()) {
-                    case "id": case "i":
+                    case "id":
+                    case "i":
                         hasId = true;
                         if (sheetRowCol == null) break;
                         idSheet = Integer.valueOf(sheetRowCol[0]);
                         idRow = Integer.valueOf(sheetRowCol[1]);
                         idCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "url": case "u":
+                    case "url":
+                    case "u":
                         hasUrl = true;
                         if (sheetRowCol == null) break;
                         urlSheet = Integer.valueOf(sheetRowCol[0]);
                         urlRow = Integer.valueOf(sheetRowCol[1]);
                         urlCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "version": case "v":
+                    case "version":
+                    case "v":
                         hasVersion = true;
                         if (sheetRowCol == null) break;
                         versionSheet = Integer.valueOf(sheetRowCol[0]);
                         versionRow = Integer.valueOf(sheetRowCol[1]);
                         versionCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "name": case "n":
+                    case "name":
+                    case "n":
                         hasName = true;
                         if (sheetRowCol == null) break;
                         nameSheet = Integer.valueOf(sheetRowCol[0]);
                         nameRow = Integer.valueOf(sheetRowCol[1]);
                         nameCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "title": case "t":
+                    case "title":
+                    case "t":
                         hasTitle = true;
                         if (sheetRowCol == null) break;
                         titleSheet = Integer.valueOf(sheetRowCol[0]);
                         titleRow = Integer.valueOf(sheetRowCol[1]);
                         titleCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "publisher": case "pub":
+                    case "publisher":
+                    case "pub":
                         hasPublisher = true;
                         if (sheetRowCol == null) break;
                         publisherSheet = Integer.valueOf(sheetRowCol[0]);
                         publisherRow = Integer.valueOf(sheetRowCol[1]);
                         publisherCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "description": case "d":
+                    case "description":
+                    case "d":
                         hasDescription = true;
                         if (sheetRowCol == null) break;
                         descriptionSheet = Integer.valueOf(sheetRowCol[0]);
                         descriptionRow = Integer.valueOf(sheetRowCol[1]);
                         descriptionCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "purpose": case "pur":
+                    case "purpose":
+                    case "pur":
                         hasPurpose = true;
                         if (sheetRowCol == null) break;
                         purposeSheet = Integer.valueOf(sheetRowCol[0]);
                         purposeRow = Integer.valueOf(sheetRowCol[1]);
                         purposeCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "copyright": case "c":
+                    case "copyright":
+                    case "c":
                         hasCopyright = true;
                         if (sheetRowCol == null) break;
                         copyrightSheet = Integer.valueOf(sheetRowCol[0]);
                         copyrightRow = Integer.valueOf(sheetRowCol[1]);
                         copyrightCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "system": case "s":
+                    case "system":
+                    case "s":
                         if (hasStaticSystem) {
                             throw new IllegalArgumentException("Cannot have both system and staticsystem flags set");
                         }
@@ -200,14 +207,16 @@ public class GenericValueSetGenerator extends Operation {
                         systemRow = Integer.valueOf(sheetRowCol[1]);
                         systemCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "synonymdesignation": case "syn":
+                    case "synonymdesignation":
+                    case "syn":
                         hasSynonymDesignation = true;
                         if (sheetRowCol == null) break;
                         synonymDesignationSheet = Integer.valueOf(sheetRowCol[0]);
                         synonymDesignationRow = Integer.valueOf(sheetRowCol[1]);
                         synonymDesignationCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "staticsystem": case "ss":
+                    case "staticsystem":
+                    case "ss":
                         if (hasSystem) {
                             throw new IllegalArgumentException("Cannot have both system and staticsystem flags set");
                         }
@@ -217,7 +226,8 @@ public class GenericValueSetGenerator extends Operation {
                         staticSystemRow = Integer.valueOf(sheetRowCol[1]);
                         staticSystemCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "codeversion": case "cv":
+                    case "codeversion":
+                    case "cv":
                         if (hasStaticCodeVersion) {
                             throw new IllegalArgumentException("Cannot have both version and staticversion flags set");
                         }
@@ -227,7 +237,8 @@ public class GenericValueSetGenerator extends Operation {
                         codeVersionRow = Integer.valueOf(sheetRowCol[1]);
                         codeVersionCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "staticversion": case "sv":
+                    case "staticversion":
+                    case "sv":
                         if (hasCodeVersion) {
                             throw new IllegalArgumentException("Cannot have both version and staticversion flags set");
                         }
@@ -244,14 +255,16 @@ public class GenericValueSetGenerator extends Operation {
                         codeRow = Integer.valueOf(sheetRowCol[1]);
                         codeCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    case "display": case "dis":
+                    case "display":
+                    case "dis":
                         hasDisplay = true;
                         if (sheetRowCol == null) break;
                         displaySheet = Integer.valueOf(sheetRowCol[0]);
                         displayRow = Integer.valueOf(sheetRowCol[1]);
                         displayCol = Integer.valueOf(sheetRowCol[2]);
                         break;
-                    default: throw new IllegalArgumentException("Unknown arg: " + arg);
+                    default:
+                        throw new IllegalArgumentException("Unknown arg: " + arg);
                 }
             }
         }
@@ -282,45 +295,66 @@ public class GenericValueSetGenerator extends Operation {
     }
 
     public void resolveMetaData(ValueSet vs, Workbook workbook) {
-        vs.setId(hasId ? SpreadsheetHelper.getCellAsString(workbook.getSheetAt(idSheet).getRow(idRow).getCell(idCol)) : "example");
+        vs.setId(
+                hasId
+                        ? SpreadsheetHelper.getCellAsString(
+                                workbook.getSheetAt(idSheet).getRow(idRow).getCell(idCol))
+                        : "example");
         vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
         if (hasUrl) {
-            vs.setUrl(SpreadsheetHelper.getCellAsString(workbook.getSheetAt(urlSheet).getRow(urlRow).getCell(urlCol)));
+            vs.setUrl(SpreadsheetHelper.getCellAsString(
+                    workbook.getSheetAt(urlSheet).getRow(urlRow).getCell(urlCol)));
         }
         if (hasVersion) {
-            vs.setVersion(SpreadsheetHelper.getCellAsString(workbook.getSheetAt(versionSheet).getRow(versionRow).getCell(versionCol)));
+            vs.setVersion(SpreadsheetHelper.getCellAsString(
+                    workbook.getSheetAt(versionSheet).getRow(versionRow).getCell(versionCol)));
         }
         if (hasName) {
-            vs.setName(SpreadsheetHelper.getCellAsString(workbook.getSheetAt(nameSheet).getRow(nameRow).getCell(nameCol)));
+            vs.setName(SpreadsheetHelper.getCellAsString(
+                    workbook.getSheetAt(nameSheet).getRow(nameRow).getCell(nameCol)));
         }
         if (hasTitle) {
-            vs.setTitle(SpreadsheetHelper.getCellAsString(workbook.getSheetAt(titleSheet).getRow(titleRow).getCell(titleCol)));
+            vs.setTitle(SpreadsheetHelper.getCellAsString(
+                    workbook.getSheetAt(titleSheet).getRow(titleRow).getCell(titleCol)));
         }
         if (hasPublisher) {
-            vs.setPublisher(SpreadsheetHelper.getCellAsString(workbook.getSheetAt(publisherSheet).getRow(publisherRow).getCell(publisherCol)));
+            vs.setPublisher(SpreadsheetHelper.getCellAsString(
+                    workbook.getSheetAt(publisherSheet).getRow(publisherRow).getCell(publisherCol)));
         }
         if (hasDescription) {
-            vs.setDescription(SpreadsheetHelper.getCellAsString(workbook.getSheetAt(descriptionSheet).getRow(descriptionRow).getCell(descriptionCol)));
+            vs.setDescription(SpreadsheetHelper.getCellAsString(
+                    workbook.getSheetAt(descriptionSheet).getRow(descriptionRow).getCell(descriptionCol)));
         }
         if (hasPurpose) {
-            vs.setPurpose(SpreadsheetHelper.getCellAsString(workbook.getSheetAt(purposeSheet).getRow(purposeRow).getCell(purposeCol)));
+            vs.setPurpose(SpreadsheetHelper.getCellAsString(
+                    workbook.getSheetAt(purposeSheet).getRow(purposeRow).getCell(purposeCol)));
         }
         if (hasCopyright) {
-            vs.setCopyright(SpreadsheetHelper.getCellAsString(workbook.getSheetAt(copyrightSheet).getRow(copyrightRow).getCell(copyrightCol)));
+            vs.setCopyright(SpreadsheetHelper.getCellAsString(
+                    workbook.getSheetAt(copyrightSheet).getRow(copyrightRow).getCell(copyrightCol)));
         }
     }
 
     public void resolveCodeList(Workbook workbook) {
         Iterator<Row> codeIterator = workbook.getSheetAt(codeSheet).rowIterator();
-        Iterator<Row> displayIterator = hasDisplay ? workbook.getSheetAt(displaySheet).rowIterator() : null;
-        Iterator<Row> systemIterator = hasSystem ? workbook.getSheetAt(systemSheet).rowIterator() : null;
-        Iterator<Row> synonymDesignationIterator = hasSynonymDesignation ? workbook.getSheetAt(synonymDesignationSheet).rowIterator() : null;
-        String system = hasStaticSystem
-                ? SpreadsheetHelper.getCellAsString(workbook.getSheetAt(staticSystemSheet).getRow(staticSystemRow).getCell(staticSystemCol))
+        Iterator<Row> displayIterator =
+                hasDisplay ? workbook.getSheetAt(displaySheet).rowIterator() : null;
+        Iterator<Row> systemIterator =
+                hasSystem ? workbook.getSheetAt(systemSheet).rowIterator() : null;
+        Iterator<Row> synonymDesignationIterator = hasSynonymDesignation
+                ? workbook.getSheetAt(synonymDesignationSheet).rowIterator()
                 : null;
-        Iterator<Row> versionIterator = hasCodeVersion ? workbook.getSheetAt(codeVersionSheet).rowIterator() : null;
+        String system = hasStaticSystem
+                ? SpreadsheetHelper.getCellAsString(workbook.getSheetAt(staticSystemSheet)
+                        .getRow(staticSystemRow)
+                        .getCell(staticSystemCol))
+                : null;
+        Iterator<Row> versionIterator =
+                hasCodeVersion ? workbook.getSheetAt(codeVersionSheet).rowIterator() : null;
         String version = hasStaticCodeVersion
-                ? SpreadsheetHelper.getCellAsString(workbook.getSheetAt(staticCodeVersionSheet).getRow(staticCodeVersionRow).getCell(staticCodeVersionCol))
+                ? SpreadsheetHelper.getCellAsString(workbook.getSheetAt(staticCodeVersionSheet)
+                        .getRow(staticCodeVersionRow)
+                        .getCell(staticCodeVersionCol))
                 : null;
 
         while (codeIterator.hasNext()) {
@@ -337,7 +371,7 @@ public class GenericValueSetGenerator extends Operation {
             if (systemIterator != null) {
                 system = getNextValue(systemIterator, systemRow, systemCol);
             }
-            
+
             if (system == null) {
                 throw new IllegalArgumentException("System not provided");
             }
@@ -355,7 +389,11 @@ public class GenericValueSetGenerator extends Operation {
             int hash = system.hashCode() * (version != null ? version.hashCode() : 1);
 
             if (!codesBySystem.containsKey(hash)) {
-                codesBySystem.put(hash, new org.opencds.cqf.tooling.terminology.ValueSet().setSystem(system).setVersion(version));
+                codesBySystem.put(
+                        hash,
+                        new org.opencds.cqf.tooling.terminology.ValueSet()
+                                .setSystem(system)
+                                .setVersion(version));
             }
 
             String display = null;
@@ -368,14 +406,18 @@ public class GenericValueSetGenerator extends Operation {
                 synonym = getNextValue(synonymDesignationIterator, synonymDesignationRow, synonymDesignationCol);
             }
 
-            ValueSet.ConceptReferenceComponent concept = new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(display);
+            ValueSet.ConceptReferenceComponent concept =
+                    new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(display);
             if (synonym != null && !synonym.isEmpty()) {
                 Coding synonymUseCoding = new Coding();
                 synonymUseCoding.setSystem("http://snomed.info/sct");
                 synonymUseCoding.setCode("synonym");
                 synonymUseCoding.setDisplay("Synonym");
 
-                ValueSet.ConceptReferenceDesignationComponent conceptDesignation = new ValueSet.ConceptReferenceDesignationComponent().setUse(synonymUseCoding).setValue(synonym);
+                ValueSet.ConceptReferenceDesignationComponent conceptDesignation =
+                        new ValueSet.ConceptReferenceDesignationComponent()
+                                .setUse(synonymUseCoding)
+                                .setValue(synonym);
                 concept.getDesignation().add(conceptDesignation);
             }
             codesBySystem.get(hash).addCode(concept);

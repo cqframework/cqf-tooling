@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.quick;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -8,115 +9,131 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.StructureDefinition;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class QuickAtlas {
 
     // Container for the QiCore-defined profiles (StructureDefinition.type -> StructureDefinition)
     private Map<String, StructureDefinition> qicoreProfiles = new TreeMap<>();
+
     public Map<String, StructureDefinition> getQicoreProfiles() {
         return qicoreProfiles;
     }
 
     // Container for the QiCore-defined extensions (StructureDefinition.url -> StructureDefinition)
     private Map<String, StructureDefinition> qicoreExtensions = new TreeMap<>();
+
     public Map<String, StructureDefinition> getQicoreExtensions() {
         return qicoreExtensions;
     }
 
     // Container for the QiCore-defined extensions (StructureDefinition.url -> StructureDefinition.type)
     private Map<String, String> qicoreUrlToType = new HashMap<>();
+
     public Map<String, String> getQicoreUrlToType() {
         return qicoreUrlToType;
     }
 
     // Container for the FHIR types (StructureDefinition.type -> StructureDefinition)
     private Map<String, StructureDefinition> fhirTypes = new TreeMap<>();
+
     public Map<String, StructureDefinition> getFhirTypes() {
         return fhirTypes;
     }
 
     // Container for the FHIR profiles (StructureDefinition.type -> StructureDefinition)
     private Map<String, StructureDefinition> fhirProfiles = new HashMap<>();
+
     public Map<String, StructureDefinition> getFhirProfiles() {
         return fhirProfiles;
     }
 
     // Container for the FHIR extensions (StructureDefinition.id -> StructureDefinition)
     private Map<String, StructureDefinition> fhirExtensions = new HashMap<>();
+
     public Map<String, StructureDefinition> getFhirExtensions() {
         return fhirExtensions;
     }
 
     // Container for links (StructureDefinition.type -> html file name)
     private Map<String, String> linkMap = new HashMap<>();
+
     public Map<String, String> getLinkMap() {
         return linkMap;
     }
 
     // Container for profile links (StructureDefinition.type -> html file name)
     private Map<String, String> profileMap = new TreeMap<>();
+
     public Map<String, String> getProfileMap() {
         return profileMap;
     }
 
     // Container for primitive type links (type -> html file name)
     private Map<String, String> primitiveMap = new TreeMap<>();
+
     public Map<String, String> getPrimitiveMap() {
         return primitiveMap;
     }
 
     // Container for complex type links (type -> html file name)
     private Map<String, String> complexMap = new TreeMap<>();
+
     public Map<String, String> getComplexMap() {
         return complexMap;
     }
 
     private final String cqlBooleanUrl = "http://cql.hl7.org/02-authorsguide.html#boolean";
+
     public String getCqlBooleanUrl() {
         return cqlBooleanUrl;
     }
 
     private final String cqlCodeUrl = "http://cql.hl7.org/02-authorsguide.html#code";
+
     public String getCqlCodeUrl() {
         return cqlCodeUrl;
     }
 
     private final String cqlConceptUrl = "http://cql.hl7.org/02-authorsguide.html#concept";
+
     public String getCqlConceptUrl() {
         return cqlConceptUrl;
     }
 
     private final String cqlDateTimeAndTimeUrl = "http://cql.hl7.org/02-authorsguide.html#date-datetime-and-time";
+
     public String getCqlDateTimeAndTimeUrl() {
         return cqlDateTimeAndTimeUrl;
     }
 
     private final String cqlDecimalUrl = "http://cql.hl7.org/02-authorsguide.html#decimal";
+
     public String getCqlDecimalUrl() {
         return cqlDecimalUrl;
     }
 
     private final String cqlIntegerUrl = "http://cql.hl7.org/02-authorsguide.html#integer";
+
     public String getCqlIntegerUrl() {
         return cqlIntegerUrl;
     }
 
     private final String cqlIntervalUrl = "http://cql.hl7.org/02-authorsguide.html#interval-values";
+
     public String getCqlIntervalUrl() {
         return cqlIntervalUrl;
     }
 
     private final String cqlQuantityUrl = "http://cql.hl7.org/02-authorsguide.html#quantities";
+
     public String getCqlQuantityUrl() {
         return cqlQuantityUrl;
     }
 
     private final String cqlStringUrl = "http://cql.hl7.org/02-authorsguide.html#string";
+
     public String getCqlStringUrl() {
         return cqlStringUrl;
     }
@@ -150,24 +167,23 @@ public class QuickAtlas {
             throw new IllegalArgumentException("The provided qicore output directory doesn't exist.");
         }
         if (!qicoreOutput.isDirectory()) {
-            throw new IllegalArgumentException("The provided qicore output directory path doesn't point to a directory");
+            throw new IllegalArgumentException(
+                    "The provided qicore output directory path doesn't point to a directory");
         }
-        File[] qicoreSds = qicoreOutput.listFiles(
-                pathname -> pathname.getName().startsWith("StructureDefinition-") && pathname.getName().endsWith(".xml")
-        );
+        File[] qicoreSds = qicoreOutput.listFiles(pathname -> pathname.getName().startsWith("StructureDefinition-")
+                && pathname.getName().endsWith(".xml"));
         if (qicoreSds != null) {
             for (File file : qicoreSds) {
-                StructureDefinition sd = context.newXmlParser().parseResource(StructureDefinition.class, new FileReader(file));
+                StructureDefinition sd =
+                        context.newXmlParser().parseResource(StructureDefinition.class, new FileReader(file));
                 if (sd.getType().equals("Extension")) {
                     qicoreExtensions.put(sd.getUrl(), sd);
-                }
-                else {
+                } else {
                     qicoreProfiles.put(sd.getType(), sd);
                     qicoreUrlToType.put(sd.getUrl(), sd.getType());
                 }
             }
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("No profiles were found in the provided QiCore directory.");
         }
     }
@@ -184,7 +200,8 @@ public class QuickAtlas {
             for (Bundle.BundleEntryComponent entry : typeBundle.getEntry()) {
                 if (entry.hasResource() && entry.getResource() instanceof StructureDefinition) {
                     StructureDefinition sd = (StructureDefinition) entry.getResource();
-                    if (sd.getType().equals("Element") || sd.getType().equals("BackboneElement")
+                    if (sd.getType().equals("Element")
+                            || sd.getType().equals("BackboneElement")
                             || sd.getType().equals("Extension")) {
                         continue;
                     }
@@ -192,8 +209,7 @@ public class QuickAtlas {
                     fhirTypes.put(sd.getType(), sd);
                 }
             }
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Provided FHIR type Bundle entry is empty");
         }
     }
@@ -217,8 +233,7 @@ public class QuickAtlas {
                     fhirProfiles.put(sd.getType(), sd);
                 }
             }
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Provided FHIR profile Bundle entry is empty");
         }
     }
@@ -237,8 +252,7 @@ public class QuickAtlas {
                     fhirExtensions.put(sd.getId(), sd);
                 }
             }
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Provided FHIR extension Bundle entry is empty");
         }
     }

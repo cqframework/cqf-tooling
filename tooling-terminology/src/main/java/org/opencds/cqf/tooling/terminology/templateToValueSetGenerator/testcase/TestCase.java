@@ -40,6 +40,7 @@ public class TestCase {
     public void setInputDataElement(DataElement inputDataElement) {
         this.inputDataElement = inputDataElement;
     }
+
     public DataElement getExpectedResult() {
         return expectedResult;
     }

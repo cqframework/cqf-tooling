@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.cql_generation.drool.traversal;
 
 import java.util.List;
-
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
@@ -16,12 +15,12 @@ import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
 
-
 /**
  * Traversal Abstraction for RCKMS Drool Object Graph
  * @author Joshua Reynolds
  * @since 2021-02-24
  */
+@SuppressWarnings("checkstyle:AbstractClassName")
 public abstract class DroolTraverser<T> {
     protected T visitor;
 
@@ -33,7 +32,7 @@ public abstract class DroolTraverser<T> {
 
     protected abstract void traverse(ConditionDTO conditionDTO);
 
-	protected abstract void traverse(ConditionCriteriaRelDTO conditionCriteriaRel);
+    protected abstract void traverse(ConditionCriteriaRelDTO conditionCriteriaRel);
 
     protected abstract void traverse(ConditionCriteriaPredicateDTO predicate);
 
@@ -48,7 +47,7 @@ public abstract class DroolTraverser<T> {
     // Right operand (Terminology)
     protected abstract void traverse(OpenCdsConceptDTO openCdsConceptDTO);
 
-    protected abstract void traverse(CriteriaPredicatePartDTO  sourcePredicatePartDTO);
+    protected abstract void traverse(CriteriaPredicatePartDTO sourcePredicatePartDTO);
 
     protected abstract void traverse(ConditionCriteriaPredicatePartConceptDTO conditionPredicatePartConcepts);
 

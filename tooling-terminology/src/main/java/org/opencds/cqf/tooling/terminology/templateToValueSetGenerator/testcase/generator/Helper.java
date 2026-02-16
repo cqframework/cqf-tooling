@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.generator;
 
+import java.util.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -8,13 +9,9 @@ import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
-
 public class Helper {
 
     private static final Logger logger = LoggerFactory.getLogger(Helper.class);
-
 
     // Assumption made:
     // - That activity id in trigger cell is 7 in length.
@@ -31,8 +28,7 @@ public class Helper {
     // - That no spreadsheet this will be ran on will have 75 populated cells in the same row.
     public static boolean isRowEmpty(Row row) {
         for (int i = 0; i <= 75; i++) {
-            if (!isCellEmpty(properlyGetCell(row, i)))
-                return false;
+            if (!isCellEmpty(properlyGetCell(row, i))) return false;
         }
         return true;
     }
@@ -47,7 +43,6 @@ public class Helper {
         String name = ret.split("=")[0];
         String condition = ret.split(" = ")[1];
 
-
         logger.info("{} RET RET RET", ret);
         return name;
     }
@@ -55,8 +50,7 @@ public class Helper {
     private static boolean isCellEmpty(Cell cell) {
         boolean empty = false;
         try {
-            if (cell.getStringCellValue().length() <= 0)
-                empty = true;
+            if (cell.getStringCellValue().length() <= 0) empty = true;
         } catch (IllegalStateException e) {
             empty = false;
         }
@@ -81,8 +75,8 @@ public class Helper {
 
         ret = ret.split("\"")[1].split("\"")[0];
 
-//        input[0] = input[0].replace(" ", "-");
-//        input[1] = input[1].replace(" ", "-");
+        //        input[0] = input[0].replace(" ", "-");
+        //        input[1] = input[1].replace(" ", "-");
 
         return ret;
     }
@@ -101,9 +95,9 @@ public class Helper {
 
         for (TestCaseOld testCase : testCases) {
             String caseName = testCase.getName();
-           if (caseName.equalsIgnoreCase(name)) {
-               ret.put(caseName, testCase);
-           }
+            if (caseName.equalsIgnoreCase(name)) {
+                ret.put(caseName, testCase);
+            }
         }
         return ret;
     }
@@ -111,10 +105,9 @@ public class Helper {
     // e.g substrToSheetName(getSortedSheets(dictWorkbook), "ANC.B10");
     // returns the full sheet title string.
     public static String substrToSheetName(HashMap<String, Integer> sortedBook, String substr) {
-       for (Map.Entry<String, Integer> i : sortedBook.entrySet()) {
-           if (i.getKey().contains(substr))
-               return i.getKey();
-       }
-       return null;
+        for (Map.Entry<String, Integer> i : sortedBook.entrySet()) {
+            if (i.getKey().contains(substr)) return i.getKey();
+        }
+        return null;
     }
 }

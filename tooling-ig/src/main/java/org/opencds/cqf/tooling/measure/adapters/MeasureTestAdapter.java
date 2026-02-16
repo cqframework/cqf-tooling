@@ -1,17 +1,16 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.util.BundleUtil;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.util.BundleUtil;
-
+@SuppressWarnings("checkstyle:AbstractClassName")
 public abstract class MeasureTestAdapter {
 
     protected String testPath;
@@ -31,15 +30,18 @@ public abstract class MeasureTestAdapter {
         this.expectedReportAdapter = getMeasureReportAdapter(fhirContext, expectedReport);
     }
 
-    protected static IMeasureReportAdapter getMeasureReportAdapter(FhirContext fhirContext, IBaseResource measureReport) {
-        //TODO: R5?
+    protected static IMeasureReportAdapter getMeasureReportAdapter(
+            FhirContext fhirContext, IBaseResource measureReport) {
+        // TODO: R5?
         IMeasureReportAdapter measureReportAdapter;
         if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-            measureReportAdapter = new Dstu3MeasureReportAdapter((org.hl7.fhir.dstu3.model.MeasureReport)measureReport);
+            measureReportAdapter =
+                    new Dstu3MeasureReportAdapter((org.hl7.fhir.dstu3.model.MeasureReport) measureReport);
         } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-            measureReportAdapter = new R4MeasureReportAdapter((org.hl7.fhir.r4.model.MeasureReport)measureReport);
+            measureReportAdapter = new R4MeasureReportAdapter((org.hl7.fhir.r4.model.MeasureReport) measureReport);
         } else {
-            throw new IllegalArgumentException("Unsupported or unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+            throw new IllegalArgumentException("Unsupported or unknown fhir version: "
+                    + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
         return measureReportAdapter;
@@ -54,13 +56,16 @@ public abstract class MeasureTestAdapter {
             throw new IllegalArgumentException("testBundle is not a Bundle Resource");
         }
 
-        IBaseBundle bundle = (IBaseBundle)this.testBundle;
+        IBaseBundle bundle = (IBaseBundle) this.testBundle;
 
-        List<? extends IBaseResource> measureReports = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle,
-            this.fhirContext.getResourceDefinition("MeasureReport").getImplementingClass());
+        List<? extends IBaseResource> measureReports = BundleUtil.toListOfResourcesOfType(
+                this.fhirContext,
+                bundle,
+                this.fhirContext.getResourceDefinition("MeasureReport").getImplementingClass());
 
         if (measureReports == null || measureReports.size() == 0 || measureReports.size() > 1) {
-            throw new IllegalArgumentException("Bundle is not a valid Measure Test Bundle. It must contain exactly 1 MeasureReport");
+            throw new IllegalArgumentException(
+                    "Bundle is not a valid Measure Test Bundle. It must contain exactly 1 MeasureReport");
         }
 
         return measureReports.get(0);
@@ -94,16 +99,16 @@ public abstract class MeasureTestAdapter {
         return reportType;
     }
 
-    protected String getPatientId () {
+    protected String getPatientId() {
         String patientId = this.expectedReportAdapter.getPatientId();
         return patientId;
     }
 
-//    protected String getPractitioner() {
-//        return null;
-//    }
+    //    protected String getPractitioner() {
+    //        return null;
+    //    }
 
-//    protected String getLastReceivedOn() {
-//        return null;
-//    }
+    //    protected String getLastReceivedOn() {
+    //        return null;
+    //    }
 }

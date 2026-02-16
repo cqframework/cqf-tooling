@@ -2,19 +2,17 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class StructureDefinitionElementVisitor extends StructureDefinitionBaseVisitor {
     private FhirContext fc;
     private CanonicalResourceAtlas canonicalResourceAtlas;
     private CanonicalResourceAtlas canonicalResourceDependenciesAtlas;
-
 
     public StructureDefinitionElementVisitor(CanonicalResourceAtlas atlas, CanonicalResourceAtlas dependencyAtlas) {
         fc = FhirContext.forCached(FhirVersionEnum.R4);
@@ -22,7 +20,8 @@ public class StructureDefinitionElementVisitor extends StructureDefinitionBaseVi
         this.canonicalResourceDependenciesAtlas = dependencyAtlas;
     }
 
-    public Map<String, StructureDefinitionElementObject> visitStructureDefinition(StructureDefinition sd, boolean snapshotOnly) {
+    public Map<String, StructureDefinitionElementObject> visitStructureDefinition(
+            StructureDefinition sd, boolean snapshotOnly) {
         if (sd == null) {
             throw new IllegalArgumentException("sd required");
         }
@@ -43,18 +42,24 @@ public class StructureDefinitionElementVisitor extends StructureDefinitionBaseVi
                 getElements(sdName, eds, sdURL, sdVersion, elementObjectsMap);
             }
             if (sd.hasBaseDefinition()) {
-                elementObjectsMap.putAll(visitStructureDefinition(this.canonicalResourceDependenciesAtlas.getStructureDefinitions().getByCanonicalUrlWithVersion(sd.getBaseDefinition()), snapshotOnly));
+                elementObjectsMap.putAll(visitStructureDefinition(
+                        this.canonicalResourceDependenciesAtlas
+                                .getStructureDefinitions()
+                                .getByCanonicalUrlWithVersion(sd.getBaseDefinition()),
+                        snapshotOnly));
             }
         }
         return elementObjectsMap;
     }
 
     public Map<String, StructureDefinitionElementObject> visitCanonicalAtlasStructureDefinitions(boolean snapshotOnly) {
-        Iterable<StructureDefinition> iterableStructureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
+        Iterable<StructureDefinition> iterableStructureDefinitions =
+                canonicalResourceAtlas.getStructureDefinitions().get();
         Map<String, StructureDefinition> sdMap = new HashMap<>();
         Map<String, StructureDefinitionElementObject> elementObjects = new HashMap<>();
         iterableStructureDefinitions.forEach((structureDefinition) -> {
-            Map<String, StructureDefinitionElementObject> newElementObjects = visitStructureDefinition(structureDefinition, snapshotOnly);
+            Map<String, StructureDefinitionElementObject> newElementObjects =
+                    visitStructureDefinition(structureDefinition, snapshotOnly);
             if (null != newElementObjects) {
                 elementObjects.putAll(newElementObjects);
             }
@@ -62,7 +67,12 @@ public class StructureDefinitionElementVisitor extends StructureDefinitionBaseVi
         return elementObjects;
     }
 
-    private void getElements(String sdName, List<ElementDefinition> eds, String sdURL, String sdVersion, Map<String, StructureDefinitionElementObject> elementObjects) {
+    private void getElements(
+            String sdName,
+            List<ElementDefinition> eds,
+            String sdURL,
+            String sdVersion,
+            Map<String, StructureDefinitionElementObject> elementObjects) {
         AtomicReference<Integer> index = new AtomicReference<Integer>(0);
         while (index.get() < eds.size()) {
             ElementDefinition ed = eds.get(index.get());
@@ -74,15 +84,17 @@ public class StructureDefinitionElementVisitor extends StructureDefinitionBaseVi
                 String edCardinality = ed.getMin() + "..." + ed.getMax();
                 sdeo.setCardinality(edCardinality);
             }
-            if(ed.getType() != null && ed.getType().size() > 0 && ed.getType().get(0).getCode() != null) {
+            if (ed.getType() != null
+                    && ed.getType().size() > 0
+                    && ed.getType().get(0).getCode() != null) {
                 String elementType = ed.getType().get(0).getCode();
-                if(elementType.equalsIgnoreCase("http://hl7.org/fhirpath/System.String")){
+                if (elementType.equalsIgnoreCase("http://hl7.org/fhirpath/System.String")) {
                     sdeo.setElementType("System.String");
                 } else {
                     sdeo.setElementType(elementType);
                 }
             }
-            if(ed.getShort() != null && ed.getShort().length() > 0) {
+            if (ed.getShort() != null && ed.getShort().length() > 0) {
                 sdeo.setElementDescription(ed.getShort());
             }
             if (ed.getConstraint() != null && ed.getConstraint().size() > 0) {
@@ -113,9 +125,12 @@ public class StructureDefinitionElementVisitor extends StructureDefinitionBaseVi
                     codeSystemsMap.put(include.getSystem(), include.getSystem());
                 }
                 for (CanonicalType r : include.getValueSet()) {
-                    ValueSet svs = this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(r.getValue());
+                    ValueSet svs =
+                            this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(r.getValue());
                     if (null == svs) {
-                        svs = this.canonicalResourceDependenciesAtlas.getValueSets().getByCanonicalUrlWithVersion(r.getValue());
+                        svs = this.canonicalResourceDependenciesAtlas
+                                .getValueSets()
+                                .getByCanonicalUrlWithVersion(r.getValue());
                     }
                     if (null != svs) {
                         getValueSetCodeSystems(svs, codeSystemsMap);

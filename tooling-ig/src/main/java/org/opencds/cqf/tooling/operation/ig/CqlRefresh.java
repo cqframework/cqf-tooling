@@ -1,10 +1,5 @@
 package org.opencds.cqf.tooling.operation.ig;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,12 +9,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+@SuppressWarnings({"checkstyle:ParameterName", "checkstyle:MemberName"})
 public class CqlRefresh extends Refresh {
 
     private static final Logger logger = LoggerFactory.getLogger(CqlRefresh.class);
-    private final Pattern VERSION_PATTERN = Pattern.compile("^(library\\s+(\\S+)\\s+version\\s+)'[0-9]+\\.[0-9]+\\.[0-9]+'");
-    private final Pattern INCLUDE_PATTERN = Pattern.compile("^(include\\s+(\\S+)\\s+version\\s+)'([0-9]+\\.[0-9]+\\.[0-9]+)'(\\s+called\\s+(\\S+))?");
+    private final Pattern VERSION_PATTERN =
+            Pattern.compile("^(library\\s+(\\S+)\\s+version\\s+)'[0-9]+\\.[0-9]+\\.[0-9]+'");
+    private final Pattern INCLUDE_PATTERN =
+            Pattern.compile("^(include\\s+(\\S+)\\s+version\\s+)'([0-9]+\\.[0-9]+\\.[0-9]+)'(\\s+called\\s+(\\S+))?");
 
     public CqlRefresh(IGInfo igInfo) {
         super(igInfo);
@@ -38,8 +40,7 @@ public class CqlRefresh extends Refresh {
     private Map<String, String> refreshCqlFile(String cqlBinaryPath, String updatedVersion) {
         Map<String, String> updatedLibraries = new HashMap<>();
         try (Stream<Path> paths = Files.walk(Paths.get(cqlBinaryPath))) {
-            List<Path> files = paths
-                    .filter(Files::isRegularFile)
+            List<Path> files = paths.filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".cql"))
                     .collect(Collectors.toList());
 
@@ -65,8 +66,7 @@ public class CqlRefresh extends Refresh {
 
     private void updateCqlReferences(String cqlBinaryPath, Map<String, String> updatedLibraries) {
         try (Stream<Path> paths = Files.walk(Paths.get(cqlBinaryPath))) {
-            List<Path> files = paths
-                    .filter(Files::isRegularFile)
+            List<Path> files = paths.filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".cql"))
                     .collect(Collectors.toList());
 
@@ -94,5 +94,4 @@ public class CqlRefresh extends Refresh {
             logger.error("Error updating CQL references: {}", e.getMessage());
         }
     }
-
 }

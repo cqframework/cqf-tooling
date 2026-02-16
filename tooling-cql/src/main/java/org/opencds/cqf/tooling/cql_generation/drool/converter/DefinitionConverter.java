@@ -1,11 +1,9 @@
 package org.opencds.cqf.tooling.cql_generation.drool.converter;
 
+import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-
-import com.google.common.base.Strings;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartDTO;
@@ -26,7 +24,7 @@ import org.slf4j.MarkerFactory;
 /**
  * Provides adapter functionality for building an Expression Definition and
  * Reference Graph
- * 
+ *
  * @author Joshua Reynolds
  * @since 2021-02-24
  */
@@ -37,6 +35,7 @@ public class DefinitionConverter {
     public DefinitionConverter() {
         markers.put("ExpressionDef", MarkerFactory.getMarker("ExpressionDef"));
     }
+
     private String identifier;
     private String expressionContext = "Patient";
 
@@ -58,7 +57,7 @@ public class DefinitionConverter {
                 break;
             case Resource:
                 break;
-            case Text: 
+            case Text:
                 inferIdentifier(predicatePart);
                 logger.debug(markers.get("ExpressionDef"), "Initializing Context for Expression {}", identifier);
                 initializeContext(libraryBuilder);
@@ -69,7 +68,7 @@ public class DefinitionConverter {
     }
 
     /**
-     * If there is no identifier, interrogate {@link ConditionCriteriaPredicateDTO predicate} 
+     * If there is no identifier, interrogate {@link ConditionCriteriaPredicateDTO predicate}
      * for description and initializes context
      * includes all Expressions in the expression stack and includes a number of Expression
      * References in the reference stack equal to the number of Predicate entries in the predicateDTOs
@@ -81,31 +80,43 @@ public class DefinitionConverter {
      * @param referenceStack referenceStack (Conjunction, ExpressionRef)
      * @return Pair of (String, ExpressionRef)
      */
-    public Pair<String, ExpressionRef> adapt(ConditionCriteriaPredicateDTO predicate, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Expression> expressionStack, Stack<Pair<String, ExpressionRef>> referenceStack) {
+    public Pair<String, ExpressionRef> adapt(
+            ConditionCriteriaPredicateDTO predicate,
+            LibraryBuilder libraryBuilder,
+            VmrToModelElmBuilder modelBuilder,
+            Stack<Expression> expressionStack,
+            Stack<Pair<String, ExpressionRef>> referenceStack) {
         if (Strings.isNullOrEmpty(identifier)) {
             identifier = predicate.getDescription() + "-" + predicate.getUuid();
             logger.debug(markers.get("ExpressionDef"), "Initializing Context for Expression {}", identifier);
             initializeContext(libraryBuilder);
         }
         logger.debug(markers.get("ExpressionDef"), "Including Expressions in ExpressionDefinition {}", identifier);
-        ExpressionDef expressionDef = includeDefinitions(predicate.getPredicateConjunction().name(), libraryBuilder, modelBuilder, expressionStack);
+        ExpressionDef expressionDef = includeDefinitions(
+                predicate.getPredicateConjunction().name(), libraryBuilder, modelBuilder, expressionStack);
         logger.debug(markers.get("ExpressionDef"), "Including References for Expression {}", identifier);
-        expressionDef = includeReferences(predicate.getPredicateDTOs().size(), libraryBuilder, modelBuilder, referenceStack, expressionDef);
+        expressionDef = includeReferences(
+                predicate.getPredicateDTOs().size(), libraryBuilder, modelBuilder, referenceStack, expressionDef);
         if (expressionDef != null) {
             logger.debug(markers.get("ExpressionDef"), "Finalizing Context for Expression {}", identifier);
-            return finalizeContext(predicate.getPredicateConjunction().name(), libraryBuilder, modelBuilder, expressionDef.getName());
-        }
-        else return null;
+            return finalizeContext(
+                    predicate.getPredicateConjunction().name(), libraryBuilder, modelBuilder, expressionDef.getName());
+        } else return null;
     }
 
-    public Pair<String, ExpressionRef> conditionCriteriaMetExpression(LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Expression> expressionStack, Stack<Pair<String, ExpressionRef>> referenceStack) {
+    public Pair<String, ExpressionRef> conditionCriteriaMetExpression(
+            LibraryBuilder libraryBuilder,
+            VmrToModelElmBuilder modelBuilder,
+            Stack<Expression> expressionStack,
+            Stack<Pair<String, ExpressionRef>> referenceStack) {
         identifier = "ConditionCriteriaMet";
         logger.debug(markers.get("ExpressionDef"), "Initializing Context for Expression {}", identifier);
         initializeContext(libraryBuilder);
         logger.debug(markers.get("ExpressionDef"), "Including Expressions in ExpressionDefinition {}", identifier);
         ExpressionDef expressionDef = includeDefinitions(null, libraryBuilder, modelBuilder, expressionStack);
         logger.debug(markers.get("ExpressionDef"), "Including References for Expression {}", identifier);
-        expressionDef = includeReferences(referenceStack.size(), libraryBuilder, modelBuilder, referenceStack, expressionDef);
+        expressionDef =
+                includeReferences(referenceStack.size(), libraryBuilder, modelBuilder, referenceStack, expressionDef);
         logger.debug(markers.get("ExpressionDef"), "Finalizing Context for Expression {}", identifier);
         return finalizeContext(null, libraryBuilder, modelBuilder, expressionDef.getName());
     }
@@ -118,7 +129,9 @@ public class DefinitionConverter {
         if (alias != null && id != null) {
             identifier = alias + "-" + id;
         } else {
-            logger.error(markers.get("ExpressionDefinition"), "predicatePart.getPartAlias(), predicatePart.getText(), and predicatePart.getNodeLabel() were null.");
+            logger.error(
+                    markers.get("ExpressionDefinition"),
+                    "predicatePart.getPartAlias(), predicatePart.getText(), and predicatePart.getNodeLabel() were null.");
             throw new RuntimeException("No Inferred Alias found for " + predicatePart.getUuid());
         }
     }
@@ -137,7 +150,11 @@ public class DefinitionConverter {
         }
     }
 
-    private ExpressionDef includeReferences(Integer actualListSize, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Pair<String, ExpressionRef>> referenceStack,
+    private ExpressionDef includeReferences(
+            Integer actualListSize,
+            LibraryBuilder libraryBuilder,
+            VmrToModelElmBuilder modelBuilder,
+            Stack<Pair<String, ExpressionRef>> referenceStack,
             ExpressionDef expressionDef) {
         if (!referenceStack.isEmpty() && actualListSize != null) {
             if (referenceStack.size() >= actualListSize.intValue()) {
@@ -147,17 +164,23 @@ public class DefinitionConverter {
                     if (expressionDef == null) {
                         expressionDef = adaptExpressionDef(libraryBuilder, modelBuilder, reference.getRight());
                     } else {
-                        buildBinaryFromConjunction(reference.getLeft(), libraryBuilder, expressionDef, reference.getRight());
+                        buildBinaryFromConjunction(
+                                reference.getLeft(), libraryBuilder, expressionDef, reference.getRight());
                     }
                     index++;
                 }
             } else if (referenceStack.size() <= actualListSize.intValue()) {
-                logger.warn(markers.get("ExpressionDef"), "missing Expression Reference, expected {} but found {}.", actualListSize, referenceStack.size());
+                logger.warn(
+                        markers.get("ExpressionDef"),
+                        "missing Expression Reference, expected {} but found {}.",
+                        actualListSize,
+                        referenceStack.size());
                 for (Pair<String, ExpressionRef> reference : referenceStack) {
                     if (expressionDef == null) {
                         expressionDef = adaptExpressionDef(libraryBuilder, modelBuilder, reference.getRight());
                     } else {
-                        buildBinaryFromConjunction(reference.getLeft(), libraryBuilder, expressionDef, reference.getRight());
+                        buildBinaryFromConjunction(
+                                reference.getLeft(), libraryBuilder, expressionDef, reference.getRight());
                     }
                 }
                 logger.debug("Clearing Reference stack.");
@@ -167,7 +190,11 @@ public class DefinitionConverter {
         return expressionDef;
     }
 
-    private ExpressionDef includeDefinitions(String conjunction, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Expression> expressionStack) {
+    private ExpressionDef includeDefinitions(
+            String conjunction,
+            LibraryBuilder libraryBuilder,
+            VmrToModelElmBuilder modelBuilder,
+            Stack<Expression> expressionStack) {
         ExpressionDef expressionDef = null;
         if (!expressionStack.isEmpty()) {
             while (!expressionStack.isEmpty()) {
@@ -175,18 +202,20 @@ public class DefinitionConverter {
                 if (expressionDef == null) {
                     expressionDef = adaptExpressionDef(libraryBuilder, modelBuilder, expression);
                 } else {
-                    buildBinaryFromConjunction(conjunction, libraryBuilder, expressionDef,
-                            expression);
+                    buildBinaryFromConjunction(conjunction, libraryBuilder, expressionDef, expression);
                 }
             }
         }
         return expressionDef;
     }
-    
-    private ExpressionDef adaptExpressionDef(LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Expression expression) {
+
+    private ExpressionDef adaptExpressionDef(
+            LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Expression expression) {
         ExpressionDef def = libraryBuilder.resolveExpressionRef(identifier);
         if (def == null) {
-            def = modelBuilder.of.createExpressionDef()
+            def = modelBuilder
+                    .of
+                    .createExpressionDef()
                     .withAccessLevel(AccessModifier.PUBLIC)
                     .withName(this.identifier)
                     .withContext(this.expressionContext)
@@ -204,7 +233,11 @@ public class DefinitionConverter {
         return def;
     }
 
-    private Pair<String, ExpressionRef> finalizeContext(String conjunction, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, String expressionName) {
+    private Pair<String, ExpressionRef> finalizeContext(
+            String conjunction,
+            LibraryBuilder libraryBuilder,
+            VmrToModelElmBuilder modelBuilder,
+            String expressionName) {
         libraryBuilder.popExpressionDefinition();
         ExpressionRef expressionRef = modelBuilder.of.createExpressionRef().withName(expressionName);
         identifier = null;
@@ -214,9 +247,9 @@ public class DefinitionConverter {
         return null;
     }
 
-    private void buildBinaryFromConjunction(String conjunction, LibraryBuilder libraryBuilder,
-            ExpressionDef expressionDef, Expression expression) {
-        BinaryExpression binary; 
+    private void buildBinaryFromConjunction(
+            String conjunction, LibraryBuilder libraryBuilder, ExpressionDef expressionDef, Expression expression) {
+        BinaryExpression binary;
         switch (conjunction.toLowerCase()) {
             case "or": {
                 binary = new Or().withOperand(expressionDef.getExpression()).withOperand(expression);
@@ -226,7 +259,8 @@ public class DefinitionConverter {
                 binary = new And().withOperand(expressionDef.getExpression()).withOperand(expression);
                 break;
             }
-            default: throw new RuntimeException("Unkown conjunction " + conjunction);
+            default:
+                throw new RuntimeException("Unkown conjunction " + conjunction);
         }
         expressionDef.setExpression(binary);
     }

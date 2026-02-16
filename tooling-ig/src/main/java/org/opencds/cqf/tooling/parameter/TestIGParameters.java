@@ -19,10 +19,10 @@ public class TestIGParameters {
     */
     public String igPath;
 
-//    /*
-//    The canonical base URL of the ig
-//    */
-//    public String igCanonicalBase;
+    //    /*
+    //    The canonical base URL of the ig
+    //    */
+    //    public String igCanonicalBase;
 
     /*
     The fhirContext for the current process

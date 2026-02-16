@@ -2,9 +2,7 @@ package org.opencds.cqf.tooling.modelinfo.fhir;
 
 import java.util.HashMap;
 import java.util.HashSet;
-
 import org.opencds.cqf.tooling.modelinfo.ClassInfoSettings;
-
 
 @SuppressWarnings("serial")
 class FHIRClassInfoSettings extends ClassInfoSettings {

@@ -1,9 +1,9 @@
 package org.opencds.cqf.tooling.cql_generation.drool.visitor;
 
+import com.google.common.base.Strings;
 import java.util.Arrays;
 import java.util.Stack;
 import java.util.stream.Collectors;
-
 import org.cqframework.cql.elm.visiting.BaseElmLibraryVisitor;
 import org.hl7.elm.r1.*;
 import org.hl7.elm.r1.Library.Statements;
@@ -11,11 +11,9 @@ import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-
 /**
  * Visits every node in a Library elm tree and builds the cql string.
- * 
+ *
  * @author Joshua Reynolds
  * @since 2021-04-05
  */
@@ -40,6 +38,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
     private final String newLine = "\r\n";
 
     private int currentLine = 0;
+
     @SuppressWarnings("unused")
     private boolean onNewLine;
     // private boolean needsWhitespace;
@@ -321,7 +320,8 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
     public Void visitUsingDef(UsingDef using, ElmContext context) {
         if (!using.getLocalIdentifier().equals("System")) {
             newConstruct("using");
-            output.append(String.format("%s %s version \'%s\'", currentSection, using.getLocalIdentifier(), using.getVersion()));
+            output.append(String.format(
+                    "%s %s version \'%s\'", currentSection, using.getLocalIdentifier(), using.getVersion()));
         }
         return super.visitUsingDef(using, context);
     }
@@ -412,7 +412,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
         if (!Strings.isNullOrEmpty(codeSystem.getLibraryName())) {
             output.append(String.format("\"%s\".", codeSystem.getLibraryName()));
         }
-        output.append(String.format("\"%s\"",codeSystem.getName()));
+        output.append(String.format("\"%s\"", codeSystem.getName()));
         return null;
     }
 
@@ -539,7 +539,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
     public Void visitListTypeSpecifier(ListTypeSpecifier typeSpecifier, ElmContext context) {
         return super.visitListTypeSpecifier(typeSpecifier, context);
     }
-  
+
     /**
      * Visit a IntervalTypeSpecifier. This method will be called for
      * every node in the tree that is a IntervalTypeSpecifier.
@@ -608,20 +608,19 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
     public Void visitStatements(Statements statements, ElmContext context) {
         newConstruct("statement");
         int n = statements.getDef().size();
-        for (int i=0; i<n; i++) {
+        for (int i = 0; i < n; i++) {
             Element c = statements.getDef().get(i);
             if (c instanceof ExpressionDef) {
                 enterClause();
                 try {
-                    visitExpressionDef((ExpressionDef)c, context);
-                }
-                finally {
+                    visitExpressionDef((ExpressionDef) c, context);
+                } finally {
                     exitClause();
                 }
             } else if (c instanceof ContextDef) {
-                visitContextDef((ContextDef)c, context);
+                visitContextDef((ContextDef) c, context);
             } else if (c instanceof FunctionDef) {
-                visitFunctionDef((FunctionDef)c, context);
+                visitFunctionDef((FunctionDef) c, context);
             }
         }
         return null;
@@ -648,7 +647,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
             visitElement(expressionDef.getExpression(), context);
         }
         if (expressionDef instanceof FunctionDef) {
-            visitFunctionDef((FunctionDef)expressionDef, context);
+            visitFunctionDef((FunctionDef) expressionDef, context);
         }
         exitClause();
         return null;
@@ -684,8 +683,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
         }
         if (function.getExpression() != null) {
             visitExpression(function.getExpression(), context);
-        }
-        else if (function.getResultTypeSpecifier() != null) {
+        } else if (function.getResultTypeSpecifier() != null) {
             visitTypeSpecifier(function.getResultTypeSpecifier(), context);
         }
 
@@ -756,13 +754,12 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
      */
     @Override
     public Void visitRelationshipClause(RelationshipClause relationship, ElmContext context) {
-        boolean clauseEntered = false;     
+        boolean clauseEntered = false;
         try {
             enterClause();
             super.visitRelationshipClause(relationship, context);
             clauseEntered = true;
-        }
-        finally {
+        } finally {
             if (clauseEntered) {
                 exitClause();
             }
@@ -814,7 +811,8 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
             if (retrieve.getCodes() != null) {
                 if (!Strings.isNullOrEmpty(retrieve.getCodeComparator())) {
                     if (!Strings.isNullOrEmpty(retrieve.getCodeProperty())) {
-                        output.append(String.format(": %s %s", retrieve.getCodeProperty(), retrieve.getCodeComparator()));
+                        output.append(
+                                String.format(": %s %s", retrieve.getCodeProperty(), retrieve.getCodeComparator()));
                     }
                 } else {
                     output.append(" :");
@@ -824,8 +822,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
             }
             output.append("]");
             return null;
-        }
-        finally {
+        } finally {
             exitRetrieve();
         }
     }
@@ -842,7 +839,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
     public Void visitQuery(Query query, ElmContext context) {
         boolean internalValidation = false;
         if (query.getSource() != null && !query.getSource().isEmpty()) {
-            for(AliasedQuerySource source : query.getSource()) {
+            for (AliasedQuerySource source : query.getSource()) {
                 if (source.getAlias().equals("$this")) {
                     internalValidation = true;
                     visitExpression(source.getExpression(), context);
@@ -861,7 +858,8 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
                 exitClause();
             }
             if (query.getRelationship() != null && !query.getRelationship().isEmpty()) {
-                query.getRelationship().stream().forEach(relationship -> visitRelationshipClause(relationship, context));
+                query.getRelationship().stream()
+                        .forEach(relationship -> visitRelationshipClause(relationship, context));
             }
             if (query.getWhere() != null) {
                 visitExpression(query.getWhere(), context);
@@ -975,8 +973,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
             output.append("where");
             visitElement(where, context);
             return null;
-        }
-        finally {
+        } finally {
             exitClause();
         }
     }
@@ -995,8 +992,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
         output.append("return");
         try {
             return super.visitReturnClause(returnClause, context);
-        }
-        finally {
+        } finally {
             exitClause();
         }
     }
@@ -1014,8 +1010,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
         enterClause();
         try {
             return super.visitSortClause(sortClause, context);
-        }
-        finally {
+        } finally {
             exitClause();
         }
     }
@@ -1503,10 +1498,10 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
      */
     @Override
     public Void visitCase(Case caseExpression, ElmContext context) {
-            newLine();
-            if (previousIndentLevel == indentLevel) {
-                increaseIndentLevel();
-            }
+        newLine();
+        if (previousIndentLevel == indentLevel) {
+            increaseIndentLevel();
+        }
 
         return super.visitCase(caseExpression, context);
     }
@@ -1873,8 +1868,8 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
             }
         }
         String removeResourceType = Arrays.stream(property.getPath().split("\\."))
-            .filter(split -> !(split.equals("Observation") || split.equals("Condition") || split.equals("System")))
-            .collect(Collectors.joining("."));
+                .filter(split -> !(split.equals("Observation") || split.equals("Condition") || split.equals("System")))
+                .collect(Collectors.joining("."));
         output.append(String.format(".%s", removeResourceType));
         return null;
     }
@@ -1887,7 +1882,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
-    @Override 
+    @Override
     public Void visitInValueSet(InValueSet inValueSet, ElmContext context) {
         visitExpression(inValueSet.getCode(), context);
         output.append(" in");
@@ -2057,64 +2052,65 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
      */
     @Override
     public Void visitUnaryExpression(UnaryExpression elm, ElmContext context) {
-        if (elm instanceof Abs) return visitAbs((Abs)elm, context);
-        else if (elm instanceof As) return visitAs((As)elm, context);
-        else if (elm instanceof Ceiling) return visitCeiling((Ceiling)elm, context);
-        else if (elm instanceof CanConvert) return visitCanConvert((CanConvert)elm, context);
-        else if (elm instanceof Convert) return visitConvert((Convert)elm, context);
+        if (elm instanceof Abs) return visitAbs((Abs) elm, context);
+        else if (elm instanceof As) return visitAs((As) elm, context);
+        else if (elm instanceof Ceiling) return visitCeiling((Ceiling) elm, context);
+        else if (elm instanceof CanConvert) return visitCanConvert((CanConvert) elm, context);
+        else if (elm instanceof Convert) return visitConvert((Convert) elm, context);
         else if (elm instanceof ConvertsToBoolean) return visitConvertsToBoolean((ConvertsToBoolean) elm, context);
-        else if (elm instanceof ConvertsToDate) return visitConvertsToDate((ConvertsToDate)elm, context);
-        else if (elm instanceof ConvertsToDateTime) return visitConvertsToDateTime((ConvertsToDateTime)elm, context);
-        else if (elm instanceof ConvertsToDecimal) return visitConvertsToDecimal((ConvertsToDecimal)elm, context);
-        else if (elm instanceof ConvertsToInteger) return visitConvertsToInteger((ConvertsToInteger)elm, context);
-        else if (elm instanceof ConvertsToLong) return visitConvertsToLong((ConvertsToLong)elm, context);
-        else if (elm instanceof ConvertsToQuantity) return visitConvertsToQuantity((ConvertsToQuantity)elm, context);
-        else if (elm instanceof ConvertsToRatio) return visitConvertsToRatio((ConvertsToRatio)elm, context);
-        else if (elm instanceof ConvertsToString) return visitConvertsToString((ConvertsToString)elm, context);
-        else if (elm instanceof ConvertsToTime) return visitConvertsToTime((ConvertsToTime)elm, context);
-        else if (elm instanceof DateFrom) return visitDateFrom((DateFrom)elm, context);
-        else if (elm instanceof DateTimeComponentFrom) return visitDateTimeComponentFrom((DateTimeComponentFrom)elm, context);
-        else if (elm instanceof Distinct) return visitDistinct((Distinct)elm, context);
-        else if (elm instanceof End) return visitEnd((End)elm, context);
-        else if (elm instanceof Exists) return visitExists((Exists)elm, context);
-        else if (elm instanceof Exp) return visitExp((Exp)elm, context);
-        else if (elm instanceof Flatten) return visitFlatten((Flatten)elm, context);
-        else if (elm instanceof Floor) return visitFloor((Floor)elm, context);
-        else if (elm instanceof Is) return visitIs((Is)elm, context);
-        else if (elm instanceof IsFalse) return visitIsFalse((IsFalse)elm, context);
-        else if (elm instanceof IsNull) return visitIsNull((IsNull)elm, context);
-        else if (elm instanceof IsTrue) return visitIsTrue((IsTrue)elm, context);
-        else if (elm instanceof Length) return visitLength((Length)elm, context);
-        else if (elm instanceof Ln) return visitLn((Ln)elm, context);
-        else if (elm instanceof Lower) return visitLower((Lower)elm, context);
-        else if (elm instanceof Negate) return visitNegate((Negate)elm, context);
-        else if (elm instanceof Not) return visitNot((Not)elm, context);
-        else if (elm instanceof PointFrom) return visitPointFrom((PointFrom)elm, context);
-        else if (elm instanceof Precision) return visitPrecision((Precision)elm, context);
-        else if (elm instanceof Predecessor) return visitPredecessor((Predecessor)elm, context);
-        else if (elm instanceof SingletonFrom) return visitSingletonFrom((SingletonFrom)elm, context);
-        else if (elm instanceof Size) return visitSize((Size)elm, context);
-        else if (elm instanceof Start) return visitStart((Start)elm, context);
-        else if (elm instanceof Successor) return visitSuccessor((Successor)elm, context);
-        else if (elm instanceof TimeFrom) return visitTimeFrom((TimeFrom)elm, context);
-        else if (elm instanceof TimezoneFrom) return visitTimezoneFrom((TimezoneFrom)elm, context);
-        else if (elm instanceof TimezoneOffsetFrom) return visitTimezoneOffsetFrom((TimezoneOffsetFrom)elm, context);
-        else if (elm instanceof ToBoolean) return visitToBoolean((ToBoolean)elm, context);
-        else if (elm instanceof ToConcept) return visitToConcept((ToConcept)elm, context);
-        else if (elm instanceof ToChars) return visitToChars((ToChars)elm, context);
-        else if (elm instanceof ToDate) return visitToDate((ToDate)elm, context);
-        else if (elm instanceof ToDateTime) return visitToDateTime((ToDateTime)elm, context);
-        else if (elm instanceof ToDecimal) return visitToDecimal((ToDecimal)elm, context);
-        else if (elm instanceof ToInteger) return visitToInteger((ToInteger)elm, context);
-        else if (elm instanceof ToLong) return visitToLong((ToLong)elm, context);
-        else if (elm instanceof ToList) return visitToList((ToList)elm, context);
-        else if (elm instanceof ToQuantity) return visitToQuantity((ToQuantity)elm, context);
-        else if (elm instanceof ToRatio) return visitToRatio((ToRatio)elm, context);
-        else if (elm instanceof ToString) return visitToString((ToString)elm, context);
-        else if (elm instanceof ToTime) return visitToTime((ToTime)elm, context);
-        else if (elm instanceof Truncate) return visitTruncate((Truncate)elm, context);
-        else if (elm instanceof Upper) return visitUpper((Upper)elm, context);
-        else if (elm instanceof Width) return visitWidth((Width)elm, context);
+        else if (elm instanceof ConvertsToDate) return visitConvertsToDate((ConvertsToDate) elm, context);
+        else if (elm instanceof ConvertsToDateTime) return visitConvertsToDateTime((ConvertsToDateTime) elm, context);
+        else if (elm instanceof ConvertsToDecimal) return visitConvertsToDecimal((ConvertsToDecimal) elm, context);
+        else if (elm instanceof ConvertsToInteger) return visitConvertsToInteger((ConvertsToInteger) elm, context);
+        else if (elm instanceof ConvertsToLong) return visitConvertsToLong((ConvertsToLong) elm, context);
+        else if (elm instanceof ConvertsToQuantity) return visitConvertsToQuantity((ConvertsToQuantity) elm, context);
+        else if (elm instanceof ConvertsToRatio) return visitConvertsToRatio((ConvertsToRatio) elm, context);
+        else if (elm instanceof ConvertsToString) return visitConvertsToString((ConvertsToString) elm, context);
+        else if (elm instanceof ConvertsToTime) return visitConvertsToTime((ConvertsToTime) elm, context);
+        else if (elm instanceof DateFrom) return visitDateFrom((DateFrom) elm, context);
+        else if (elm instanceof DateTimeComponentFrom)
+            return visitDateTimeComponentFrom((DateTimeComponentFrom) elm, context);
+        else if (elm instanceof Distinct) return visitDistinct((Distinct) elm, context);
+        else if (elm instanceof End) return visitEnd((End) elm, context);
+        else if (elm instanceof Exists) return visitExists((Exists) elm, context);
+        else if (elm instanceof Exp) return visitExp((Exp) elm, context);
+        else if (elm instanceof Flatten) return visitFlatten((Flatten) elm, context);
+        else if (elm instanceof Floor) return visitFloor((Floor) elm, context);
+        else if (elm instanceof Is) return visitIs((Is) elm, context);
+        else if (elm instanceof IsFalse) return visitIsFalse((IsFalse) elm, context);
+        else if (elm instanceof IsNull) return visitIsNull((IsNull) elm, context);
+        else if (elm instanceof IsTrue) return visitIsTrue((IsTrue) elm, context);
+        else if (elm instanceof Length) return visitLength((Length) elm, context);
+        else if (elm instanceof Ln) return visitLn((Ln) elm, context);
+        else if (elm instanceof Lower) return visitLower((Lower) elm, context);
+        else if (elm instanceof Negate) return visitNegate((Negate) elm, context);
+        else if (elm instanceof Not) return visitNot((Not) elm, context);
+        else if (elm instanceof PointFrom) return visitPointFrom((PointFrom) elm, context);
+        else if (elm instanceof Precision) return visitPrecision((Precision) elm, context);
+        else if (elm instanceof Predecessor) return visitPredecessor((Predecessor) elm, context);
+        else if (elm instanceof SingletonFrom) return visitSingletonFrom((SingletonFrom) elm, context);
+        else if (elm instanceof Size) return visitSize((Size) elm, context);
+        else if (elm instanceof Start) return visitStart((Start) elm, context);
+        else if (elm instanceof Successor) return visitSuccessor((Successor) elm, context);
+        else if (elm instanceof TimeFrom) return visitTimeFrom((TimeFrom) elm, context);
+        else if (elm instanceof TimezoneFrom) return visitTimezoneFrom((TimezoneFrom) elm, context);
+        else if (elm instanceof TimezoneOffsetFrom) return visitTimezoneOffsetFrom((TimezoneOffsetFrom) elm, context);
+        else if (elm instanceof ToBoolean) return visitToBoolean((ToBoolean) elm, context);
+        else if (elm instanceof ToConcept) return visitToConcept((ToConcept) elm, context);
+        else if (elm instanceof ToChars) return visitToChars((ToChars) elm, context);
+        else if (elm instanceof ToDate) return visitToDate((ToDate) elm, context);
+        else if (elm instanceof ToDateTime) return visitToDateTime((ToDateTime) elm, context);
+        else if (elm instanceof ToDecimal) return visitToDecimal((ToDecimal) elm, context);
+        else if (elm instanceof ToInteger) return visitToInteger((ToInteger) elm, context);
+        else if (elm instanceof ToLong) return visitToLong((ToLong) elm, context);
+        else if (elm instanceof ToList) return visitToList((ToList) elm, context);
+        else if (elm instanceof ToQuantity) return visitToQuantity((ToQuantity) elm, context);
+        else if (elm instanceof ToRatio) return visitToRatio((ToRatio) elm, context);
+        else if (elm instanceof ToString) return visitToString((ToString) elm, context);
+        else if (elm instanceof ToTime) return visitToTime((ToTime) elm, context);
+        else if (elm instanceof Truncate) return visitTruncate((Truncate) elm, context);
+        else if (elm instanceof Upper) return visitUpper((Upper) elm, context);
+        else if (elm instanceof Width) return visitWidth((Width) elm, context);
         else return null;
     }
 
@@ -2128,59 +2124,59 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
      */
     @Override
     public Void visitBinaryExpression(BinaryExpression elm, ElmContext context) {
-        if (elm instanceof Add) return visitAdd((Add)elm, context);
-        else if (elm instanceof After) return visitAfter((After)elm, context);
-        else if (elm instanceof And) return visitAnd((And)elm, context);
-        else if (elm instanceof Before) return visitBefore((Before)elm, context);
-        else if (elm instanceof CanConvertQuantity) return visitCanConvertQuantity((CanConvertQuantity)elm, context);
-        else if (elm instanceof Contains) return visitContains((Contains)elm, context);
-        else if (elm instanceof ConvertQuantity) return visitConvertQuantity((ConvertQuantity)elm, context);
-        else if (elm instanceof Collapse) return visitCollapse((Collapse)elm, context);
-        else if (elm instanceof DifferenceBetween) return visitDifferenceBetween((DifferenceBetween)elm, context);
-        else if (elm instanceof Divide) return visitDivide((Divide)elm, context);
-        else if (elm instanceof DurationBetween) return visitDurationBetween((DurationBetween)elm, context);
-        else if (elm instanceof Ends) return visitEnds((Ends)elm, context);
-        else if (elm instanceof EndsWith) return visitEndsWith((EndsWith)elm, context);
-        else if (elm instanceof Equal) return visitEqual((Equal)elm, context);
-        else if (elm instanceof Equivalent) return visitEquivalent((Equivalent)elm, context);
-        else if (elm instanceof Expand) return visitExpand((Expand)elm, context);
-        else if (elm instanceof Greater) return visitGreater((Greater)elm, context);
-        else if (elm instanceof GreaterOrEqual) return visitGreaterOrEqual((GreaterOrEqual)elm, context);
-        else if (elm instanceof HighBoundary) return visitHighBoundary((HighBoundary)elm, context);
-        else if (elm instanceof Implies) return visitImplies((Implies)elm, context);
-        else if (elm instanceof In) return visitIn((In)elm, context);
-        else if (elm instanceof IncludedIn) return visitIncludedIn((IncludedIn)elm, context);
-        else if (elm instanceof Includes) return visitIncludes((Includes)elm, context);
-        else if (elm instanceof Indexer) return visitIndexer((Indexer)elm, context);
-        else if (elm instanceof Less) return visitLess((Less)elm, context);
-        else if (elm instanceof LessOrEqual) return visitLessOrEqual((LessOrEqual)elm, context);
-        else if (elm instanceof Log) return visitLog((Log)elm, context);
-        else if (elm instanceof LowBoundary) return visitLowBoundary((LowBoundary)elm, context);
-        else if (elm instanceof Matches) return visitMatches((Matches)elm, context);
-        else if (elm instanceof Meets) return visitMeets((Meets)elm, context);
-        else if (elm instanceof MeetsAfter) return visitMeetsAfter((MeetsAfter)elm, context);
-        else if (elm instanceof MeetsBefore) return visitMeetsBefore((MeetsBefore)elm, context);
-        else if (elm instanceof Modulo) return visitModulo((Modulo)elm, context);
-        else if (elm instanceof Multiply) return visitMultiply((Multiply)elm, context);
-        else if (elm instanceof NotEqual) return visitNotEqual((NotEqual)elm, context);
-        else if (elm instanceof Or) return visitOr((Or)elm, context);
-        else if (elm instanceof Overlaps) return visitOverlaps((Overlaps)elm, context);
-        else if (elm instanceof OverlapsAfter) return visitOverlapsAfter((OverlapsAfter)elm, context);
-        else if (elm instanceof OverlapsBefore) return visitOverlapsBefore((OverlapsBefore)elm, context);
-        else if (elm instanceof Power) return visitPower((Power)elm, context);
-        else if (elm instanceof ProperContains) return visitProperContains((ProperContains)elm, context);
-        else if (elm instanceof ProperIn) return visitProperIn((ProperIn)elm, context);
-        else if (elm instanceof ProperIncludedIn) return visitProperIncludedIn((ProperIncludedIn)elm, context);
-        else if (elm instanceof ProperIncludes) return visitProperIncludes((ProperIncludes)elm, context);
-        else if (elm instanceof SameAs) return visitSameAs((SameAs)elm, context);
-        else if (elm instanceof SameOrAfter) return visitSameOrAfter((SameOrAfter)elm, context);
-        else if (elm instanceof SameOrBefore) return visitSameOrBefore((SameOrBefore)elm, context);
-        else if (elm instanceof Starts) return visitStarts((Starts)elm, context);
-        else if (elm instanceof StartsWith) return visitStartsWith((StartsWith)elm, context);
-        else if (elm instanceof Subtract) return visitSubtract((Subtract)elm, context);
-        else if (elm instanceof Times) return visitTimes((Times)elm, context);
-        else if (elm instanceof TruncatedDivide) return visitTruncatedDivide((TruncatedDivide)elm, context);
-        else if (elm instanceof Xor) return visitXor((Xor)elm, context);
+        if (elm instanceof Add) return visitAdd((Add) elm, context);
+        else if (elm instanceof After) return visitAfter((After) elm, context);
+        else if (elm instanceof And) return visitAnd((And) elm, context);
+        else if (elm instanceof Before) return visitBefore((Before) elm, context);
+        else if (elm instanceof CanConvertQuantity) return visitCanConvertQuantity((CanConvertQuantity) elm, context);
+        else if (elm instanceof Contains) return visitContains((Contains) elm, context);
+        else if (elm instanceof ConvertQuantity) return visitConvertQuantity((ConvertQuantity) elm, context);
+        else if (elm instanceof Collapse) return visitCollapse((Collapse) elm, context);
+        else if (elm instanceof DifferenceBetween) return visitDifferenceBetween((DifferenceBetween) elm, context);
+        else if (elm instanceof Divide) return visitDivide((Divide) elm, context);
+        else if (elm instanceof DurationBetween) return visitDurationBetween((DurationBetween) elm, context);
+        else if (elm instanceof Ends) return visitEnds((Ends) elm, context);
+        else if (elm instanceof EndsWith) return visitEndsWith((EndsWith) elm, context);
+        else if (elm instanceof Equal) return visitEqual((Equal) elm, context);
+        else if (elm instanceof Equivalent) return visitEquivalent((Equivalent) elm, context);
+        else if (elm instanceof Expand) return visitExpand((Expand) elm, context);
+        else if (elm instanceof Greater) return visitGreater((Greater) elm, context);
+        else if (elm instanceof GreaterOrEqual) return visitGreaterOrEqual((GreaterOrEqual) elm, context);
+        else if (elm instanceof HighBoundary) return visitHighBoundary((HighBoundary) elm, context);
+        else if (elm instanceof Implies) return visitImplies((Implies) elm, context);
+        else if (elm instanceof In) return visitIn((In) elm, context);
+        else if (elm instanceof IncludedIn) return visitIncludedIn((IncludedIn) elm, context);
+        else if (elm instanceof Includes) return visitIncludes((Includes) elm, context);
+        else if (elm instanceof Indexer) return visitIndexer((Indexer) elm, context);
+        else if (elm instanceof Less) return visitLess((Less) elm, context);
+        else if (elm instanceof LessOrEqual) return visitLessOrEqual((LessOrEqual) elm, context);
+        else if (elm instanceof Log) return visitLog((Log) elm, context);
+        else if (elm instanceof LowBoundary) return visitLowBoundary((LowBoundary) elm, context);
+        else if (elm instanceof Matches) return visitMatches((Matches) elm, context);
+        else if (elm instanceof Meets) return visitMeets((Meets) elm, context);
+        else if (elm instanceof MeetsAfter) return visitMeetsAfter((MeetsAfter) elm, context);
+        else if (elm instanceof MeetsBefore) return visitMeetsBefore((MeetsBefore) elm, context);
+        else if (elm instanceof Modulo) return visitModulo((Modulo) elm, context);
+        else if (elm instanceof Multiply) return visitMultiply((Multiply) elm, context);
+        else if (elm instanceof NotEqual) return visitNotEqual((NotEqual) elm, context);
+        else if (elm instanceof Or) return visitOr((Or) elm, context);
+        else if (elm instanceof Overlaps) return visitOverlaps((Overlaps) elm, context);
+        else if (elm instanceof OverlapsAfter) return visitOverlapsAfter((OverlapsAfter) elm, context);
+        else if (elm instanceof OverlapsBefore) return visitOverlapsBefore((OverlapsBefore) elm, context);
+        else if (elm instanceof Power) return visitPower((Power) elm, context);
+        else if (elm instanceof ProperContains) return visitProperContains((ProperContains) elm, context);
+        else if (elm instanceof ProperIn) return visitProperIn((ProperIn) elm, context);
+        else if (elm instanceof ProperIncludedIn) return visitProperIncludedIn((ProperIncludedIn) elm, context);
+        else if (elm instanceof ProperIncludes) return visitProperIncludes((ProperIncludes) elm, context);
+        else if (elm instanceof SameAs) return visitSameAs((SameAs) elm, context);
+        else if (elm instanceof SameOrAfter) return visitSameOrAfter((SameOrAfter) elm, context);
+        else if (elm instanceof SameOrBefore) return visitSameOrBefore((SameOrBefore) elm, context);
+        else if (elm instanceof Starts) return visitStarts((Starts) elm, context);
+        else if (elm instanceof StartsWith) return visitStartsWith((StartsWith) elm, context);
+        else if (elm instanceof Subtract) return visitSubtract((Subtract) elm, context);
+        else if (elm instanceof Times) return visitTimes((Times) elm, context);
+        else if (elm instanceof TruncatedDivide) return visitTruncatedDivide((TruncatedDivide) elm, context);
+        else if (elm instanceof Xor) return visitXor((Xor) elm, context);
         else return null;
     }
 

@@ -2,18 +2,16 @@ package org.opencds.cqf.tooling.dateroller;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.gson.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Locale;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Locale;
-
 
 public class DataDateRollerOperation extends Operation {
     private FhirContext fhirContext;
@@ -49,7 +47,8 @@ public class DataDateRollerOperation extends Operation {
             throw new IllegalArgumentException("The directory to files to change dates is required as -ip=");
         }
         if (fhirVersion.length() < 1) {
-            throw new IllegalArgumentException("The FHIR version(-v) must be specified and must be the version number such as 3.0.0 or 4.0.1");
+            throw new IllegalArgumentException(
+                    "The FHIR version(-v) must be specified and must be the version number such as 3.0.0 or 4.0.1");
         }
         fhirContext = ResourceUtils.getFhirContext(ResourceUtils.FhirVersion.parse(fhirVersion));
 
@@ -70,16 +69,16 @@ public class DataDateRollerOperation extends Operation {
                 if (nextFile.isDirectory()) {
                     processFiles(nextFile);
                 }
-                if ((!nextFile.getName().toLowerCase(Locale.ROOT).contains("xml")) &&
-                        (!nextFile.getName().toLowerCase(Locale.ROOT).contains("json"))) {
+                if ((!nextFile.getName().toLowerCase(Locale.ROOT).contains("xml"))
+                        && (!nextFile.getName().toLowerCase(Locale.ROOT).contains("json"))) {
                     continue;
                 }
                 rollDatesInFile(nextFile);
             }
         }
         if (file.isFile()) {
-            if ((!file.getName().toLowerCase(Locale.ROOT).contains("xml")) &&
-                    (!file.getName().toLowerCase(Locale.ROOT).contains("json"))) {
+            if ((!file.getName().toLowerCase(Locale.ROOT).contains("xml"))
+                    && (!file.getName().toLowerCase(Locale.ROOT).contains("json"))) {
                 return;
             }
             rollDatesInFile(file);
@@ -91,18 +90,22 @@ public class DataDateRollerOperation extends Operation {
         fileEncoding = IOUtils.getEncoding(file.getName());
 
         String fileContents = IOUtils.getFileContent(file);
-        if(null != fileContents && fileContents.length() > 0) {
+        if (null != fileContents && fileContents.length() > 0) {
             if (fileContents.contains("hookInstance")) {
                 if (fileEncoding.equals(IOUtils.Encoding.XML)) {
                     logger.error("Current CDS Hooks specification calls for JSON only. (5/2022)");
                     return;
                 } else if (fileEncoding.equals(IOUtils.Encoding.JSON)) {
                     HookDataDateRoller hookDataDateRoller = new HookDataDateRoller(fhirContext, fileEncoding);
-                    JsonObject hook = hookDataDateRoller.rollJSONHookDates(JsonParser.parseString(fileContents).getAsJsonObject());//this should be the whole hook
+                    JsonObject hook = hookDataDateRoller.rollJSONHookDates(
+                            JsonParser.parseString(fileContents).getAsJsonObject()); // this should be the whole hook
                     FileWriter fileWriter = null;
                     try {
                         fileWriter = new FileWriter(file.getAbsolutePath());
-                        Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+                        Gson gson = new GsonBuilder()
+                                .serializeNulls()
+                                .setPrettyPrinting()
+                                .create();
                         gson.toJson(hook, fileWriter);
                         fileWriter.close();
                     } catch (IOException e) {
@@ -122,8 +125,7 @@ public class DataDateRollerOperation extends Operation {
                     }
                 }
             }
-        }
-        else{
+        } else {
             logger.error("The file {} was either empty or came back null.", file.getAbsolutePath());
         }
     }

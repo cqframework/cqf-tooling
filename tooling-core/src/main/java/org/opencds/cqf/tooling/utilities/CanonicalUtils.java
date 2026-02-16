@@ -40,11 +40,9 @@ public class CanonicalUtils {
         int index = url.lastIndexOf("|");
         if (index == -1) {
             return null;
-        }
-        else if (index > 0) {
+        } else if (index > 0) {
             return url.substring(index + 1);
-        }
-        else {
+        } else {
             return "";
         }
     }

@@ -1,16 +1,16 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
-import org.hl7.fhir.r4.model.MeasureReport;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import org.hl7.fhir.r4.model.MeasureReport;
 
 public class R4MeasureReportAdapter implements IMeasureReportAdapter {
 
     private MeasureReport measureReport;
+
     public R4MeasureReportAdapter(MeasureReport measureReport) {
         this.measureReport = measureReport;
     }
@@ -21,7 +21,7 @@ public class R4MeasureReportAdapter implements IMeasureReportAdapter {
         return reportType;
     }
 
-    //TODO: In R4 the Subject will not necessarily be a Patient.
+    // TODO: In R4 the Subject will not necessarily be a Patient.
     @Override
     public String getPatientId() {
         String[] subjectRefParts = measureReport.getSubject().getReference().split("/");
@@ -35,15 +35,15 @@ public class R4MeasureReportAdapter implements IMeasureReportAdapter {
         String measureId = measureRefParts[measureRefParts.length - 1];
         return measureId;
 
-//        String measureId = null;
-//        measureId = measureReport.getMeasure() .getId();
-//
-//        if (measureId == null) {
-//            String[] measureRefParts = measureReport.getMeasure().getReference().split("/");
-//            measureId = measureRefParts[measureRefParts.length - 1];
-//        }
-//
-//        return measureId;
+        //        String measureId = null;
+        //        measureId = measureReport.getMeasure() .getId();
+        //
+        //        if (measureId == null) {
+        //            String[] measureRefParts = measureReport.getMeasure().getReference().split("/");
+        //            measureId = measureRefParts[measureRefParts.length - 1];
+        //        }
+        //
+        //        return measureId;
     }
 
     @Override

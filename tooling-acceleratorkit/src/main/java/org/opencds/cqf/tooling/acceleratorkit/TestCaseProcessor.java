@@ -1,22 +1,12 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
 import java.io.*;
-
 import java.math.BigDecimal;
-import java.nio.file.Paths;
-import java.security.Provider;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
 import org.apache.poi.ss.usermodel.*;
-
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.tooling.Operation;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
 public class TestCaseProcessor {
@@ -26,22 +16,25 @@ public class TestCaseProcessor {
     private Sheet map;
     private Map<String, String> headerMap;
 
-    public TestCaseProcessor() {
-    }
+    public TestCaseProcessor() {}
 
     private CanonicalResourceAtlas atlas;
+
     public CanonicalResourceAtlas getAtlas() {
         return atlas;
     }
+
     public TestCaseProcessor setAtlas(CanonicalResourceAtlas atlas) {
         this.atlas = atlas;
         return this;
     }
 
     private Map<String, StructureDefinition> profilesByElementId;
+
     public Map<String, StructureDefinition> getProfilesByElementId() {
         return profilesByElementId;
     }
+
     public TestCaseProcessor setProfilesByElementId(Map<String, StructureDefinition> profilesByElementId) {
         this.profilesByElementId = profilesByElementId;
         return this;
@@ -70,12 +63,12 @@ public class TestCaseProcessor {
                 continue;
             }
 
-            if (isRowEmpty(currentRow))
-                continue;
+            if (isRowEmpty(currentRow)) continue;
 
             Map<String, Object> testCaseValues = loadTestCaseValues(currentRow);
 
-            Map<StructureDefinition, Map<String, Object>> testCaseProfiles = indexTestCaseValuesByProfile(testCaseValues);
+            Map<StructureDefinition, Map<String, Object>> testCaseProfiles =
+                    indexTestCaseValuesByProfile(testCaseValues);
 
             ExampleBuilder eb = new ExampleBuilder();
             eb.setAtlas(atlas);
@@ -108,11 +101,11 @@ public class TestCaseProcessor {
     private Patient generatePatient(ExampleBuilder eb, Map<StructureDefinition, Map<String, Object>> testCaseProfiles) {
         for (Map.Entry<StructureDefinition, Map<String, Object>> e : testCaseProfiles.entrySet()) {
             if (e.getKey().getType().equals("Patient")) {
-                Patient p = (Patient)generateResource(eb, e.getKey(), e.getValue());
+                Patient p = (Patient) generateResource(eb, e.getKey(), e.getValue());
                 if (p != null) {
                     Object identifierValue = e.getValue().get("ANC.A.DE1");
                     if (identifierValue != null && identifierValue instanceof String) {
-                        p.setId((String)identifierValue);
+                        p.setId((String) identifierValue);
                     }
                     return p;
                 }
@@ -121,16 +114,18 @@ public class TestCaseProcessor {
         return null;
     }
 
-    private Encounter generateEncounter(ExampleBuilder eb, Map<StructureDefinition, Map<String, Object>> testCaseProfiles) {
+    private Encounter generateEncounter(
+            ExampleBuilder eb, Map<StructureDefinition, Map<String, Object>> testCaseProfiles) {
         for (Map.Entry<StructureDefinition, Map<String, Object>> e : testCaseProfiles.entrySet()) {
             if (e.getKey().getType().equals("Encounter")) {
-                return (Encounter)generateResource(eb, e.getKey(), e.getValue());
+                return (Encounter) generateResource(eb, e.getKey(), e.getValue());
             }
         }
         return null;
     }
 
-    private List<Resource> generateResources(ExampleBuilder eb, Map<StructureDefinition, Map<String, Object>> testCaseProfiles) {
+    private List<Resource> generateResources(
+            ExampleBuilder eb, Map<StructureDefinition, Map<String, Object>> testCaseProfiles) {
         List<Resource> resources = new ArrayList<Resource>();
 
         for (Map.Entry<StructureDefinition, Map<String, Object>> e : testCaseProfiles.entrySet()) {
@@ -171,15 +166,15 @@ public class TestCaseProcessor {
             String elementId = getElementId(sd, e.getKey());
             if (elementId != null) {
                 elementValues.put(elementId, e.getValue());
-            }
-            else {
+            } else {
                 // TODO: Error? Warning? This shouldn't ever happen
             }
         }
         return eb.build(sd, elementValues);
     }
 
-    private Map<StructureDefinition, Map<String, Object>> indexTestCaseValuesByProfile(Map<String, Object> testCaseValues) {
+    private Map<StructureDefinition, Map<String, Object>> indexTestCaseValuesByProfile(
+            Map<String, Object> testCaseValues) {
         Map<StructureDefinition, Map<String, Object>> result = new HashMap<StructureDefinition, Map<String, Object>>();
         for (Map.Entry<String, Object> e : testCaseValues.entrySet()) {
             String dataElementId = e.getKey();
@@ -210,11 +205,16 @@ public class TestCaseProcessor {
 
             Cell headerCell = currentRow.getCell(0, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
             Cell elementCell = currentRow.getCell(1, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-            if (headerCell != null && headerCell.getCellType() == CellType.STRING
-                    && elementCell != null && elementCell.getCellType() == CellType.STRING) {
+            if (headerCell != null
+                    && headerCell.getCellType() == CellType.STRING
+                    && elementCell != null
+                    && elementCell.getCellType() == CellType.STRING) {
                 String headerCellStr = headerCell.getStringCellValue();
                 String elementCellStr = elementCell.getStringCellValue();
-                if (headerCellStr != null && !headerCellStr.isEmpty() && elementCellStr != null && !elementCellStr.isEmpty()) {
+                if (headerCellStr != null
+                        && !headerCellStr.isEmpty()
+                        && elementCellStr != null
+                        && !elementCellStr.isEmpty()) {
                     result.put(headerCellStr, elementCellStr);
                 }
             }
@@ -251,8 +251,12 @@ public class TestCaseProcessor {
 
             Object cellValue = null;
             switch (currentCell.getCellType()) {
-                case STRING: cellValue = currentCell.getStringCellValue(); break;
-                case BOOLEAN: cellValue = currentCell.getBooleanCellValue(); break;
+                case STRING:
+                    cellValue = currentCell.getStringCellValue();
+                    break;
+                case BOOLEAN:
+                    cellValue = currentCell.getBooleanCellValue();
+                    break;
                 case NUMERIC:
                     if (DateUtil.isCellDateFormatted(currentCell)) {
                         // Good hell Java's date libraries suck....
@@ -260,18 +264,20 @@ public class TestCaseProcessor {
                         LocalDate date = dateTime.toLocalDate();
                         cellValue = date.format(DateTimeFormatter.ISO_DATE);
 
-                        // This will give an appropriately formatted ISO8601 offset datetime, but the Instant.parse method can't deal with that format
+                        // This will give an appropriately formatted ISO8601 offset datetime, but the Instant.parse
+                        // method can't deal with that format
                         // No idea why instants can't deal with offsets, but there it is.
                         // Current tests only have date values, so I'm going to just assume date values
-                        // TODO: Support date/time values in future (will need an indicator on the data element to distinguish source values of date, datetime, and time)
-                        //LocalDateTime dateTime = currentCell.getLocalDateTimeCellValue();
-                        //OffsetDateTime offsetDateTime = dateTime.atOffset(ZoneId.systemDefault().getRules().getOffset(Instant.now()));
-                        //cellValue = offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                    }
-                    else {
+                        // TODO: Support date/time values in future (will need an indicator on the data element to
+                        // distinguish source values of date, datetime, and time)
+                        // LocalDateTime dateTime = currentCell.getLocalDateTimeCellValue();
+                        // OffsetDateTime offsetDateTime =
+                        // dateTime.atOffset(ZoneId.systemDefault().getRules().getOffset(Instant.now()));
+                        // cellValue = offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                    } else {
                         cellValue = new BigDecimal(currentCell.getNumericCellValue());
                     }
-                break;
+                    break;
             }
 
             // Skip if there are no contents for the element
@@ -288,8 +294,7 @@ public class TestCaseProcessor {
     private static boolean isRowEmpty(Row row) {
         for (int c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
             Cell cell = row.getCell(c);
-            if (cell != null && cell.getCellType() != CellType.BLANK)
-                return false;
+            if (cell != null && cell.getCellType() != CellType.BLANK) return false;
         }
         return true;
     }
@@ -308,7 +313,7 @@ public class TestCaseProcessor {
 
         while (cIterator.hasNext()) {
             Cell cell = cIterator.next();
-            if (cell== null || cell.getCellType() == CellType.BLANK) {
+            if (cell == null || cell.getCellType() == CellType.BLANK) {
                 continue;
             }
 
@@ -317,10 +322,7 @@ public class TestCaseProcessor {
                 continue;
             }
 
-            statement += String.format(
-                    "\tcase \"%s\":\n\t\tbreak;\n",
-                    cellStr
-            );
+            statement += String.format("\tcase \"%s\":\n\t\tbreak;\n", cellStr);
 
             alreadyAdded.add(cellStr);
         }

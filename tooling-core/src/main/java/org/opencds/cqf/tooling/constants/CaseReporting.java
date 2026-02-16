@@ -15,9 +15,12 @@ public class CaseReporting {
     public static final String VSMUSAGECONTEXTTYPESYSTEMURL = "http://aphl.org/fhir/vsm/CodeSystem/usage-context-type";
     public static final String USAGECONTEXTTYPESYSTEMURL = "http://terminology.hl7.org/CodeSystem/usage-context-type";
     public static final String USPHUSAGECONTEXTURL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
-    public static final String SEARCHPARAMSYSTEMLIBRARYDEPENDSON = "http://hl7.org/fhir/Library#relatedArtifact.dependsOn";
-    public static final String SEARCHPARAMSYSTEMLIBRARYCONTEXTTYPEVALUE = "http://hl7.org/fhir/ValueSet#useContext.context-type-value";
-    public static final String SEARCHPARAMUSECONTEXTVALUEGROUPERTYPECONDITIONGROUPER = "grouper-type$http://aphl.org/fhir/vsm/CodeSystem/usage-context-type|condition-grouper";
+    public static final String SEARCHPARAMSYSTEMLIBRARYDEPENDSON =
+            "http://hl7.org/fhir/Library#relatedArtifact.dependsOn";
+    public static final String SEARCHPARAMSYSTEMLIBRARYCONTEXTTYPEVALUE =
+            "http://hl7.org/fhir/ValueSet#useContext.context-type-value";
+    public static final String SEARCHPARAMUSECONTEXTVALUEGROUPERTYPECONDITIONGROUPER =
+            "grouper-type$http://aphl.org/fhir/vsm/CodeSystem/usage-context-type|condition-grouper";
 
     // Condition Groupers Sheet Layout
     public static final int CONDITIONGROUPINGSSHEETINDEX = 1;

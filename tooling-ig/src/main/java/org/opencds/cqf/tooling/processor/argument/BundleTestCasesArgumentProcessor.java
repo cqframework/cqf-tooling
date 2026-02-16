@@ -2,14 +2,12 @@ package org.opencds.cqf.tooling.processor.argument;
 
 import static java.util.Arrays.asList;
 
-import org.opencds.cqf.tooling.parameter.BundleTestCasesParameters;
-import org.opencds.cqf.tooling.utilities.ArgUtils;
-
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-
+import org.opencds.cqf.tooling.parameter.BundleTestCasesParameters;
+import org.opencds.cqf.tooling.utilities.ArgUtils;
 
 public class BundleTestCasesArgumentProcessor {
 
@@ -21,15 +19,16 @@ public class BundleTestCasesArgumentProcessor {
     @SuppressWarnings("unused")
     public OptionParser build() {
         OptionParser parser = new OptionParser();
-      
-        OptionSpecBuilder pathBuilder = parser.acceptsAll(asList(PATH_OPTIONS),"Required.");
-        OptionSpecBuilder igVersionBuilder = parser.acceptsAll(asList(IG_VERSION_OPTIONS),"Required.");
-    
-        OptionSpec<String> path = pathBuilder.withRequiredArg().describedAs("root directory of the test cases");
-        OptionSpec<String> igVersion = igVersionBuilder.withRequiredArg().describedAs("ig fhir version");    
 
-        parser.acceptsAll(asList(OPERATION_OPTIONS),"The operation to run.");        
-        OptionSpec<Void> help = parser.acceptsAll(asList(HELP_OPTIONS), "Show this help page").forHelp();
+        OptionSpecBuilder pathBuilder = parser.acceptsAll(asList(PATH_OPTIONS), "Required.");
+        OptionSpecBuilder igVersionBuilder = parser.acceptsAll(asList(IG_VERSION_OPTIONS), "Required.");
+
+        OptionSpec<String> path = pathBuilder.withRequiredArg().describedAs("root directory of the test cases");
+        OptionSpec<String> igVersion = igVersionBuilder.withRequiredArg().describedAs("ig fhir version");
+
+        parser.acceptsAll(asList(OPERATION_OPTIONS), "The operation to run.");
+        OptionSpec<Void> help =
+                parser.acceptsAll(asList(HELP_OPTIONS), "Show this help page").forHelp();
 
         return parser;
     }
@@ -40,9 +39,9 @@ public class BundleTestCasesArgumentProcessor {
 
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
-        String path = (String)options.valueOf(PATH_OPTIONS[0]);
-        //could not easily use the built-in default here because it is based on the value of the igPath argument.
-        String igVersion = (String)options.valueOf(IG_VERSION_OPTIONS[0]);
+        String path = (String) options.valueOf(PATH_OPTIONS[0]);
+        // could not easily use the built-in default here because it is based on the value of the igPath argument.
+        String igVersion = (String) options.valueOf(IG_VERSION_OPTIONS[0]);
 
         BundleTestCasesParameters ip = new BundleTestCasesParameters();
         ip.path = path;

@@ -1,6 +1,10 @@
 package org.opencds.cqf.tooling.terminology.distributable;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -9,11 +13,7 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.time.Instant;
-import java.util.*;
-
+@SuppressWarnings("checkstyle:MemberName")
 public class DistributableValueSetGenerator extends Operation {
 
     private FhirContext fhirContext;
@@ -47,10 +47,20 @@ public class DistributableValueSetGenerator extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break;
-                case "encoding": case "e": encoding = value.toLowerCase(); break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                case "outputpath":
+                case "op":
+                    setOutputPath(value);
+                    break; // -outputpath (-op)
+                case "pathtospreadsheet":
+                case "pts":
+                    pathToSpreadsheet = value;
+                    break;
+                case "encoding":
+                case "e":
+                    encoding = value.toLowerCase();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
 
             if (pathToSpreadsheet == null) {
@@ -79,51 +89,55 @@ public class DistributableValueSetGenerator extends Operation {
 
             if (cellAsString.equals("CodeSystems")) {
                 isCodeSystem = true;
-            }
-
-            else if (cellAsString.equals("ValueSets")) {
+            } else if (cellAsString.equals("ValueSets")) {
                 isCodeSystem = false;
                 isValueSet = true;
-            }
-
-            else if (isCodeSystem) {
+            } else if (isCodeSystem) {
                 commonMetaData.addCodeSystemMeta(
                         SpreadsheetHelper.getCellAsString(row.getCell(0)),
                         SpreadsheetHelper.getCellAsString(row.getCell(1)),
-                        SpreadsheetHelper.getCellAsString(row.getCell(2))
-                );
-            }
-
-            else if (isValueSet) {
+                        SpreadsheetHelper.getCellAsString(row.getCell(2)));
+            } else if (isValueSet) {
                 commonMetaData.addValueSetMeta(
                         SpreadsheetHelper.getCellAsString(row.getCell(0)),
                         SpreadsheetHelper.getCellAsString(row.getCell(2)),
-                        SpreadsheetHelper.getCellAsString(row.getCell(3))
-                );
-            }
-
-            else {
+                        SpreadsheetHelper.getCellAsString(row.getCell(3)));
+            } else {
                 switch (cellAsString) {
                     case CANONICAL_URL:
-                        commonMetaData.getOrganizationalMetaData().setCanonicalUrlBase(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        commonMetaData
+                                .getOrganizationalMetaData()
+                                .setCanonicalUrlBase(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                         break;
                     case COPYRIGHT:
-                        commonMetaData.getOrganizationalMetaData().setCopyright(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        commonMetaData
+                                .getOrganizationalMetaData()
+                                .setCopyright(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                         break;
                     case JURISDICTION:
-                        commonMetaData.getOrganizationalMetaData().setJurisdiction(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        commonMetaData
+                                .getOrganizationalMetaData()
+                                .setJurisdiction(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                         break;
                     case PUBLISHER:
-                        commonMetaData.getOrganizationalMetaData().setPublisher(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        commonMetaData
+                                .getOrganizationalMetaData()
+                                .setPublisher(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                         break;
                     case AUTHOR_NAME:
-                        commonMetaData.getOrganizationalMetaData().setAuthorName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        commonMetaData
+                                .getOrganizationalMetaData()
+                                .setAuthorName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                         break;
                     case AUTHOR_TELECOM_SYSTEM:
-                        commonMetaData.getOrganizationalMetaData().setAuthorTelecomSystem(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        commonMetaData
+                                .getOrganizationalMetaData()
+                                .setAuthorTelecomSystem(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                         break;
                     case AUTHOR_TELECOM_VALUE:
-                        commonMetaData.getOrganizationalMetaData().setAuthorTelecomValue(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        commonMetaData
+                                .getOrganizationalMetaData()
+                                .setAuthorTelecomValue(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                         break;
                     default:
                         break;
@@ -205,16 +219,18 @@ public class DistributableValueSetGenerator extends Operation {
         List<ValueSet> valueSets = new ArrayList<>();
         DistributableValueSetMeta distributableValueSetMeta;
         ValueSet vs;
-        for (Map.Entry<String, CommonMetaData.ValueSetMeta> entrySet : meta.getValueSetMeta().entrySet()) {
+        for (Map.Entry<String, CommonMetaData.ValueSetMeta> entrySet :
+                meta.getValueSetMeta().entrySet()) {
             if (entrySet.getKey().isEmpty()
                     || entrySet.getValue().getMetaPageName().isEmpty()
-                    || entrySet.getValue().getCodeListPageName().isEmpty())
-            {
+                    || entrySet.getValue().getCodeListPageName().isEmpty()) {
                 continue;
             }
-            distributableValueSetMeta = resolveDistributableValueSetMeta(workbook.getSheet(entrySet.getValue().getMetaPageName()));
+            distributableValueSetMeta = resolveDistributableValueSetMeta(
+                    workbook.getSheet(entrySet.getValue().getMetaPageName()));
             vs = distributableValueSetMeta.populate(fhirContext);
-            meta.getOrganizationalMetaData().populate(vs, fhirContext.getVersion().toString());
+            meta.getOrganizationalMetaData()
+                    .populate(vs, fhirContext.getVersion().toString());
 
             resolveCodeList(meta, workbook.getSheet(entrySet.getValue().getCodeListPageName()), vs);
 
@@ -239,51 +255,56 @@ public class DistributableValueSetGenerator extends Operation {
             if (code.equals("Code")) continue;
 
             String description = SpreadsheetHelper.getCellAsString(row.getCell(1));
-            active = SpreadsheetHelper.getCellAsString(row.getCell(2)) == null ? active : Boolean.valueOf(SpreadsheetHelper.getCellAsString(row.getCell(2)));
-            system = SpreadsheetHelper.getCellAsString(row.getCell(3)) == null ? system : SpreadsheetHelper.getCellAsString(row.getCell(3));
+            active = SpreadsheetHelper.getCellAsString(row.getCell(2)) == null
+                    ? active
+                    : Boolean.valueOf(SpreadsheetHelper.getCellAsString(row.getCell(2)));
+            system = SpreadsheetHelper.getCellAsString(row.getCell(3)) == null
+                    ? system
+                    : SpreadsheetHelper.getCellAsString(row.getCell(3));
 
             if (system == null) {
                 throw new RuntimeException("A system must be specified in the code list");
             }
 
-            version = SpreadsheetHelper.getCellAsString(row.getCell(4)) == null ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));
+            version = SpreadsheetHelper.getCellAsString(row.getCell(4)) == null
+                    ? version
+                    : SpreadsheetHelper.getCellAsString(row.getCell(4));
 
             if (!vs.hasExpansion()) {
-                vs.setExpansion(
-                        new ValueSet.ValueSetExpansionComponent()
-                                .setTimestamp(Date.from(Instant.now()))
-                                .addContains(
-                                        new ValueSet.ValueSetExpansionContainsComponent()
-                                                .setSystem(system)
-                                                .setCode(code)
-                                                .setDisplay(description)
-                                                .setVersion(meta.getCodeSystemMeta().get(system).getVersion())
-                                )
-                );
-            }
-
-            else {
+                vs.setExpansion(new ValueSet.ValueSetExpansionComponent()
+                        .setTimestamp(Date.from(Instant.now()))
+                        .addContains(new ValueSet.ValueSetExpansionContainsComponent()
+                                .setSystem(system)
+                                .setCode(code)
+                                .setDisplay(description)
+                                .setVersion(meta.getCodeSystemMeta().get(system).getVersion())));
+            } else {
                 vs.getExpansion()
-                        .addContains(
-                                new ValueSet.ValueSetExpansionContainsComponent()
-                                        .setSystem(system)
-                                        .setCode(code)
-                                        .setDisplay(description)
-                                        .setVersion(meta.getCodeSystemMeta().get(system).getVersion())
-                );
+                        .addContains(new ValueSet.ValueSetExpansionContainsComponent()
+                                .setSystem(system)
+                                .setCode(code)
+                                .setDisplay(description)
+                                .setVersion(meta.getCodeSystemMeta().get(system).getVersion()));
             }
         }
     }
 
     private void output(List<ValueSet> valueSets) {
         for (ValueSet valueSet : valueSets) {
-            try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(),
-                    "valueset-" + valueSet.getId() + "." + encoding))) {
+            try (FileOutputStream writer = new FileOutputStream(
+                    IOUtils.concatFilePath(getOutputPath(), "valueset-" + valueSet.getId() + "." + encoding))) {
                 writer.write(
                         encoding.equals("json")
-                                ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet).getBytes()
-                                : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(valueSet).getBytes()
-                );
+                                ? fhirContext
+                                        .newJsonParser()
+                                        .setPrettyPrint(true)
+                                        .encodeResourceToString(valueSet)
+                                        .getBytes()
+                                : fhirContext
+                                        .newXmlParser()
+                                        .setPrettyPrint(true)
+                                        .encodeResourceToString(valueSet)
+                                        .getBytes());
                 writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();

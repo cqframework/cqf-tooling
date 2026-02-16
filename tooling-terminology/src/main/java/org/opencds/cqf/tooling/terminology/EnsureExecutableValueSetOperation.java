@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.terminology;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -7,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -18,10 +18,9 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-
 public class EnsureExecutableValueSetOperation extends Operation {
-    private static final String USAGE_WARNING = "CAUTION: The compose element in this ValueSet resource was inferred from the expansion element. It is NOT an authoritative definition of the value set and is provided only for convenience for systems that assume a compose will be present.";
+    private static final String USAGE_WARNING =
+            "CAUTION: The compose element in this ValueSet resource was inferred from the expansion element. It is NOT an authoritative definition of the value set and is provided only for convenience for systems that assume a compose will be present.";
     private String valueSetPath;
     private String encoding = IOUtils.Encoding.JSON.toString();
     private boolean declareCPGProfiles = true;
@@ -41,7 +40,7 @@ public class EnsureExecutableValueSetOperation extends Operation {
 
     @Override
     public void execute(String[] args) {
-        //setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); //default
+        // setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); //default
 
         for (String arg : args) {
             if (arg.equals("-EnsureExecutableValueSet")) {
@@ -61,16 +60,36 @@ public class EnsureExecutableValueSetOperation extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "valuesetpath": case "path": case "vsp": valueSetPath = value; break; // -valuesetpath (-vsp, -path)
-                case "encoding": case "e": encoding = value.toLowerCase(); break;
-                case "declarecpg": case "cpg": declareCPGProfiles = value.toLowerCase().equals("true") ? true : false; break;
-                case "force": case "f": force = value.toLowerCase().equals("true") ? true : false; break;
-                case "skipversion": case "sv": skipVersion = value.toLowerCase().equals("true") ? true : false; break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                case "outputpath":
+                case "op":
+                    setOutputPath(value);
+                    break; // -outputpath (-op)
+                case "valuesetpath":
+                case "path":
+                case "vsp":
+                    valueSetPath = value;
+                    break; // -valuesetpath (-vsp, -path)
+                case "encoding":
+                case "e":
+                    encoding = value.toLowerCase();
+                    break;
+                case "declarecpg":
+                case "cpg":
+                    declareCPGProfiles = value.toLowerCase().equals("true") ? true : false;
+                    break;
+                case "force":
+                case "f":
+                    force = value.toLowerCase().equals("true") ? true : false;
+                    break;
+                case "skipversion":
+                case "sv":
+                    skipVersion = value.toLowerCase().equals("true") ? true : false;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
             if (null == getOutputPath() || getOutputPath().equals("")) {
-                setOutputPath(this.valueSetPath); //default to editing files in place
+                setOutputPath(this.valueSetPath); // default to editing files in place
             }
         }
 
@@ -82,9 +101,11 @@ public class EnsureExecutableValueSetOperation extends Operation {
             if (file.getName().endsWith(".json") || file.getName().endsWith(".xml")) {
                 IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), getFhirContext());
                 if (resource instanceof ValueSet) {
-                    ValueSet valueSet = (ValueSet)resource;
-                    if ((ensureExecutable && refreshExpansion(valueSet)) || (ensureComputable && inferCompose(valueSet))) {
-                        IOUtils.writeResource(valueSet, super.getOutputPath(), IOUtils.Encoding.parse(encoding), getFhirContext());
+                    ValueSet valueSet = (ValueSet) resource;
+                    if ((ensureExecutable && refreshExpansion(valueSet))
+                            || (ensureComputable && inferCompose(valueSet))) {
+                        IOUtils.writeResource(
+                                valueSet, super.getOutputPath(), IOUtils.Encoding.parse(encoding), getFhirContext());
                     }
                 }
             }
@@ -96,9 +117,11 @@ public class EnsureExecutableValueSetOperation extends Operation {
             ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
             expansion.setTimestamp(Date.from(Instant.now()));
 
-            //Expansions via EnsureExecutableValueSet are run independent of terminology servers and should be flagged as such
+            // Expansions via EnsureExecutableValueSet are run independent of terminology servers and should be flagged
+            // as such
             ArrayList<ValueSet.ValueSetExpansionParameterComponent> expansionParameters = new ArrayList<>();
-            ValueSet.ValueSetExpansionParameterComponent parameterNaive = new ValueSet.ValueSetExpansionParameterComponent();
+            ValueSet.ValueSetExpansionParameterComponent parameterNaive =
+                    new ValueSet.ValueSetExpansionParameterComponent();
             parameterNaive.setName("naive");
             parameterNaive.setValue(new BooleanType(true));
             expansionParameters.add(parameterNaive);
@@ -106,7 +129,8 @@ public class EnsureExecutableValueSetOperation extends Operation {
 
             for (ValueSet.ConceptSetComponent csc : valueSet.getCompose().getInclude()) {
                 for (ValueSet.ConceptReferenceComponent crc : csc.getConcept()) {
-                    expansion.addContains()
+                    expansion
+                            .addContains()
                             .setCode(crc.getCode())
                             .setSystem(csc.getSystem())
                             .setVersion(csc.getVersion())
@@ -115,11 +139,13 @@ public class EnsureExecutableValueSetOperation extends Operation {
             }
             valueSet.setExpansion(expansion);
             if (declareCPGProfiles) {
-                if (!valueSet.getMeta().hasProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset")) {
-                    valueSet.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset");
+                if (!valueSet.getMeta()
+                        .hasProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset")) {
+                    valueSet.getMeta()
+                            .addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset");
                 }
-                ensureKnowledgeCapability(valueSet,"executable");
-                ensureKnowledgeRepresentationLevel(valueSet,"executable");
+                ensureKnowledgeCapability(valueSet, "executable");
+                ensureKnowledgeRepresentationLevel(valueSet, "executable");
             }
             return true;
         }
@@ -158,15 +184,19 @@ public class EnsureExecutableValueSetOperation extends Operation {
     // NOTE: This assumes the ValueSet expansion is complete... It will THROW if the expansion is partial
     public boolean inferCompose(ValueSet valueSet) {
         if (valueSet.hasExpansion() && (!valueSet.hasCompose() || force)) {
-            int total = valueSet.getExpansion().hasTotal() ? valueSet.getExpansion().getTotal() : -1;
+            int total =
+                    valueSet.getExpansion().hasTotal() ? valueSet.getExpansion().getTotal() : -1;
             int count = 0;
 
             // Index the expansion contains by code system and version
-            HashMap<String, Map<String, ValueSet.ValueSetExpansionContainsComponent>> codesBySystem = new HashMap<String, Map<String, ValueSet.ValueSetExpansionContainsComponent>>();
-            for (ValueSet.ValueSetExpansionContainsComponent contains : valueSet.getExpansion().getContains()) {
+            HashMap<String, Map<String, ValueSet.ValueSetExpansionContainsComponent>> codesBySystem =
+                    new HashMap<String, Map<String, ValueSet.ValueSetExpansionContainsComponent>>();
+            for (ValueSet.ValueSetExpansionContainsComponent contains :
+                    valueSet.getExpansion().getContains()) {
                 count++;
                 if (contains.hasCode() && contains.hasSystem()) {
-                    String scr = getSystemCanonicalReference(contains.getSystem(), !skipVersion ? contains.getVersion() : null);
+                    String scr = getSystemCanonicalReference(
+                            contains.getSystem(), !skipVersion ? contains.getVersion() : null);
                     Map<String, ValueSet.ValueSetExpansionContainsComponent> concepts = codesBySystem.get(scr);
                     if (concepts == null) {
                         concepts = new LinkedHashMap<String, ValueSet.ValueSetExpansionContainsComponent>();
@@ -186,7 +216,8 @@ public class EnsureExecutableValueSetOperation extends Operation {
             // Add a compose include for each system and version
             ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
             valueSet.setCompose(compose);
-            for (Map.Entry<String, Map<String, ValueSet.ValueSetExpansionContainsComponent>> conceptsEntry : codesBySystem.entrySet()) {
+            for (Map.Entry<String, Map<String, ValueSet.ValueSetExpansionContainsComponent>> conceptsEntry :
+                    codesBySystem.entrySet()) {
                 ValueSet.ConceptSetComponent csc = compose.addInclude();
                 String systemUri = getSystemUri(conceptsEntry.getKey());
                 String version = getVersion(conceptsEntry.getKey());
@@ -195,30 +226,38 @@ public class EnsureExecutableValueSetOperation extends Operation {
                     csc.setVersion(version);
                 }
 
-                for (ValueSet.ValueSetExpansionContainsComponent c : conceptsEntry.getValue().values()) {
+                for (ValueSet.ValueSetExpansionContainsComponent c :
+                        conceptsEntry.getValue().values()) {
                     csc.addConcept().setCode(c.getCode()).setDisplay(c.getDisplay());
                 }
             }
 
             // Mark CPG Profiles and knowledge capabilities
             if (declareCPGProfiles) {
-                if (!valueSet.getMeta().hasProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset")) {
-                    valueSet.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
+                if (!valueSet.getMeta()
+                        .hasProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset")) {
+                    valueSet.getMeta()
+                            .addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
                 }
-                ensureKnowledgeCapability(valueSet,"computable");
-                ensureKnowledgeRepresentationLevel(valueSet,"structured");
+                ensureKnowledgeCapability(valueSet, "computable");
+                ensureKnowledgeRepresentationLevel(valueSet, "structured");
             }
 
             // Add a warning that the compose element was inferred from the expansion
             boolean hasCaution = false;
-            for (Extension e : valueSet.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/valueset-warning")) {
-                if (e.getValue() instanceof MarkdownType && ((MarkdownType)e.getValue()).hasValue() && ((MarkdownType)e.getValue()).getValue().equals(USAGE_WARNING)) {
+            for (Extension e :
+                    valueSet.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/valueset-warning")) {
+                if (e.getValue() instanceof MarkdownType
+                        && ((MarkdownType) e.getValue()).hasValue()
+                        && ((MarkdownType) e.getValue()).getValue().equals(USAGE_WARNING)) {
                     hasCaution = true;
                     break;
                 }
             }
             if (!hasCaution) {
-                valueSet.addExtension("http://hl7.org/fhir/StructureDefinition/valueset-warning", new MarkdownType().setValue(USAGE_WARNING));
+                valueSet.addExtension(
+                        "http://hl7.org/fhir/StructureDefinition/valueset-warning",
+                        new MarkdownType().setValue(USAGE_WARNING));
             }
 
             return true;
@@ -253,13 +292,17 @@ public class EnsureExecutableValueSetOperation extends Operation {
 
     public void ensureKnowledgeCapability(DomainResource resource, String capability) {
         if (!hasKnowledgeCapability(resource, capability)) {
-            resource.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new StringType(capability));
+            resource.addExtension()
+                    .setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability")
+                    .setValue(new StringType(capability));
         }
     }
 
     public void ensureKnowledgeRepresentationLevel(DomainResource resource, String level) {
         if (!hasKnowledgeRepresentationLevel(resource, level)) {
-            resource.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new StringType(level));
+            resource.addExtension()
+                    .setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel")
+                    .setValue(new StringType(level));
         }
     }
 

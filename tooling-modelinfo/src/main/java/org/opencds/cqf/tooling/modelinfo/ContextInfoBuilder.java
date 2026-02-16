@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ContextInfo;
 import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
@@ -39,17 +38,20 @@ public class ContextInfoBuilder {
         NamedTypeSpecifier nts = new NamedTypeSpecifier();
         nts.setNamespace(this.settings.name);
         if (ci.getName().equals("Patient")) {
-            nts.setName(this.settings.patientClassName.startsWith(this.settings.name + ".") ? "Patient" : this.settings.patientClassName);
+            nts.setName(
+                    this.settings.patientClassName.startsWith(this.settings.name + ".")
+                            ? "Patient"
+                            : this.settings.patientClassName);
             ci.setBirthDateElement(this.settings.patientBirthDatePropertyName);
-        }
-        else {
+        } else {
             nts.setName(ci.getName());
         }
         ci.setContextType(nts);
         ci.setKeyElement("id"); // KeyElement for all FHIR Resources is id
 
         // Do not add compartments for types that cannot be resolved
-        if (!typeInfos.containsKey(this.settings.name + "." + ci.getContextType().getName())) {
+        if (!typeInfos.containsKey(
+                this.settings.name + "." + ci.getContextType().getName())) {
             return null;
         }
 
@@ -58,16 +60,19 @@ public class ContextInfoBuilder {
             if (typeInfos.containsKey(relatedResourceTypeName)) {
                 TypeInfo relatedResourceTypeInfo = typeInfos.get(relatedResourceTypeName);
                 if (relatedResourceTypeInfo instanceof ClassInfo) {
-                    ClassInfo relatedResourceClassInfo = (ClassInfo)relatedResourceTypeInfo;
+                    ClassInfo relatedResourceClassInfo = (ClassInfo) relatedResourceTypeInfo;
                     for (StringType p : r.getParam()) {
                         SearchParameter sp = atlas.resolveSearchParameter(r.getCode(), p.getValue());
                         if (sp != null) {
                             RelationshipInfo relationshipInfo = new RelationshipInfo();
                             relationshipInfo.setContext(ci.getName());
-                            List<String> terms = Arrays.asList(sp.getExpression().split("\\."));
+                            List<String> terms =
+                                    Arrays.asList(sp.getExpression().split("\\."));
                             if (terms.size() >= 1) {
                                 relationshipInfo.setRelatedKeyElement(terms.get(terms.size() - 1));
-                                relatedResourceClassInfo.getContextRelationship().add(relationshipInfo);
+                                relatedResourceClassInfo
+                                        .getContextRelationship()
+                                        .add(relationshipInfo);
                             }
                         }
                     }

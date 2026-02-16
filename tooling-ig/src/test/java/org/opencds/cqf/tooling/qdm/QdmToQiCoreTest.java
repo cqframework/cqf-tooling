@@ -1,9 +1,8 @@
 package org.opencds.cqf.tooling.qdm;
 
+import java.io.File;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.io.File;
 
 public class QdmToQiCoreTest {
 
@@ -29,5 +28,4 @@ public class QdmToQiCoreTest {
 
         Assert.assertEquals(htmlFiles.length, 21, "Expected 21 HTML files, but found " + htmlFiles.length + ".");
     }
-
 }

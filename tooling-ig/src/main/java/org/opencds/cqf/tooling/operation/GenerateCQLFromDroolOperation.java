@@ -8,12 +8,11 @@ import org.opencds.cqf.tooling.processor.argument.GenerateCQLFromDroolArgumentPr
 /**
  * Generate Cql (Elm Libraries as of now) from a Data Input Source File
  * @author  Joshua Reynolds
- * @since   2021-02-24 
+ * @since   2021-02-24
  */
 public class GenerateCQLFromDroolOperation extends Operation {
 
-    public GenerateCQLFromDroolOperation() {
-    }
+    public GenerateCQLFromDroolOperation() {}
 
     @Override
     public void execute(String[] args) {
@@ -21,8 +20,7 @@ public class GenerateCQLFromDroolOperation extends Operation {
         GenerateCQLFromDroolParameters params = null;
         try {
             params = new GenerateCQLFromDroolArgumentProcessor().parseAndConvert(args);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }

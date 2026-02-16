@@ -1,13 +1,12 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
-import org.hl7.fhir.dstu3.model.MeasureReport;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.testng.Assert.assertTrue;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.testng.annotations.Test;
 
 public class Dstu3MeasureReportAdapterTest {
 
@@ -20,7 +19,8 @@ public class Dstu3MeasureReportAdapterTest {
         report.setPatient(new org.hl7.fhir.dstu3.model.Reference("Patient/" + id));
         report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.INDIVIDUAL);
         List<MeasureReport.MeasureReportGroupComponent> groupList = new ArrayList<>();
-        org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent group1 = new org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent();
+        org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent group1 =
+                new org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent();
         group1.setId("group-1");
         group1.setMeasureScore(1.0);
         groupList.add(group1);
@@ -77,7 +77,8 @@ public class Dstu3MeasureReportAdapterTest {
         String testCaseId = "DSTU3MeasureReportAdapterTest";
         org.hl7.fhir.dstu3.model.MeasureReport report = GetDstu3BasicMeasureReportWithId(testCaseId);
 
-        org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent group2 = new org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent();
+        org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent group2 =
+                new org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent();
         group2.setId("group-2");
         group2.setMeasureScore(2.0);
         report.getGroup().add(group2);

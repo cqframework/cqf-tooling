@@ -1,11 +1,10 @@
 package org.opencds.cqf.tooling.jsonschema;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 public class FhirSchema {
 
@@ -25,7 +24,8 @@ public class FhirSchema {
             if (entry.getKey().equals(name)) {
                 continue;
             }
-            this.elements.add(new FhirSchemaElement(entry.getKey().replace(name + ".", ""), entry.getValue().getAsJsonObject()));
+            this.elements.add(new FhirSchemaElement(
+                    entry.getKey().replace(name + ".", ""), entry.getValue().getAsJsonObject()));
         }
     }
 

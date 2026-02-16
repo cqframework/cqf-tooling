@@ -1,10 +1,8 @@
-
 package org.opencds.cqf.tooling.utilities;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.apache.commons.io.FilenameUtils;
 
 public class LogUtils {
@@ -15,8 +13,7 @@ public class LogUtils {
 
     public static void putException(String id, Exception e) {
         e.printStackTrace();
-        resourceWarnings.put(LocalDateTime.now() + ": " + id,
-                e.getMessage() == null ? e.toString() : e.getMessage());
+        resourceWarnings.put(LocalDateTime.now() + ": " + id, e.getMessage() == null ? e.toString() : e.getMessage());
     }
 
     public static void putException(String id, String warning) {

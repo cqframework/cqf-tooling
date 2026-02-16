@@ -1,8 +1,7 @@
 package org.opencds.cqf.tooling.parameter;
 
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 public class MeasureTestParameters {
     public String contentPath;

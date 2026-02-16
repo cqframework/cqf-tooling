@@ -1,13 +1,12 @@
-
 package org.opencds.cqf.tooling.cql_generation.drool.serialization;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -22,7 +21,7 @@ import org.cdsframework.util.ClassUtils;
  * @author Rckms
  */
 @SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
-public class RCKMSJacksonProvider  {
+public class RCKMSJacksonProvider {
     private ObjectMapper objectMapper = null;
 
     public ObjectMapper createObjectMapper(JsonInclude.Include jsonInclude, String[] ignorableFields) {
@@ -32,7 +31,8 @@ public class RCKMSJacksonProvider  {
         if (ignorableFields != null) {
             secondaryIntrospector.setIgnoreableFields(ignorableFields);
         }
-        AnnotationIntrospector annotationIntrospector = AnnotationIntrospector.pair(primaryIntrospector, secondaryIntrospector);            
+        AnnotationIntrospector annotationIntrospector =
+                AnnotationIntrospector.pair(primaryIntrospector, secondaryIntrospector);
         objectMapper.setAnnotationIntrospector(annotationIntrospector);
 
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
@@ -55,22 +55,22 @@ public class RCKMSJacksonProvider  {
                 }
             }
             if (!dtoClasses.isEmpty()) {
-                registerDTOs(dtoClasses);       
+                registerDTOs(dtoClasses);
             }
-        }
-        catch (IOException | ClassNotFoundException | URISyntaxException e) {
+        } catch (IOException | ClassNotFoundException | URISyntaxException e) {
             String errorMessage = "An " + e.getClass().getSimpleName() + " has occurred; Message: " + e.getMessage();
             throw new RuntimeException(errorMessage, e);
         }
     }
-    
+
     public void registerDTOs(List<Class<? extends BaseDTO>> dtoClasses) {
         if (objectMapper != null && dtoClasses != null) {
             BaseDTODeserializer deserializer = new BaseDTODeserializer();
             for (Class<? extends BaseDTO> dtoClass : dtoClasses) {
                 deserializer.registerBaseDTO(dtoClass);
             }
-            SimpleModule simpleModule = new SimpleModule("PolymorphicDTODeserializerModule", new Version(1, 0, 0, null));
+            SimpleModule simpleModule =
+                    new SimpleModule("PolymorphicDTODeserializerModule", new Version(1, 0, 0, null));
             simpleModule.addDeserializer(BaseDTO.class, deserializer);
             objectMapper.registerModule(simpleModule);
         }

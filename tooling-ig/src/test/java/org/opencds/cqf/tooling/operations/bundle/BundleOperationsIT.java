@@ -1,34 +1,29 @@
 package org.opencds.cqf.tooling.operations.bundle;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
 public class BundleOperationsIT {
-
-
 
     @Test
     void TestBundleOperations() {
         FhirContext context = FhirContext.forR4Cached();
         String bundleId = "test-collection-bundle";
         BundleTypeEnum type = BundleTypeEnum.COLLECTION;
-        List<IBaseResource> resourcesToBundle = Arrays.asList(
-                new Patient().setId("test-1"),
-                new Patient().setId("test-2")
-        );
+        List<IBaseResource> resourcesToBundle =
+                Arrays.asList(new Patient().setId("test-1"), new Patient().setId("test-2"));
 
         IBaseBundle bundle = BundleResources.bundleResources(context, bundleId, type, resourcesToBundle);
         assertTrue(bundle instanceof Bundle);

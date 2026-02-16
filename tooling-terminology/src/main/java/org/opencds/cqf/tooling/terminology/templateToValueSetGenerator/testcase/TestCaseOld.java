@@ -1,6 +1,5 @@
 package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase;
 
-
 import org.hl7.fhir.dstu3.model.DataElement;
 
 public class TestCaseOld {
@@ -48,35 +47,61 @@ public class TestCaseOld {
     private ExpectedResult expectedResult;
     private DataElement inputDataElement;
 
-    public void setSection(String section) { this.section = section; }
+    public void setSection(String section) {
+        this.section = section;
+    }
 
-    public String getSection() { return this.section; }
+    public String getSection() {
+        return this.section;
+    }
 
-    public String getId() { return this.id; }
+    public String getId() {
+        return this.id;
+    }
 
-    public String getOutput() { return this.output; }
+    public String getOutput() {
+        return this.output;
+    }
 
-    public void setOutput(String output) { this.output = output; }
+    public void setOutput(String output) {
+        this.output = output;
+    }
 
-    public String getAction() { return this.action; }
+    public String getAction() {
+        return this.action;
+    }
 
-    public void setAction(String action) { this.action = action; }
+    public void setAction(String action) {
+        this.action = action;
+    }
 
-    public String getCondition() { return this.condition; }
+    public String getCondition() {
+        return this.condition;
+    }
 
-    public void setCondition(String condition) { this.condition = condition; }
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
 
-    public void setGrayFlag(Boolean grayFlag) { this.grayFlag = grayFlag; }
+    public void setGrayFlag(Boolean grayFlag) {
+        this.grayFlag = grayFlag;
+    }
 
-    public Boolean getGrayFlag() { return this.grayFlag; }
+    public Boolean getGrayFlag() {
+        return this.grayFlag;
+    }
 
     public void setId(String id) {
         this.id = id;
     }
 
-    public String getDataType() { return dataType; }
+    public String getDataType() {
+        return dataType;
+    }
 
-    public void setDataType(String dataType) { this.dataType = dataType; }
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
 
     public String getName() {
         return name;
@@ -102,13 +127,21 @@ public class TestCaseOld {
         this.expectedResult = expectedResult;
     }
 
-    public String getDataElementId() { return dataElementId; }
+    public String getDataElementId() {
+        return dataElementId;
+    }
 
-    public void setDataElementId(String dataElementId) { this.dataElementId = dataElementId; }
+    public void setDataElementId(String dataElementId) {
+        this.dataElementId = dataElementId;
+    }
 
-    public String getDataElementDefinition() { return dataElementDefinition; }
+    public String getDataElementDefinition() {
+        return dataElementDefinition;
+    }
 
-    public void setDataElementDefinition(String dataElementDefinition) { this.dataElementDefinition = dataElementDefinition; }
+    public void setDataElementDefinition(String dataElementDefinition) {
+        this.dataElementDefinition = dataElementDefinition;
+    }
 
     public String getNotes() {
         return notes;
@@ -174,21 +207,37 @@ public class TestCaseOld {
         this.inputOptions = inputOptions;
     }
 
-    public String getActivityId() { return this.activityId; }
+    public String getActivityId() {
+        return this.activityId;
+    }
 
-    public void setActivityId(String activityId) { this.activityId = activityId; }
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
+    }
 
-    public String getDataElementLabel() { return this.dataElementLabel; }
+    public String getDataElementLabel() {
+        return this.dataElementLabel;
+    }
 
-    public void setDataElementLabel(String dataElementLabel) { this.dataElementLabel = dataElementLabel; }
+    public void setDataElementLabel(String dataElementLabel) {
+        this.dataElementLabel = dataElementLabel;
+    }
 
-    public String getMultipleChoice() { return this.multipleChoice; }
+    public String getMultipleChoice() {
+        return this.multipleChoice;
+    }
 
-    public void setMultipleChoice(String multipleChoice) { this.multipleChoice = multipleChoice; }
+    public void setMultipleChoice(String multipleChoice) {
+        this.multipleChoice = multipleChoice;
+    }
 
-    public String getRequired() { return this.required; }
+    public String getRequired() {
+        return this.required;
+    }
 
-    public void setRequired(String required) { this.required = required; }
+    public void setRequired(String required) {
+        this.required = required;
+    }
 
     public String getIcd11Code() {
         return icd11Code;

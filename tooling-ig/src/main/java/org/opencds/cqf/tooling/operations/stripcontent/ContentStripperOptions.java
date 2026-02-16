@@ -8,19 +8,19 @@ import java.util.Set;
 // Intentionally package-private. This is a package-internal API for ContentStripper
 class ContentStripperOptions {
     static final String CQL_CONTENT_TYPE = "text/cql";
-    static final String ELM_JSON_CONTENT_TYPE =  "application/elm+json";
+    static final String ELM_JSON_CONTENT_TYPE = "application/elm+json";
     static final String ELM_XML_CONTENT_TYPE = "application/elm+xml";
 
-    static final Set<String> DEFAULT_STRIPPED_CONTENT_TYPES = new HashSet<>(
-            Arrays.asList(ELM_JSON_CONTENT_TYPE, ELM_XML_CONTENT_TYPE));
+    static final Set<String> DEFAULT_STRIPPED_CONTENT_TYPES =
+            new HashSet<>(Arrays.asList(ELM_JSON_CONTENT_TYPE, ELM_XML_CONTENT_TYPE));
 
-    static final Set<String> DEFAULT_STRIPPED_EXTENSION_URLS = new HashSet<>(
-            Arrays.asList("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
-                    "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement",
-                    "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
-                    "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-                    "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
-                    "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions"));
+    static final Set<String> DEFAULT_STRIPPED_EXTENSION_URLS = new HashSet<>(Arrays.asList(
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement",
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+            "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions"));
 
     private ContentStripperOptions() {
         // Intentionally empty, forces use of the static factory
@@ -31,15 +31,18 @@ class ContentStripperOptions {
     }
 
     private File cqlExportDirectory;
+
     public File cqlExportDirectory() {
         return cqlExportDirectory;
     }
+
     public ContentStripperOptions cqlExportDirectory(File cqlExportDirectory) {
         this.cqlExportDirectory = cqlExportDirectory;
         return this;
     }
 
     private Set<String> strippedContentTypes = DEFAULT_STRIPPED_CONTENT_TYPES;
+
     public Set<String> strippedContentTypes() {
         return this.strippedContentTypes;
     }
@@ -50,6 +53,7 @@ class ContentStripperOptions {
     }
 
     private Set<String> strippedExtensionUrls = DEFAULT_STRIPPED_EXTENSION_URLS;
+
     public Set<String> strippedExtensionUrls() {
         return this.strippedExtensionUrls;
     }
@@ -58,5 +62,4 @@ class ContentStripperOptions {
         this.strippedExtensionUrls = strippedExtensionUrls;
         return this;
     }
-  
 }

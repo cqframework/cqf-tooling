@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -53,12 +52,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Transforms Vmr data to the FHIR equivalent.
- * 
+ *
  * @author Joshua Reynolds
  * @since 2021-04-05
  */
 public class VmrToFhirTransformer {
-    private static final String ConditionClinicalStatusCodesUrl = "http://terminology.hl7.org/CodeSystem/condition-clinical";
+    private static final String ConditionClinicalStatusCodesUrl =
+            "http://terminology.hl7.org/CodeSystem/condition-clinical";
     private static final Logger logger = LoggerFactory.getLogger(VmrToFhirTransformer.class);
     private Patient patient = new Patient();
 
@@ -127,14 +127,16 @@ public class VmrToFhirTransformer {
             });
         }
         if (statements.getSubstanceAdministrationEvents() != null) {
-            statements.getSubstanceAdministrationEvents().getSubstanceAdministrationEvent().stream().forEach(substanceAdministrationEvent -> {
-                result.addAll(transform(substanceAdministrationEvent));
-            });
+            statements.getSubstanceAdministrationEvents().getSubstanceAdministrationEvent().stream()
+                    .forEach(substanceAdministrationEvent -> {
+                        result.addAll(transform(substanceAdministrationEvent));
+                    });
         }
         if (statements.getSubstanceAdministrationOrders() != null) {
-            statements.getSubstanceAdministrationOrders().getSubstanceAdministrationOrder().stream().forEach(subStanceAdministrationOrder -> {
-                result.addAll(transform(subStanceAdministrationOrder));
-            });
+            statements.getSubstanceAdministrationOrders().getSubstanceAdministrationOrder().stream()
+                    .forEach(subStanceAdministrationOrder -> {
+                        result.addAll(transform(subStanceAdministrationOrder));
+                    });
         }
         return result;
     }
@@ -216,7 +218,8 @@ public class VmrToFhirTransformer {
             CD focusCoding = observationOrder.getObservationFocus();
             ServiceRequest serviceRequest = new ServiceRequest();
             serviceRequest.setId(new IdType(UUID.randomUUID().toString()));
-            serviceRequest.setCode(new CodeableConcept(new Coding(focusCoding.getCodeSystem(), focusCoding.getCode(), focusCoding.getDisplayName())));
+            serviceRequest.setCode(new CodeableConcept(
+                    new Coding(focusCoding.getCodeSystem(), focusCoding.getCode(), focusCoding.getDisplayName())));
             serviceRequest.setSubject(new Reference(patient));
             return serviceRequest;
         }
@@ -239,14 +242,18 @@ public class VmrToFhirTransformer {
             CD focusCoding = observationResult.getObservationFocus();
             Observation observation = new Observation();
             observation.setId(new IdType(UUID.randomUUID().toString()));
-            observation.setCode(new CodeableConcept(new Coding(focusCoding.getCodeSystem(), focusCoding.getCode(), focusCoding.getDisplayName())));
+            observation.setCode(new CodeableConcept(
+                    new Coding(focusCoding.getCodeSystem(), focusCoding.getCode(), focusCoding.getDisplayName())));
             observation.setSubject(new Reference(patient));
             return observation;
         }
-        if (observationResult.getInterpretation() != null && !observationResult.getInterpretation().isEmpty()) {
+        if (observationResult.getInterpretation() != null
+                && !observationResult.getInterpretation().isEmpty()) {
             logger.debug("transforming Interpretation...");
             List<CodeableConcept> concepts = new ArrayList<CodeableConcept>();
-            observationResult.getInterpretation().stream().forEach(concept -> concepts.add(new CodeableConcept(new Coding(concept.getCodeSystem(), concept.getCode(), concept.getDisplayName()))));
+            observationResult.getInterpretation().stream()
+                    .forEach(concept -> concepts.add(new CodeableConcept(
+                            new Coding(concept.getCodeSystem(), concept.getCode(), concept.getDisplayName()))));
             Observation observation = new Observation();
             observation.setId(new IdType(UUID.randomUUID().toString()));
             observation.setInterpretation(concepts);
@@ -268,7 +275,8 @@ public class VmrToFhirTransformer {
             CD problemCoding = observationValue.getConcept();
             Observation observation = new Observation();
             observation.setId(new IdType(UUID.randomUUID().toString()));
-            observation.setValue(new CodeableConcept(new Coding(problemCoding.getCodeSystem(), problemCoding.getCode(), problemCoding.getDisplayName())));
+            observation.setValue(new CodeableConcept(new Coding(
+                    problemCoding.getCodeSystem(), problemCoding.getCode(), problemCoding.getDisplayName())));
             observation.setSubject(new Reference(patient));
             return observation;
         }
@@ -285,7 +293,6 @@ public class VmrToFhirTransformer {
             return observation;
         }
         return null;
-         
     }
 
     /**
@@ -300,7 +307,8 @@ public class VmrToFhirTransformer {
             CD problemCoding = problem.getProblemCode();
             Condition condition = new Condition();
             condition.setId(new IdType(UUID.randomUUID().toString()));
-            condition.setCode(new CodeableConcept(new Coding(problemCoding.getCodeSystem(), problemCoding.getCode(), problemCoding.getDisplayName())));
+            condition.setCode(new CodeableConcept(new Coding(
+                    problemCoding.getCodeSystem(), problemCoding.getCode(), problemCoding.getDisplayName())));
             condition.setSubject(new Reference(patient));
             return condition;
         }
@@ -309,8 +317,10 @@ public class VmrToFhirTransformer {
             CD problemCoding = problem.getProblemStatus();
             Condition condition = new Condition();
             condition.setId(new IdType(UUID.randomUUID().toString()));
-            if (problemCoding.getCode() != null && problemCoding.getCode().toLowerCase().equals("active")) {
-                condition.setClinicalStatus(new CodeableConcept(new Coding(ConditionClinicalStatusCodesUrl, "active", problemCoding.getDisplayName())));
+            if (problemCoding.getCode() != null
+                    && problemCoding.getCode().toLowerCase().equals("active")) {
+                condition.setClinicalStatus(new CodeableConcept(
+                        new Coding(ConditionClinicalStatusCodesUrl, "active", problemCoding.getDisplayName())));
             }
             condition.setSubject(new Reference(patient));
             return condition;
@@ -389,7 +399,8 @@ public class VmrToFhirTransformer {
             }
             if (substanceAdministrationOrder.getId() != null) {
                 MedicationRequest medicationRequest = new MedicationRequest();
-                medicationRequest.setId(new IdType(substanceAdministrationOrder.getId().toString()));
+                medicationRequest.setId(
+                        new IdType(substanceAdministrationOrder.getId().toString()));
                 medicationRequest.setSubject(new Reference(patient));
             }
         }
@@ -405,7 +416,8 @@ public class VmrToFhirTransformer {
         logger.debug("transforming AdministrableSubstance...");
         if (substance.getSubstanceCode() != null) {
             CD substanceCode = substance.getSubstanceCode();
-            return new CodeableConcept(new Coding(substanceCode.getCodeSystem(), substanceCode.getCode(), substanceCode.getDisplayName()));
+            return new CodeableConcept(
+                    new Coding(substanceCode.getCodeSystem(), substanceCode.getCode(), substanceCode.getDisplayName()));
         }
         return null;
     }
@@ -445,15 +457,14 @@ public class VmrToFhirTransformer {
             return null;
         }
 
-
         if (operand instanceof String) {
             try {
                 DateTimeFormatter dtf = new DateTimeFormatterBuilder()
-                    .appendValue(ChronoField.INSTANT_SECONDS, 1, 19, SignStyle.NEVER)
-                    .appendValue(ChronoField.MILLI_OF_SECOND, 3)
-                    .appendOffsetId()
-                    .toFormatter();
- 
+                        .appendValue(ChronoField.INSTANT_SECONDS, 1, 19, SignStyle.NEVER)
+                        .appendValue(ChronoField.MILLI_OF_SECOND, 3)
+                        .appendOffsetId()
+                        .toFormatter();
+
                 ZonedDateTime zdt = ZonedDateTime.parse(operand, dtf);
                 return Date.from(zdt.toInstant());
 
@@ -468,10 +479,12 @@ public class VmrToFhirTransformer {
     private AdministrativeGender transform(CD gender) {
         logger.debug("transforming Gender...");
         switch (gender.getCode()) {
-            case "M" : return AdministrativeGender.fromCode("male");
-            case "F" : return AdministrativeGender.fromCode("female");
-            default : throw new RuntimeException("Unknown gender code: " + gender.getCode());
+            case "M":
+                return AdministrativeGender.fromCode("male");
+            case "F":
+                return AdministrativeGender.fromCode("female");
+            default:
+                throw new RuntimeException("Unknown gender code: " + gender.getCode());
         }
     }
-    
 }

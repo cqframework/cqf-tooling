@@ -1,10 +1,9 @@
 package org.opencds.cqf.tooling.cql.exception;
 
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 
 /**
  * Custom exception to pass the list of errors returned by the translator to calling methods.
@@ -15,7 +14,7 @@ public class CqlTranslatorException extends Exception implements Serializable {
     /**
      * Using Set to avoid duplicate entries.
      */
-    private final transient List<CqlCompilerException>  errors = new ArrayList<>();
+    private final transient List<CqlCompilerException> errors = new ArrayList<>();
 
     public CqlTranslatorException(Exception e) {
         super("CQL Translation Error(s): " + e.getMessage());
@@ -28,7 +27,7 @@ public class CqlTranslatorException extends Exception implements Serializable {
 
     public CqlTranslatorException(List<String> errorsInput, CqlCompilerException.ErrorSeverity errorSeverity) {
         super("CQL Translation Error(s)");
-        for (String error : errorsInput){
+        for (String error : errorsInput) {
             errors.add(new CqlCompilerException(error, errorSeverity));
         }
     }

@@ -1,5 +1,8 @@
 package org.opencds.cqf.tooling.measure.r4;
 
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -16,10 +19,6 @@ import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
-
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class R4MeasureProcessor extends MeasureProcessor {
 
@@ -47,7 +46,8 @@ public class R4MeasureProcessor extends MeasureProcessor {
         If the path is not specified, or is not a known directory, process
         all known measure resources
     */
-    protected List<String> refreshMeasures(String measurePath, String measureOutputDirectory, IOUtils.Encoding encoding) {
+    protected List<String> refreshMeasures(
+            String measurePath, String measureOutputDirectory, IOUtils.Encoding encoding) {
         var file = measurePath != null ? new File(measurePath) : null;
         var fileMap = new HashMap<String, String>();
         var measures = new ArrayList<org.hl7.fhir.r5.model.Measure>();
@@ -56,15 +56,13 @@ public class R4MeasureProcessor extends MeasureProcessor {
             for (var path : ResourceDiscovery.getMeasurePaths(params.fhirContext)) {
                 loadMeasure(fileMap, measures, new File(path));
             }
-        }
-        else if (file.isDirectory()) {
+        } else if (file.isDirectory()) {
             for (var libraryFile : Objects.requireNonNull(file.listFiles())) {
-                if(IOUtils.isXMLOrJson(measurePath, libraryFile.getName())) {
+                if (IOUtils.isXMLOrJson(measurePath, libraryFile.getName())) {
                     loadMeasure(fileMap, measures, libraryFile);
                 }
             }
-        }
-        else {
+        } else {
             loadMeasure(fileMap, measures, file);
         }
 
@@ -78,8 +76,7 @@ public class R4MeasureProcessor extends MeasureProcessor {
             }
             String filePath;
             IOUtils.Encoding fileEncoding;
-            if (fileMap.containsKey(refreshedMeasure.getId()))
-            {
+            if (fileMap.containsKey(refreshedMeasure.getId())) {
                 filePath = fileMap.get(refreshedMeasure.getId());
                 fileEncoding = IOUtils.getEncoding(filePath);
             } else {
@@ -118,7 +115,8 @@ public class R4MeasureProcessor extends MeasureProcessor {
         return refreshedMeasureNames;
     }
 
-    private void loadMeasure(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Measure> measures, File measureFile) {
+    private void loadMeasure(
+            Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Measure> measures, File measureFile) {
         try {
             var resource = FormatUtilities.loadFile(measureFile.getAbsolutePath());
             var versionConvertor = new VersionConvertor_40_50(new BaseAdvisor_40_50());
@@ -126,7 +124,8 @@ public class R4MeasureProcessor extends MeasureProcessor {
             fileMap.put(measure.getId(), measureFile.getAbsolutePath());
             measures.add(measure);
         } catch (Exception ex) {
-            logMessage(String.format("Error reading measure: %s. Error: %s", measureFile.getAbsolutePath(), ex.getMessage()));
+            logMessage(String.format(
+                    "Error reading measure: %s. Error: %s", measureFile.getAbsolutePath(), ex.getMessage()));
         }
     }
 
@@ -153,8 +152,11 @@ public class R4MeasureProcessor extends MeasureProcessor {
         return resources;
     }
 
-    private Measure refreshGeneratedContent(Measure measure, MeasureRefreshProcessor processor,
-                                            LibraryManager libraryManager, CqlTranslatorOptions cqlTranslatorOptions) {
+    private Measure refreshGeneratedContent(
+            Measure measure,
+            MeasureRefreshProcessor processor,
+            LibraryManager libraryManager,
+            CqlTranslatorOptions cqlTranslatorOptions) {
         var libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
         var primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
 
@@ -165,12 +167,13 @@ public class R4MeasureProcessor extends MeasureProcessor {
 
         var hasSevereErrors = CqlProcessor.hasSevereErrors(errors);
 
-        //refresh measures without severe errors:
+        // refresh measures without severe errors:
         if (!hasSevereErrors) {
             if (params.includePopulationDataRequirements != null) {
                 processor.includePopulationDataRequirements = params.includePopulationDataRequirements;
             }
-            return processor.refreshMeasure(measure, libraryManager, compiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
+            return processor.refreshMeasure(
+                    measure, libraryManager, compiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
         }
 
         return measure;
@@ -180,8 +183,7 @@ public class R4MeasureProcessor extends MeasureProcessor {
     public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
         if (params.parentContext != null) {
             initialize(params.parentContext);
-        }
-        else {
+        } else {
             initializeFromIni(params.ini);
         }
 

@@ -2,9 +2,7 @@ package org.opencds.cqf.tooling.modelinfo.qicore;
 
 import java.util.HashMap;
 import java.util.HashSet;
-
 import org.opencds.cqf.tooling.modelinfo.ClassInfoSettings;
-
 
 @SuppressWarnings("serial")
 class QICoreClassInfoSettings extends ClassInfoSettings {
@@ -54,8 +52,7 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
                     put("QICore.xhtml", "System.String");
                 }
             };
-        }
-        else {
+        } else {
             this.primitiveTypeMappings = new HashMap<String, String>() {
                 {
                     put("FHIR.base64Binary", "System.String");
@@ -135,8 +132,7 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
                     put("QICore.Ratio", "System.Ratio");
                 }
             };
-        }
-        else {
+        } else {
             this.cqlTypeMappings = new HashMap<String, String>() {
                 {
                     put("FHIR.xsd:base64Binary", "System.String");
@@ -191,32 +187,32 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
             };
         }
 
-/*
-        this.typeNameMappings = new HashMap<String, String>() {
-            {
-                put("CarePlanProfile", "CarePlan");
-                put("DiagnosticReportProfileLaboratoryReporting", "DiagnosticReport"); // TODO: Support synonyms?
-                put("DiagnosticReportProfileNoteExchange", "DiagnosticReportNote");
-                put("DocumentReferenceProfile", "DocumentReference");
-                put("EncounterProfile", "Encounter");
-                put("GoalProfile", "Goal");
-                put("ImmunizationProfile", "Immunizataion");
-                put("ImplantableDeviceProfile", "Device"); // TODO: Support synonyms?
-                put("LaboratoryResultObservationProfile", "Observation"); // TODO: Support synonyms?
-                put("MedicationProfile", "Medication");
-                put("MedicationRequestProfile", "MedicationRequest");
-                put("OrganizationProfile", "Organization");
-                put("PatientProfile", "Patient");
-                put("PediatricBMIforAgeObservationProfile", "PediatricBMIforAgeObservation");
-                put("PediatricWeightForHeightObservationProfile", "PediatricWeightForHeightObservation");
-                put("PractitionerProfile", "Practitioner");
-                put("PractitionerRoleProfile", "PractitionerRole");
-                put("ProcedureProfile", "Procedure");
-                put("PulseOximetryProfile", "PulseOximetry");
-                put("SmokingStatusProfile", "SmokingStatus");
-            }
-        };
- */
+        /*
+               this.typeNameMappings = new HashMap<String, String>() {
+                   {
+                       put("CarePlanProfile", "CarePlan");
+                       put("DiagnosticReportProfileLaboratoryReporting", "DiagnosticReport"); // TODO: Support synonyms?
+                       put("DiagnosticReportProfileNoteExchange", "DiagnosticReportNote");
+                       put("DocumentReferenceProfile", "DocumentReference");
+                       put("EncounterProfile", "Encounter");
+                       put("GoalProfile", "Goal");
+                       put("ImmunizationProfile", "Immunizataion");
+                       put("ImplantableDeviceProfile", "Device"); // TODO: Support synonyms?
+                       put("LaboratoryResultObservationProfile", "Observation"); // TODO: Support synonyms?
+                       put("MedicationProfile", "Medication");
+                       put("MedicationRequestProfile", "MedicationRequest");
+                       put("OrganizationProfile", "Organization");
+                       put("PatientProfile", "Patient");
+                       put("PediatricBMIforAgeObservationProfile", "PediatricBMIforAgeObservation");
+                       put("PediatricWeightForHeightObservationProfile", "PediatricWeightForHeightObservation");
+                       put("PractitionerProfile", "Practitioner");
+                       put("PractitionerRoleProfile", "PractitionerRole");
+                       put("ProcedureProfile", "Procedure");
+                       put("PulseOximetryProfile", "PulseOximetry");
+                       put("SmokingStatusProfile", "SmokingStatus");
+                   }
+               };
+        */
 
         this.primaryCodePath = new HashMap<String, String>() {
             {
@@ -291,7 +287,7 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
                 put("ProcedureNotDone", "code");
                 put("ProcedureRequest", "code");
                 put("Questionnaire", "name");
-                //put("QuestionnaireResponse", ""); // Not clear what the primary code path should be...
+                // put("QuestionnaireResponse", ""); // Not clear what the primary code path should be...
                 put("ServiceRequest", "code");
                 put("ServiceNotRequested", "code");
                 put("RelatedPerson", "relationship");
@@ -306,7 +302,7 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
                 put("TaskNotDone", "code");
                 put("TaskRejected", "code");
                 put("USCoreImplantableDeviceProfile", "type");
-                //put("USCoreLaboratoryResultObservationProfile", "code"); // v4.1.1
+                // put("USCoreLaboratoryResultObservationProfile", "code"); // v4.1.1
                 put("USCorePediatricBMIforAgeObservationProfile", "code");
                 put("USCorePediatricWeightForHeightObservationProfile", "code");
                 put("USCoreObservationSexualOrientationProfile", "code"); // v5.0.0

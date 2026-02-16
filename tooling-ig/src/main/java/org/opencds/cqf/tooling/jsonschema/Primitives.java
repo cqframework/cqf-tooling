@@ -1,15 +1,15 @@
 package org.opencds.cqf.tooling.jsonschema;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Primitives {
 
-    // This class provides a JSONSchema scaffolding map for FHIR primitive types (http://hl7.org/fhir/STU3/datatypes.html)
+    // This class provides a JSONSchema scaffolding map for FHIR primitive types
+    // (http://hl7.org/fhir/STU3/datatypes.html)
     // Map<[FHIR type name] -> [JSONSchema]>
 
     private static final int INT_MIN = -2147483648;
@@ -100,13 +100,18 @@ public class Primitives {
 
     private static JsonObject stu3DateTimeSchema() {
         JsonObject ret = stu3StringSchema();
-        ret.add("pattern", new JsonPrimitive("^\\d{4}(-\\d{2}(-\\d{2}(T\\d{2}(:\\d{2}(:\\d{2}(\\.\\d{3}(Z|([+-]\\d{2}:\\d{2})?)?)?)?)?)?)?)?$"));
+        ret.add(
+                "pattern",
+                new JsonPrimitive(
+                        "^\\d{4}(-\\d{2}(-\\d{2}(T\\d{2}(:\\d{2}(:\\d{2}(\\.\\d{3}(Z|([+-]\\d{2}:\\d{2})?)?)?)?)?)?)?)?$"));
         return ret;
     }
 
     private static JsonObject stu3InstantSchema() {
         JsonObject ret = stu3StringSchema();
-        ret.add("pattern", new JsonPrimitive("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?(Z|([+-]\\d{2}:\\d{2}))$"));
+        ret.add(
+                "pattern",
+                new JsonPrimitive("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?(Z|([+-]\\d{2}:\\d{2}))$"));
         return ret;
     }
 

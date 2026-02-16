@@ -7,8 +7,7 @@ import org.opencds.cqf.tooling.processor.argument.ValidateArgumentProcessor;
 
 public class ValidateOperation extends Operation {
 
-    public ValidateOperation() {
-    }
+    public ValidateOperation() {}
 
     @Override
     public void execute(String[] args) {
@@ -16,8 +15,7 @@ public class ValidateOperation extends Operation {
         ValidateParameters params = null;
         try {
             params = new ValidateArgumentProcessor().parseAndConvert(args);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }

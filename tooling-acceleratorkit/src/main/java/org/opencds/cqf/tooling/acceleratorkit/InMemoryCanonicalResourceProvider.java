@@ -1,9 +1,8 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
+import java.util.*;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Resource;
-
-import java.util.*;
 
 public class InMemoryCanonicalResourceProvider<T extends Resource> implements CanonicalResourceProvider<T> {
 

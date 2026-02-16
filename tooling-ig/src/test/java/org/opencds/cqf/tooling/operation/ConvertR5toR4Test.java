@@ -1,14 +1,13 @@
 package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 
 public class ConvertR5toR4Test {
 
@@ -27,8 +26,7 @@ public class ConvertR5toR4Test {
             var r4Context = FhirContext.forR4();
             var parsed = r4Context.newJsonParser().parseResource(bundleJson);
 
-            Assert.assertTrue(parsed instanceof Bundle,
-                    "Output resource should be an R4 Bundle.");
+            Assert.assertTrue(parsed instanceof Bundle, "Output resource should be an R4 Bundle.");
 
             return (Bundle) parsed;
         } catch (IOException e) {
@@ -55,13 +53,15 @@ public class ConvertR5toR4Test {
             Assert.assertNotNull(actualFiles, "Conversion folder should not be null.");
             Assert.assertEquals(actualFiles.length, 1, "Conversion folder should only have a single file.");
             var expectedFileName = outputFile + ".json";
-            Assert.assertEquals(actualFiles[0].getName(), expectedFileName,
+            Assert.assertEquals(
+                    actualFiles[0].getName(),
+                    expectedFileName,
                     "Converted file name should match the expected output file name.");
 
             var bundle = parseR4BundleFromFile(actualFiles[0]);
             Assert.assertNotNull(bundle);
-            Assert.assertEquals(bundle.getEntry().size(), 1,
-                    "Bundle should contain a single entry for a single source resource.");
+            Assert.assertEquals(
+                    bundle.getEntry().size(), 1, "Bundle should contain a single entry for a single source resource.");
         } finally {
             try {
                 IOUtils.deleteDirectory(outputPath);
@@ -90,14 +90,13 @@ public class ConvertR5toR4Test {
             var resultDir = new File(outputPath);
             var actualFiles = resultDir.listFiles((dir, name) -> name.endsWith(".json"));
             Assert.assertNotNull(actualFiles, "Conversion folder should not be null.");
-            Assert.assertEquals(actualFiles.length, 1,
-                    "Conversion should produce a single R4 bundle file.");
+            Assert.assertEquals(actualFiles.length, 1, "Conversion should produce a single R4 bundle file.");
 
             var bundleFile = actualFiles[0];
             var bundle = parseR4BundleFromFile(bundleFile);
             Assert.assertNotNull(bundle);
-            Assert.assertEquals(bundle.getEntry().size(), expectedCount,
-                    "Bundle should contain one entry per source resource.");
+            Assert.assertEquals(
+                    bundle.getEntry().size(), expectedCount, "Bundle should contain one entry per source resource.");
         } finally {
             try {
                 IOUtils.deleteDirectory(outputPath);
@@ -110,45 +109,45 @@ public class ConvertR5toR4Test {
     @Test
     public void testExecute_ConvertSingleResourceCodeSystem() {
         convertSingleResource(
-                getFullPath("src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/code-system"),
+                getFullPath(
+                        "src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/code-system"),
                 getFullPath("target/test-output/convertR5toR4SingleResourceResults/single-resource/code-system"),
-                "r4-code-system-action-code"
-        );
+                "r4-code-system-action-code");
     }
 
     @Test
     public void testExecute_ConvertSingleResourceConceptMap() {
         convertSingleResource(
-                getFullPath("src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/concept-map"),
+                getFullPath(
+                        "src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/concept-map"),
                 getFullPath("target/test-output/convertR5toR4SingleResourceResults/single-resource/concept-map"),
-                "r4-concept-map-observation-status"
-        );
+                "r4-concept-map-observation-status");
     }
 
     @Test
     public void testExecute_ConvertSingleResourceStructuredDefinition() {
         convertSingleResource(
-                getFullPath("src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/structured-definition"),
-                getFullPath("target/test-output/convertR5toR4SingleResourceResults/single-resource/structured-definition"),
-                "r4-structured-definition-code"
-        );
+                getFullPath(
+                        "src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/structured-definition"),
+                getFullPath(
+                        "target/test-output/convertR5toR4SingleResourceResults/single-resource/structured-definition"),
+                "r4-structured-definition-code");
     }
 
     @Test
     public void testExecute_ConvertSingleResourceValueset() {
         convertSingleResource(
-                getFullPath("src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/valueset"),
+                getFullPath(
+                        "src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/valueset"),
                 getFullPath("target/test-output/convertR5toR4SingleResourceResults/single-resource/valueset"),
-                "r4-valueset-event-status"
-        );
+                "r4-valueset-event-status");
     }
 
     @Test
     public void testExecute_ConvertMultipleResources() {
         convertMultipleResources(
                 getFullPath("src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/multiple-resources"),
-                getFullPath("target/test-output/convertR5toR4SingleResourceResults/multiple-resources")
-        );
+                getFullPath("target/test-output/convertR5toR4SingleResourceResults/multiple-resources"));
     }
 
     @Test
@@ -193,7 +192,8 @@ public class ConvertR5toR4Test {
 
     @Test(expectedExceptions = Exception.class)
     public void testExecute_InvalidEncodingThrowsException() {
-        var sourceDirectory = getFullPath("src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/code-system");
+        var sourceDirectory = getFullPath(
+                "src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/single-resource/code-system");
         var outputDirectory = getFullPath("target/test-output/convertR5toR4SingleResourceResults/invalid-encoding");
 
         IOUtils.initializeDirectory(outputDirectory);
@@ -218,7 +218,8 @@ public class ConvertR5toR4Test {
 
     @Test(expectedExceptions = Exception.class)
     public void testExecute_InvalidPathToDirectoryThrowsException() {
-        var invalidDirectory = getFullPath("src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/does-not-exist");
+        var invalidDirectory =
+                getFullPath("src/test/resources/org/opencds/cqf/tooling/operation/convertR5toR4/does-not-exist");
 
         var args = new String[3];
         args[0] = "-ConvertR5toR4";

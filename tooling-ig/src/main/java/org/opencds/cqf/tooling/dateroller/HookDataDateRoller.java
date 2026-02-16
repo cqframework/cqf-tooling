@@ -56,7 +56,8 @@ public class HookDataDateRoller {
                 return;
             }
             context.remove(DRAFT_ORDERS);
-            JsonElement newDraftOrders = JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource));
+            JsonElement newDraftOrders =
+                    JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource));
             draftOrders = newDraftOrders.getAsJsonObject();
             context.add(DRAFT_ORDERS, draftOrders);
         }
@@ -70,7 +71,8 @@ public class HookDataDateRoller {
                 if (!prefetch.get(itemNo).isJsonNull()) {
                     item = prefetch.getAsJsonObject(itemNo);
                     IBaseResource resource = item.has("resource")
-                            ? resourceParser.parseResource(item.getAsJsonObject("resource").toString())
+                            ? resourceParser.parseResource(
+                                    item.getAsJsonObject("resource").toString())
                             : resourceParser.parseResource(item.toString());
                     if (resource != null) {
                         if (resource.fhirType().equalsIgnoreCase("bundle")) {
@@ -84,15 +86,16 @@ public class HookDataDateRoller {
                         addUpdatedJsonObject(resource, prefetch, itemNo);
                     }
                 }
-            }
-            else {
+            } else {
                 logger.warn("Prefetch is missing {} - setting to null", itemNo);
                 prefetch.add(itemNo, null);
             }
-       }
+        }
     }
 
-    public void addUpdatedJsonObject(IBaseResource resource, JsonObject objectToAddTo, String objectName){
-        objectToAddTo.add(objectName, JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource)));
+    public void addUpdatedJsonObject(IBaseResource resource, JsonObject objectToAddTo, String objectName) {
+        objectToAddTo.add(
+                objectName,
+                JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource)));
     }
 }

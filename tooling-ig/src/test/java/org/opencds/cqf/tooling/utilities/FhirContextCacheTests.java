@@ -2,10 +2,9 @@ package org.opencds.cqf.tooling.utilities;
 
 import static org.testng.Assert.assertEquals;
 
-import org.testng.annotations.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.testng.annotations.Test;
 
 public class FhirContextCacheTests {
 

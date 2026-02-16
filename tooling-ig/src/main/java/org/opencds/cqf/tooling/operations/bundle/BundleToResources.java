@@ -1,7 +1,9 @@
 package org.opencds.cqf.tooling.operations.bundle;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.BundleUtil;
+import jakarta.annotation.Nonnull;
 import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.operations.ExecutableOperation;
@@ -10,24 +12,36 @@ import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.BundleUtil;
-import jakarta.annotation.Nonnull;
-
 @Operation(name = "BundleToResources")
 public class BundleToResources implements ExecutableOperation {
-    @OperationParam(alias = { "ptb", "pathtobundle" }, setter = "setPathToBundle", required = true,
+    @OperationParam(
+            alias = {"ptb", "pathtobundle"},
+            setter = "setPathToBundle",
+            required = true,
             description = "Path to the bundle to decompose (required)")
     private String pathToBundle;
-    @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json",
-            description = "The file format to be used for representing the resulting resources { json, xml } (default json)")
+
+    @OperationParam(
+            alias = {"e", "encoding"},
+            setter = "setEncoding",
+            defaultValue = "json",
+            description =
+                    "The file format to be used for representing the resulting resources { json, xml } (default json)")
     private String encoding;
-    @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4",
+
+    @OperationParam(
+            alias = {"v", "version"},
+            setter = "setVersion",
+            defaultValue = "r4",
             description = "FHIR version { stu3, r4, r5 } (default r4)")
     private String version;
-    @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath",
+
+    @OperationParam(
+            alias = {"op", "outputPath"},
+            setter = "setOutputPath",
             defaultValue = "src/main/resources/org/opencds/cqf/tooling/bundle/output",
-            description = "The directory path to which the resource files should be written (default src/main/resources/org/opencds/cqf/tooling/bundle/output)")
+            description =
+                    "The directory path to which the resource files should be written (default src/main/resources/org/opencds/cqf/tooling/bundle/output)")
     private String outputPath;
 
     @Override
@@ -38,11 +52,12 @@ public class BundleToResources implements ExecutableOperation {
             throw new IllegalArgumentException("Could not find Bundle at path: " + pathToBundle);
         }
         if (possibleBundle instanceof IBaseBundle) {
-            IOUtils.writeResources(bundleToResources(context, (IBaseBundle) possibleBundle),
+            IOUtils.writeResources(
+                    bundleToResources(context, (IBaseBundle) possibleBundle),
                     outputPath == null ? pathToBundle : outputPath,
-                    IOUtils.Encoding.parse(encoding), context);
-        }
-        else {
+                    IOUtils.Encoding.parse(encoding),
+                    context);
+        } else {
             throw new IllegalArgumentException("Expected a Bundle, found " + possibleBundle.fhirType());
         }
     }

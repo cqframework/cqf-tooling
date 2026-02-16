@@ -1,4 +1,3 @@
 package org.opencds.cqf.tooling.modelinfo.ig;
 
-public class IGModelInfoSettings {
-}
+public class IGModelInfoSettings {}

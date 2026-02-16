@@ -1,9 +1,8 @@
 package org.opencds.cqf.tooling.packaging;
 
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.util.Set;
 
 public class TestPackage<G extends IBaseResource, B extends IBaseBundle> {
     G group;

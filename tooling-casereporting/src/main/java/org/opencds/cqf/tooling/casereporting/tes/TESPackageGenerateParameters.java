@@ -1,8 +1,7 @@
 package org.opencds.cqf.tooling.casereporting.tes;
 
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
 import java.util.Set;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 public class TESPackageGenerateParameters {
     public String version; // -version (-v)

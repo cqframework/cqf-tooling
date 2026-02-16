@@ -1,15 +1,23 @@
 package org.opencds.cqf.tooling.common;
 
-
 public class SoftwareSystem {
     protected String name;
-    public String getName() { return this.name; }
+
+    public String getName() {
+        return this.name;
+    }
 
     protected String version;
-    public String getVersion() { return this.version; }
+
+    public String getVersion() {
+        return this.version;
+    }
 
     protected String manufacturer;
-    public String getManufacturer() { return this.manufacturer; }
+
+    public String getManufacturer() {
+        return this.manufacturer;
+    }
 
     public SoftwareSystem(String name, String version, String manufacturer) {
         this.name = name;

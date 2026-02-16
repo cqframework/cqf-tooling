@@ -2,6 +2,12 @@ package org.opencds.cqf.tooling.library;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -22,13 +28,6 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Pattern;
 
 public class LibraryProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
@@ -54,15 +53,44 @@ public class LibraryProcessor extends BaseProcessor {
         }
     }
 
-    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) throws IOException {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+    public List<String> refreshIgLibraryContent(
+            BaseProcessor parentContext,
+            Encoding outputEncoding,
+            Boolean versioned,
+            FhirContext fhirContext,
+            Boolean shouldApplySoftwareSystemStamp)
+            throws IOException {
+        return refreshIgLibraryContent(
+                parentContext, outputEncoding, null, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
 
-    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) throws IOException {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, libraryOutputDirectory, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+    public List<String> refreshIgLibraryContent(
+            BaseProcessor parentContext,
+            Encoding outputEncoding,
+            String libraryOutputDirectory,
+            Boolean versioned,
+            FhirContext fhirContext,
+            Boolean shouldApplySoftwareSystemStamp)
+            throws IOException {
+        return refreshIgLibraryContent(
+                parentContext,
+                outputEncoding,
+                null,
+                libraryOutputDirectory,
+                versioned,
+                fhirContext,
+                shouldApplySoftwareSystemStamp);
     }
 
-    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryPath, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) throws IOException {
+    public List<String> refreshIgLibraryContent(
+            BaseProcessor parentContext,
+            Encoding outputEncoding,
+            String libraryPath,
+            String libraryOutputDirectory,
+            Boolean versioned,
+            FhirContext fhirContext,
+            Boolean shouldApplySoftwareSystemStamp)
+            throws IOException {
         logger.info("[Refreshing Libraries]");
 
         LibraryProcessor libraryProcessor;
@@ -74,8 +102,8 @@ public class LibraryProcessor extends BaseProcessor {
                 libraryProcessor = new R4LibraryProcessor();
                 break;
             default:
-                throw new IllegalArgumentException(
-                        "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+                throw new IllegalArgumentException("Unknown fhir version: "
+                        + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
         if (libraryPath == null) {
@@ -108,9 +136,15 @@ public class LibraryProcessor extends BaseProcessor {
      * @param encoding    The encoding to use for reading and processing resources.
      * @param versioned   A boolean indicating whether to consider versioned resources.
      */
-    public void bundleLibraryDependencies(IBaseResource library, FhirContext fhirContext, Map<String, IBaseResource> resources,
-                                          Encoding encoding, boolean versioned) throws Exception {
-        Queue<Callable<Void>> bundleLibraryDependenciesTasks = bundleLibraryDependenciesTasks(library, fhirContext, resources, encoding, versioned);
+    public void bundleLibraryDependencies(
+            IBaseResource library,
+            FhirContext fhirContext,
+            Map<String, IBaseResource> resources,
+            Encoding encoding,
+            boolean versioned)
+            throws Exception {
+        Queue<Callable<Void>> bundleLibraryDependenciesTasks =
+                bundleLibraryDependenciesTasks(library, fhirContext, resources, encoding, versioned);
         ThreadUtils.executeTasks(bundleLibraryDependenciesTasks);
     }
 
@@ -126,21 +160,28 @@ public class LibraryProcessor extends BaseProcessor {
      * @return A queue of Callable tasks, each representing the bundling of a library dependency.
      * The Callable returns null (Void) and is meant for asynchronous execution.
      */
-    public Queue<Callable<Void>> bundleLibraryDependenciesTasks(IBaseResource library, FhirContext fhirContext, Map<String, IBaseResource> resources,
-                                                                Encoding encoding, boolean versioned) throws Exception {
+    public Queue<Callable<Void>> bundleLibraryDependenciesTasks(
+            IBaseResource library,
+            FhirContext fhirContext,
+            Map<String, IBaseResource> resources,
+            Encoding encoding,
+            boolean versioned)
+            throws Exception {
 
         Queue<Callable<Void>> returnTasks = new ConcurrentLinkedQueue<>();
 
         returnTasks.add(() -> {
             Set<String> missingDependencies = new HashSet<>();
-            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(library, fhirContext, true, versioned, missingDependencies);
+            Map<String, IBaseResource> dependencies =
+                    ResourceUtils.getDepLibraryResources(library, fhirContext, true, versioned, missingDependencies);
             for (IBaseResource resource : dependencies.values()) {
-                resources.putIfAbsent(resource.fhirType() + '/' + resource.getIdElement().getIdPart(), resource);
+                resources.putIfAbsent(
+                        resource.fhirType() + '/' + resource.getIdElement().getIdPart(), resource);
             }
 
             // TODO: Return missing dependencies as translator warnings...
 
-            //return statement needed for Callable<Void>
+            // return statement needed for Callable<Void>
             return null;
         });
         return returnTasks;
@@ -148,57 +189,62 @@ public class LibraryProcessor extends BaseProcessor {
 
     protected boolean versioned;
 
-
     // TODO: use this approach once the package operation is separated from the refresh operation
-//    protected Library refreshGeneratedContent(Library sourceLibrary) {
-//        String libraryName = sourceLibrary.getName();
-//        if (versioned) {
-//            libraryName += "-" + sourceLibrary.getVersion();
-//        }
-//        String fileName = libraryName + ".cql";
-//        Attachment attachment = null;
-//        try {
-//            attachment = loadFile(fileName);
-//        } catch (IOException e) {
-//            logMessage(String.format("Error loading CQL source for library %s", libraryName));
-//        }
-//
-//        if (attachment != null) {
-//            CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
-//            attachment.setUrlElement(null);
-//            if (info != null) {
-//                setLibraryType(sourceLibrary);
-//                sourceLibrary.getDataRequirement().clear();
-//                sourceLibrary.getDataRequirement().addAll(info.getDataRequirements());
-//                sourceLibrary.getRelatedArtifact().removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
-//                sourceLibrary.getRelatedArtifact().addAll(info.getRelatedArtifacts());
-//                sourceLibrary.getParameter().clear();
-//                sourceLibrary.getParameter().addAll(info.getParameters());
-//                getCqlProcessor().getCqlTranslatorOptions();
-//                setTranslatorOptions(sourceLibrary, getCqlProcessor().getCqlTranslatorOptions());
-//
-//                // Check for referenced CQL to be handled by publisher
-//                if (sourceLibrary.hasContent() && sourceLibrary.getContent().size() == 1
-//                        && sourceLibrary.getContentFirstRep().hasId() && sourceLibrary.getContentFirstRep().getId().startsWith("ig-loader")) {
-//                    return sourceLibrary;
-//                } else {
-//                    // Refresh content
-//                    sourceLibrary.getContent().clear();
-//                    sourceLibrary.getContent().add(attachment);
-//                    if (info.getElm() != null && emptyIfNull(getCqlProcessor().getCqlTranslatorOptions().getFormats()).contains(Format.XML)) {
-//                        sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
-//                    }
-//                    if (info.getJsonElm() != null && emptyIfNull(getCqlProcessor().getCqlTranslatorOptions().getFormats()).contains(Format.JSON)) {
-//                        sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
-//                    }
-//                }
-//            } else {
-//                logMessage(String.format("No cql info found for %s", fileName));
-//            }
-//        }
-//
-//        return sourceLibrary;
-//    }
+    //    protected Library refreshGeneratedContent(Library sourceLibrary) {
+    //        String libraryName = sourceLibrary.getName();
+    //        if (versioned) {
+    //            libraryName += "-" + sourceLibrary.getVersion();
+    //        }
+    //        String fileName = libraryName + ".cql";
+    //        Attachment attachment = null;
+    //        try {
+    //            attachment = loadFile(fileName);
+    //        } catch (IOException e) {
+    //            logMessage(String.format("Error loading CQL source for library %s", libraryName));
+    //        }
+    //
+    //        if (attachment != null) {
+    //            CqlProcessor.CqlSourceFileInformation info =
+    // getCqlProcessor().getFileInformation(attachment.getUrl());
+    //            attachment.setUrlElement(null);
+    //            if (info != null) {
+    //                setLibraryType(sourceLibrary);
+    //                sourceLibrary.getDataRequirement().clear();
+    //                sourceLibrary.getDataRequirement().addAll(info.getDataRequirements());
+    //                sourceLibrary.getRelatedArtifact().removeIf(n -> n.getType() ==
+    // RelatedArtifact.RelatedArtifactType.DEPENDSON);
+    //                sourceLibrary.getRelatedArtifact().addAll(info.getRelatedArtifacts());
+    //                sourceLibrary.getParameter().clear();
+    //                sourceLibrary.getParameter().addAll(info.getParameters());
+    //                getCqlProcessor().getCqlTranslatorOptions();
+    //                setTranslatorOptions(sourceLibrary, getCqlProcessor().getCqlTranslatorOptions());
+    //
+    //                // Check for referenced CQL to be handled by publisher
+    //                if (sourceLibrary.hasContent() && sourceLibrary.getContent().size() == 1
+    //                        && sourceLibrary.getContentFirstRep().hasId() &&
+    // sourceLibrary.getContentFirstRep().getId().startsWith("ig-loader")) {
+    //                    return sourceLibrary;
+    //                } else {
+    //                    // Refresh content
+    //                    sourceLibrary.getContent().clear();
+    //                    sourceLibrary.getContent().add(attachment);
+    //                    if (info.getElm() != null &&
+    // emptyIfNull(getCqlProcessor().getCqlTranslatorOptions().getFormats()).contains(Format.XML)) {
+    //                        sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
+    //                    }
+    //                    if (info.getJsonElm() != null &&
+    // emptyIfNull(getCqlProcessor().getCqlTranslatorOptions().getFormats()).contains(Format.JSON)) {
+    //
+    // sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
+    //                    }
+    //                }
+    //            } else {
+    //                logMessage(String.format("No cql info found for %s", fileName));
+    //            }
+    //        }
+    //
+    //        return sourceLibrary;
+    //    }
 
     /*
     Refreshes generated content in the given library.
@@ -241,14 +287,22 @@ public class LibraryProcessor extends BaseProcessor {
             }
             if (info != null) {
                 if (info.getElm() != null && emptyIfNull(formats).contains(Format.XML)) {
-                    sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
+                    sourceLibrary
+                            .addContent()
+                            .setContentType("application/elm+xml")
+                            .setData(info.getElm());
                 }
                 if (info.getJsonElm() != null && emptyIfNull(formats).contains(Format.JSON)) {
-                    sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
+                    sourceLibrary
+                            .addContent()
+                            .setContentType("application/elm+json")
+                            .setData(info.getJsonElm());
                 }
                 sourceLibrary.getDataRequirement().clear();
                 sourceLibrary.getDataRequirement().addAll(info.getDataRequirements());
-                sourceLibrary.getRelatedArtifact().removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                sourceLibrary
+                        .getRelatedArtifact()
+                        .removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
                 sourceLibrary.getRelatedArtifact().addAll(info.getRelatedArtifacts());
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
@@ -267,9 +321,11 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     protected void setTranslatorOptions(Library sourceLibrary, CqlTranslatorOptions options) {
-        Extension optionsExtension = sourceLibrary.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions");
+        Extension optionsExtension =
+                sourceLibrary.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions");
         if (optionsExtension == null) {
-            optionsExtension = sourceLibrary.addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions");
+            optionsExtension =
+                    sourceLibrary.addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions");
         }
         Reference optionsReference = optionsExtension.getValueReference();
         String optionsReferenceValue = optionsReference.getReference();
@@ -285,7 +341,8 @@ public class LibraryProcessor extends BaseProcessor {
         }
         optionsParameters.getParameter().clear();
 
-        optionsParameters.addParameter("translatorVersion", CqlTranslator.class.getPackage().getImplementationVersion());
+        optionsParameters.addParameter(
+                "translatorVersion", CqlTranslator.class.getPackage().getImplementationVersion());
 
         var compilerOptions = options.getCqlCompilerOptions();
         for (CqlCompilerOptions.Options o : compilerOptions.getOptions()) {
@@ -300,8 +357,10 @@ public class LibraryProcessor extends BaseProcessor {
             optionsParameters.addParameter("compatibilityLevel", compilerOptions.getCompatibilityLevel());
         }
         optionsParameters.addParameter("enableCqlOnly", compilerOptions.getEnableCqlOnly());
-        optionsParameters.addParameter("errorLevel", compilerOptions.getErrorLevel().name());
-        optionsParameters.addParameter("signatureLevel", compilerOptions.getSignatureLevel().name());
+        optionsParameters.addParameter(
+                "errorLevel", compilerOptions.getErrorLevel().name());
+        optionsParameters.addParameter(
+                "signatureLevel", compilerOptions.getSignatureLevel().name());
         optionsParameters.addParameter("validateUnits", compilerOptions.getValidateUnits());
         optionsParameters.addParameter("verifyOnly", compilerOptions.getVerifyOnly());
     }
@@ -323,8 +382,9 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     private void setLibraryType(Library library) {
-        library.setType(new CodeableConcept().addCoding(
-                new Coding().setCode("logic-library")
+        library.setType(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setCode("logic-library")
                         .setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
     }
 
@@ -333,12 +393,14 @@ public class LibraryProcessor extends BaseProcessor {
 
         // For each CQL file, ensure that there is a Library resource with a matching name and version
         for (CqlProcessor.CqlSourceFileInformation fileInfo : getCqlProcessor().getAllFileInformation()) {
-            if (fileInfo.getIdentifier() != null && fileInfo.getIdentifier().getId() != null && !fileInfo.getIdentifier().getId().equals("")) {
+            if (fileInfo.getIdentifier() != null
+                    && fileInfo.getIdentifier().getId() != null
+                    && !fileInfo.getIdentifier().getId().equals("")) {
                 Library existingLibrary = null;
                 for (Library sourceLibrary : sourceLibraries) {
                     if (fileInfo.getIdentifier().getId().equals(sourceLibrary.getName())
-                            && (fileInfo.getIdentifier().getVersion() == null || fileInfo.getIdentifier().getVersion().equals(sourceLibrary.getVersion()))
-                    ) {
+                            && (fileInfo.getIdentifier().getVersion() == null
+                                    || fileInfo.getIdentifier().getVersion().equals(sourceLibrary.getVersion()))) {
                         existingLibrary = sourceLibrary;
                         break;
                     }
@@ -348,7 +410,10 @@ public class LibraryProcessor extends BaseProcessor {
                     Library newLibrary = new Library();
                     newLibrary.setName(fileInfo.getIdentifier().getId());
                     newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
-                    newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
+                    newLibrary.setUrl(String.format(
+                            "%s/Library/%s",
+                            (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase),
+                            fileInfo.getIdentifier().getId()));
                     newLibrary.setId(newLibrary.getName() + (versioned ? "-" + newLibrary.getVersion() : ""));
                     setLibraryType(newLibrary);
                     validateIdAlphaNumeric(newLibrary.getId());
@@ -360,12 +425,9 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setContent(attachments);
                     sourceLibraries.add(newLibrary);
                 }
-            }
-            else
-            {
+            } else {
                 logger.warn("No identifier found for CQL file {}", fileInfo.getPath());
             }
-
         }
 
         List<Library> resources = new ArrayList<Library>();

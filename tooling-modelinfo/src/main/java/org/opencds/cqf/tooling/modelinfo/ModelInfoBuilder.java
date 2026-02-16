@@ -3,7 +3,6 @@ package org.opencds.cqf.tooling.modelinfo;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.ModelSpecifier;
@@ -18,8 +17,7 @@ public class ModelInfoBuilder {
         this.typeInfos = typeInfos;
     }
 
-    public ModelInfo build()
-    {
+    public ModelInfo build() {
         this.beforeBuild();
         ModelInfo mi = this.innerBuild();
         return this.afterBuild(mi);
@@ -27,28 +25,28 @@ public class ModelInfoBuilder {
 
     protected ModelInfo innerBuild() {
         Collection<TypeInfo> modelTypeInfos = this.typeInfos.stream()
-        .map(x -> ((ClassInfo)x))
-        .sorted(Comparator.comparing(ClassInfo::getName))
-        .collect(Collectors.toList());
+                .map(x -> ((ClassInfo) x))
+                .sorted(Comparator.comparing(ClassInfo::getName))
+                .collect(Collectors.toList());
 
         ModelInfo mi = new ModelInfo()
-            .withRequiredModelInfo(new ModelSpecifier().withName("System").withVersion("1.0.0"))
-            .withTypeInfo(modelTypeInfos.stream().filter(
-                    x -> x instanceof ClassInfo && ((ClassInfo)x).getNamespace() != null
-                            && ((ClassInfo)x).getNamespace().equals(this.settings.name)
-            ).collect(Collectors.toList()))
-            .withConversionInfo(this.settings.conversionInfos)
-            .withName(this.settings.name)
-            .withVersion(this.settings.version)
-            .withUrl(this.settings.url)
-            .withPatientClassName(this.settings.patientClassName)
-            .withPatientBirthDatePropertyName(this.settings.patientBirthDatePropertyName)
-            .withTargetQualifier(this.settings.targetQualifier)
-            .withTargetUrl(this.settings.targetUrl);
+                .withRequiredModelInfo(new ModelSpecifier().withName("System").withVersion("1.0.0"))
+                .withTypeInfo(modelTypeInfos.stream()
+                        .filter(x -> x instanceof ClassInfo
+                                && ((ClassInfo) x).getNamespace() != null
+                                && ((ClassInfo) x).getNamespace().equals(this.settings.name))
+                        .collect(Collectors.toList()))
+                .withConversionInfo(this.settings.conversionInfos)
+                .withName(this.settings.name)
+                .withVersion(this.settings.version)
+                .withUrl(this.settings.url)
+                .withPatientClassName(this.settings.patientClassName)
+                .withPatientBirthDatePropertyName(this.settings.patientBirthDatePropertyName)
+                .withTargetQualifier(this.settings.targetQualifier)
+                .withTargetUrl(this.settings.targetUrl);
 
         return mi;
     }
-
 
     protected String unQualify(String name) {
         int index = name.indexOf(".");
@@ -60,10 +58,12 @@ public class ModelInfoBuilder {
     }
 
     // Apply any pre-build fixups to TypeInfos here
-    protected void beforeBuild() {};
+    protected void beforeBuild() {}
+    ;
 
     // Apply any post-build fixups to ModelInfo here
     protected ModelInfo afterBuild(ModelInfo mi) {
         return mi;
-    };
+    }
+    ;
 }

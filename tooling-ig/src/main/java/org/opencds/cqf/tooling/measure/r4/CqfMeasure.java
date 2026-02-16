@@ -1,9 +1,11 @@
 package org.opencds.cqf.tooling.measure.r4;
 
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -21,136 +23,231 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UsageContext;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-
-@ResourceDef(name="CqfMeasure")
+@ResourceDef(name = "CqfMeasure")
+@SuppressWarnings({"checkstyle:ParameterName", "checkstyle:MemberName"})
 public class CqfMeasure extends Measure {
     private static final long serialVersionUID = -1297192817969868337L;
 
-    @Child(name = "parameter", type = {ParameterDefinition.class}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Parameters defined by the library", value="The parameter element defines parameters used by the library." )
+    @Child(
+            name = "parameter",
+            type = {ParameterDefinition.class},
+            order = 26,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "Parameters defined by the library",
+            value = "The parameter element defines parameters used by the library.")
     @SuppressWarnings("serial")
     protected List<ParameterDefinition> parameter;
 
-    @Child(name = "dataRequirement", type = {DataRequirement.class}, order=27, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="What data is referenced by this library", value="Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library." )
+    @Child(
+            name = "dataRequirement",
+            type = {DataRequirement.class},
+            order = 27,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "What data is referenced by this library",
+            value =
+                    "Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library.")
     @SuppressWarnings("serial")
     protected List<DataRequirement> dataRequirement;
 
-    @Child(name = "content", type = {Attachment.class}, order=28, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contents of the library, either embedded or referenced", value="The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content." )
+    @Child(
+            name = "content",
+            type = {Attachment.class},
+            order = 28,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "Contents of the library, either embedded or referenced",
+            value =
+                    "The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.")
     @SuppressWarnings("serial")
     protected List<Attachment> content;
 
-    @Child(name = "populationStatements", type = {}, order=29, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Population Statements of the library", value="The populations of the library as a MeasureGroupComponent." )
+    @Child(
+            name = "populationStatements",
+            type = {},
+            order = 29,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "Population Statements of the library",
+            value = "The populations of the library as a MeasureGroupComponent.")
     @SuppressWarnings("serial")
     protected List<MeasureGroupComponent> populationStatements;
 
-    @Child(name = "definitionStatements", type = {}, order=30, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Defintion Statements of the library", value="The definitions of the library as a MeasureGroupPopulationComponent." )
+    @Child(
+            name = "definitionStatements",
+            type = {},
+            order = 30,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "Defintion Statements of the library",
+            value = "The definitions of the library as a MeasureGroupPopulationComponent.")
     @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> definitionStatements;
 
-    @Child(name = "functionStatements", type = {}, order=31, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Function Statements of the library", value="The functions of the library as a MeasureGroupPopulationComponent." )
+    @Child(
+            name = "functionStatements",
+            type = {},
+            order = 31,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "Function Statements of the library",
+            value = "The functions of the library as a MeasureGroupPopulationComponent.")
     @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> functionStatements;
 
-    @Child(name = "supplementalDataElements", type = {}, order=32, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Supplemental Data Elements of the library", value="The supplemental data elements of the library as a MeasureGroupPopulationComponent." )
+    @Child(
+            name = "supplementalDataElements",
+            type = {},
+            order = 32,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "Supplemental Data Elements of the library",
+            value = "The supplemental data elements of the library as a MeasureGroupPopulationComponent.")
     @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> supplementalDataElements;
 
-    @Child(name = "terminology", type = {TerminologyRef.class}, order=33, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Terminology of the library", value="The terminology referenced in the library" )
+    @Child(
+            name = "terminology",
+            type = {TerminologyRef.class},
+            order = 33,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(shortDefinition = "Terminology of the library", value = "The terminology referenced in the library")
     @SuppressWarnings("serial")
     protected List<TerminologyRef> terminology;
 
-    @Child(name = "dataCriteria", type = {StringType.class}, order=34, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Data Elements of the library", value="The data elements referenced in the library" )
+    @Child(
+            name = "dataCriteria",
+            type = {StringType.class},
+            order = 34,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "Data Elements of the library",
+            value = "The data elements referenced in the library")
     @SuppressWarnings("serial")
     protected List<StringType> dataCriteria;
 
-    @Child(name = "libraries", type = {Library.class}, order=35, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Measure libraries", value="All the libraries the measure depends on" )
+    @Child(
+            name = "libraries",
+            type = {Library.class},
+            order = 35,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(shortDefinition = "Measure libraries", value = "All the libraries the measure depends on")
     @SuppressWarnings("serial")
     protected List<Library> libraries;
 
-    @Child(name = "citations", type = {RelatedArtifact.class}, order=36, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Additional documentation, citations, etc", value="Related artifacts such as additional documentation, justification, or bibliographic references." )
+    @Child(
+            name = "citations",
+            type = {RelatedArtifact.class},
+            order = 36,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(
+            shortDefinition = "Additional documentation, citations, etc",
+            value = "Related artifacts such as additional documentation, justification, or bibliographic references.")
     @SuppressWarnings("serial")
     protected List<RelatedArtifact> citations;
 
-    @Child(name = "sharedPopulationCriteria", type = {PopulationCriteriaMap.class}, order=37, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Shared criteria of the library", value="The shared criteria of the measure." )
+    @Child(
+            name = "sharedPopulationCriteria",
+            type = {PopulationCriteriaMap.class},
+            order = 37,
+            min = 0,
+            max = Child.MAX_UNLIMITED,
+            modifier = false,
+            summary = false)
+    @Description(shortDefinition = "Shared criteria of the library", value = "The shared criteria of the measure.")
     protected PopulationCriteriaMap sharedPopulationCriteria;
 
-    // @Child(name = "uniquePopulationGroup", type = {}, order=38, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    // @Description(shortDefinition="Population Statements of the library", value="The populations of the library as a MeasureGroupComponent." )
+    // @Child(name = "uniquePopulationGroup", type = {}, order=38, min=0, max=Child.MAX_UNLIMITED, modifier=false,
+    // summary=false)
+    // @Description(shortDefinition="Population Statements of the library", value="The populations of the library as a
+    // MeasureGroupComponent." )
     // protected List<MeasureGroupComponent> uniquePopulationGroup;
 
     /**
      * @return {@link #relatedArtifact} (Related artifacts such as additional documentation, justification, or bibliographic references.)
      */
     public List<RelatedArtifact> getCitations() {
-      if (this.citations == null)
-        this.citations = new ArrayList<RelatedArtifact>();
-      return this.citations;
+        if (this.citations == null) this.citations = new ArrayList<RelatedArtifact>();
+        return this.citations;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
     public Measure setCitations(List<RelatedArtifact> theRelatedArtifact) {
-      this.citations = theRelatedArtifact;
-      return this;
+        this.citations = theRelatedArtifact;
+        return this;
     }
 
     public boolean hasCitations() {
-      if (this.citations == null)
+        if (this.citations == null) return false;
+        for (RelatedArtifact item : this.citations) if (!item.isEmpty()) return true;
         return false;
-      for (RelatedArtifact item : this.citations)
-        if (!item.isEmpty())
-          return true;
-      return false;
     }
 
-    public RelatedArtifact addCitations() { //3
-      RelatedArtifact t = new RelatedArtifact();
-      if (this.citations == null)
-        this.citations = new ArrayList<RelatedArtifact>();
-      this.citations.add(t);
-      return t;
+    public RelatedArtifact addCitations() { // 3
+        RelatedArtifact t = new RelatedArtifact();
+        if (this.citations == null) this.citations = new ArrayList<RelatedArtifact>();
+        this.citations.add(t);
+        return t;
     }
 
-    public CqfMeasure addCitations(RelatedArtifact t) { //3
-      if (t == null)
+    public CqfMeasure addCitations(RelatedArtifact t) { // 3
+        if (t == null) return this;
+        if (this.citations == null) this.citations = new ArrayList<RelatedArtifact>();
+        this.citations.add(t);
         return this;
-      if (this.citations == null)
-        this.citations = new ArrayList<RelatedArtifact>();
-      this.citations.add(t);
-      return this;
     }
 
     /**
      * @return The first repetition of repeating field {@link #relatedArtifact}, creating it if it does not already exist
      */
     public RelatedArtifact getCitationsFirstRep() {
-      if (getCitations().isEmpty()) {
-        addCitations();
-      }
-      return getCitations().get(0);
+        if (getCitations().isEmpty()) {
+            addCitations();
+        }
+        return getCitations().get(0);
     }
 
     /**
      * @return {@link #library} (The library element defines libraries used by the library.)
-    */
+     */
     public List<Library> getLibraries() {
-        if (this.libraries == null)
-            this.libraries = new ArrayList<Library>();
+        if (this.libraries == null) this.libraries = new ArrayList<Library>();
         return this.libraries;
     }
 
@@ -166,19 +263,16 @@ public class CqfMeasure extends Measure {
         return this.libraries != null && this.libraries.size() > 0;
     }
 
-    public Library addLibraries() { //3
+    public Library addLibraries() { // 3
         Library t = new Library();
-        if (this.libraries == null)
-            this.libraries = new ArrayList<Library>();
+        if (this.libraries == null) this.libraries = new ArrayList<Library>();
         this.libraries.add(t);
         return t;
     }
 
-    public CqfMeasure addLibraries(Library t) { //3
-        if (t == null)
-            return this;
-        if (this.libraries == null)
-            this.libraries = new ArrayList<Library>();
+    public CqfMeasure addLibraries(Library t) { // 3
+        if (t == null) return this;
+        if (this.libraries == null) this.libraries = new ArrayList<Library>();
         this.libraries.add(t);
         return this;
     }
@@ -193,13 +287,11 @@ public class CqfMeasure extends Measure {
         return getLibraries().get(0);
     }
 
-
     /**
      * @return {@link #parameter} (The parameter element defines parameters used by the library.)
-    */
+     */
     public List<ParameterDefinition> getParameter() {
-        if (this.parameter == null)
-            this.parameter = new ArrayList<ParameterDefinition>();
+        if (this.parameter == null) this.parameter = new ArrayList<ParameterDefinition>();
         return this.parameter;
     }
 
@@ -212,27 +304,21 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasParameter() {
-        if (this.parameter == null)
-            return false;
-        for (ParameterDefinition item : this.parameter)
-            if (!item.isEmpty())
-            return true;
+        if (this.parameter == null) return false;
+        for (ParameterDefinition item : this.parameter) if (!item.isEmpty()) return true;
         return false;
     }
 
-    public ParameterDefinition addParameter() { //3
+    public ParameterDefinition addParameter() { // 3
         ParameterDefinition t = new ParameterDefinition();
-        if (this.parameter == null)
-            this.parameter = new ArrayList<ParameterDefinition>();
+        if (this.parameter == null) this.parameter = new ArrayList<ParameterDefinition>();
         this.parameter.add(t);
         return t;
     }
 
-    public CqfMeasure addParameter(ParameterDefinition t) { //3
-        if (t == null)
-            return this;
-        if (this.parameter == null)
-            this.parameter = new ArrayList<ParameterDefinition>();
+    public CqfMeasure addParameter(ParameterDefinition t) { // 3
+        if (t == null) return this;
+        if (this.parameter == null) this.parameter = new ArrayList<ParameterDefinition>();
         this.parameter.add(t);
         return this;
     }
@@ -251,8 +337,7 @@ public class CqfMeasure extends Measure {
      * @return {@link #dataRequirement} (Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library.)
      */
     public List<DataRequirement> getDataRequirement() {
-        if (this.dataRequirement == null)
-            this.dataRequirement = new ArrayList<DataRequirement>();
+        if (this.dataRequirement == null) this.dataRequirement = new ArrayList<DataRequirement>();
         return this.dataRequirement;
     }
 
@@ -265,27 +350,21 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasDataRequirement() {
-        if (this.dataRequirement == null)
-            return false;
-        for (DataRequirement item : this.dataRequirement)
-            if (!item.isEmpty())
-            return true;
+        if (this.dataRequirement == null) return false;
+        for (DataRequirement item : this.dataRequirement) if (!item.isEmpty()) return true;
         return false;
     }
 
-    public DataRequirement addDataRequirement() { //3
+    public DataRequirement addDataRequirement() { // 3
         DataRequirement t = new DataRequirement();
-        if (this.dataRequirement == null)
-            this.dataRequirement = new ArrayList<DataRequirement>();
+        if (this.dataRequirement == null) this.dataRequirement = new ArrayList<DataRequirement>();
         this.dataRequirement.add(t);
         return t;
     }
 
-    public CqfMeasure addDataRequirement(DataRequirement t) { //3
-        if (t == null)
-            return this;
-        if (this.dataRequirement == null)
-            this.dataRequirement = new ArrayList<DataRequirement>();
+    public CqfMeasure addDataRequirement(DataRequirement t) { // 3
+        if (t == null) return this;
+        if (this.dataRequirement == null) this.dataRequirement = new ArrayList<DataRequirement>();
         this.dataRequirement.add(t);
         return this;
     }
@@ -304,8 +383,7 @@ public class CqfMeasure extends Measure {
      * @return {@link #content} (The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.)
      */
     public List<Attachment> getContent() {
-        if (this.content == null)
-            this.content = new ArrayList<Attachment>();
+        if (this.content == null) this.content = new ArrayList<Attachment>();
         return this.content;
     }
 
@@ -318,27 +396,21 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasContent() {
-        if (this.content == null)
-            return false;
-        for (Attachment item : this.content)
-            if (!item.isEmpty())
-            return true;
+        if (this.content == null) return false;
+        for (Attachment item : this.content) if (!item.isEmpty()) return true;
         return false;
     }
 
-    public Attachment addContent() { //3
+    public Attachment addContent() { // 3
         Attachment t = new Attachment();
-        if (this.content == null)
-            this.content = new ArrayList<Attachment>();
+        if (this.content == null) this.content = new ArrayList<Attachment>();
         this.content.add(t);
         return t;
     }
 
-    public CqfMeasure addContent(Attachment t) { //3
-        if (t == null)
-            return this;
-        if (this.content == null)
-            this.content = new ArrayList<Attachment>();
+    public CqfMeasure addContent(Attachment t) { // 3
+        if (t == null) return this;
+        if (this.content == null) this.content = new ArrayList<Attachment>();
         this.content.add(t);
         return this;
     }
@@ -353,10 +425,8 @@ public class CqfMeasure extends Measure {
         return getContent().get(0);
     }
 
-
-    public Map<String, Pair<String,String>> getSharedPopulationCriteria() {
-        if (this.sharedPopulationCriteria == null)
-            this.sharedPopulationCriteria = new PopulationCriteriaMap();
+    public Map<String, Pair<String, String>> getSharedPopulationCriteria() {
+        if (this.sharedPopulationCriteria == null) this.sharedPopulationCriteria = new PopulationCriteriaMap();
         return this.sharedPopulationCriteria.getMap();
     }
 
@@ -369,16 +439,13 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasSharedPopulationCriteria() {
-        if (this.sharedPopulationCriteria == null)
-            return false;
+        if (this.sharedPopulationCriteria == null) return false;
         return this.sharedPopulationCriteria.getMap().size() > 0;
     }
 
-    public CqfMeasure addSharedPopulationCriteria(String key, String display, String description) { //3
-        if (key == null || display == null || description == null)
-            return this;
-        if (this.sharedPopulationCriteria == null)
-            this.sharedPopulationCriteria = new PopulationCriteriaMap();
+    public CqfMeasure addSharedPopulationCriteria(String key, String display, String description) { // 3
+        if (key == null || display == null || description == null) return this;
+        if (this.sharedPopulationCriteria == null) this.sharedPopulationCriteria = new PopulationCriteriaMap();
         this.sharedPopulationCriteria.getMap().put(key, Pair.of(display, description));
         return this;
     }
@@ -450,8 +517,7 @@ public class CqfMeasure extends Measure {
      * @return {@link #populationStatements} (The Population Statements of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.)
      */
     public List<MeasureGroupComponent> getPopulationStatements() {
-        if (this.populationStatements == null)
-            this.populationStatements = new ArrayList<MeasureGroupComponent>();
+        if (this.populationStatements == null) this.populationStatements = new ArrayList<MeasureGroupComponent>();
         return this.populationStatements;
     }
 
@@ -464,27 +530,21 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasPopulationStatements() {
-        if (this.populationStatements == null)
-            return false;
-        for (MeasureGroupComponent item : this.populationStatements)
-            if (!item.isEmpty())
-            return true;
+        if (this.populationStatements == null) return false;
+        for (MeasureGroupComponent item : this.populationStatements) if (!item.isEmpty()) return true;
         return false;
     }
 
-    public MeasureGroupComponent addPopulationStatements() { //3
+    public MeasureGroupComponent addPopulationStatements() { // 3
         MeasureGroupComponent t = new MeasureGroupComponent();
-        if (this.populationStatements == null)
-            this.populationStatements = new ArrayList<MeasureGroupComponent>();
+        if (this.populationStatements == null) this.populationStatements = new ArrayList<MeasureGroupComponent>();
         this.populationStatements.add(t);
         return t;
     }
 
-    public CqfMeasure addPopulationStatements(MeasureGroupComponent t) { //3
-        if (t == null)
-            return this;
-        if (this.populationStatements == null)
-            this.populationStatements = new ArrayList<MeasureGroupComponent>();
+    public CqfMeasure addPopulationStatements(MeasureGroupComponent t) { // 3
+        if (t == null) return this;
+        if (this.populationStatements == null) this.populationStatements = new ArrayList<MeasureGroupComponent>();
         this.populationStatements.add(t);
         return this;
     }
@@ -517,15 +577,12 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasDefinitionStatements() {
-        if (this.definitionStatements == null)
-            return false;
-        for (MeasureGroupPopulationComponent item : this.definitionStatements)
-            if (!item.isEmpty())
-            return true;
+        if (this.definitionStatements == null) return false;
+        for (MeasureGroupPopulationComponent item : this.definitionStatements) if (!item.isEmpty()) return true;
         return false;
     }
 
-    public MeasureGroupPopulationComponent addDefinitionStatements() { //3
+    public MeasureGroupPopulationComponent addDefinitionStatements() { // 3
         MeasureGroupPopulationComponent t = new MeasureGroupPopulationComponent();
         if (this.definitionStatements == null)
             this.definitionStatements = new ArrayList<MeasureGroupPopulationComponent>();
@@ -533,9 +590,8 @@ public class CqfMeasure extends Measure {
         return t;
     }
 
-    public CqfMeasure addDefinitionStatements(MeasureGroupPopulationComponent t) { //3
-        if (t == null)
-            return this;
+    public CqfMeasure addDefinitionStatements(MeasureGroupPopulationComponent t) { // 3
+        if (t == null) return this;
         if (this.definitionStatements == null)
             this.definitionStatements = new ArrayList<MeasureGroupPopulationComponent>();
         this.definitionStatements.add(t);
@@ -556,8 +612,7 @@ public class CqfMeasure extends Measure {
      * @return {@link #functionStatements} (The Function Statements of the library as a MeasureGroupPopulationComponent.)
      */
     public List<MeasureGroupPopulationComponent> getFunctionStatements() {
-        if (this.functionStatements == null)
-            this.functionStatements = new ArrayList<MeasureGroupPopulationComponent>();
+        if (this.functionStatements == null) this.functionStatements = new ArrayList<MeasureGroupPopulationComponent>();
         return this.functionStatements;
     }
 
@@ -570,27 +625,21 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasFunctionStatements() {
-        if (this.functionStatements == null)
-            return false;
-        for (MeasureGroupPopulationComponent item : this.functionStatements)
-            if (!item.isEmpty())
-            return true;
+        if (this.functionStatements == null) return false;
+        for (MeasureGroupPopulationComponent item : this.functionStatements) if (!item.isEmpty()) return true;
         return false;
     }
 
-    public MeasureGroupPopulationComponent addFunctionStatements() { //3
+    public MeasureGroupPopulationComponent addFunctionStatements() { // 3
         MeasureGroupPopulationComponent t = new MeasureGroupPopulationComponent();
-        if (this.functionStatements == null)
-            this.functionStatements = new ArrayList<MeasureGroupPopulationComponent>();
+        if (this.functionStatements == null) this.functionStatements = new ArrayList<MeasureGroupPopulationComponent>();
         this.functionStatements.add(t);
         return t;
     }
 
-    public CqfMeasure addFunctionStatements(MeasureGroupPopulationComponent t) { //3
-        if (t == null)
-            return this;
-        if (this.functionStatements == null)
-            this.functionStatements = new ArrayList<MeasureGroupPopulationComponent>();
+    public CqfMeasure addFunctionStatements(MeasureGroupPopulationComponent t) { // 3
+        if (t == null) return this;
+        if (this.functionStatements == null) this.functionStatements = new ArrayList<MeasureGroupPopulationComponent>();
         this.functionStatements.add(t);
         return this;
     }
@@ -623,15 +672,12 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasSupplementalDataElements() {
-        if (this.supplementalDataElements == null)
-            return false;
-        for (MeasureGroupPopulationComponent item : this.supplementalDataElements)
-            if (!item.isEmpty())
-            return true;
+        if (this.supplementalDataElements == null) return false;
+        for (MeasureGroupPopulationComponent item : this.supplementalDataElements) if (!item.isEmpty()) return true;
         return false;
     }
 
-    public MeasureGroupPopulationComponent addSupplementalDataElements() { //3
+    public MeasureGroupPopulationComponent addSupplementalDataElements() { // 3
         MeasureGroupPopulationComponent t = new MeasureGroupPopulationComponent();
         if (this.supplementalDataElements == null)
             this.supplementalDataElements = new ArrayList<MeasureGroupPopulationComponent>();
@@ -639,9 +685,8 @@ public class CqfMeasure extends Measure {
         return t;
     }
 
-    public CqfMeasure addSupplementalDataElements(MeasureGroupPopulationComponent t) { //3
-        if (t == null)
-            return this;
+    public CqfMeasure addSupplementalDataElements(MeasureGroupPopulationComponent t) { // 3
+        if (t == null) return this;
         if (this.supplementalDataElements == null)
             this.supplementalDataElements = new ArrayList<MeasureGroupPopulationComponent>();
         this.supplementalDataElements.add(t);
@@ -662,8 +707,7 @@ public class CqfMeasure extends Measure {
      * @return {@link #terminology} (The terminology referenced in the library.)
      */
     public List<TerminologyRef> getTerminology() {
-        if (this.terminology == null)
-            this.terminology = new ArrayList<TerminologyRef>();
+        if (this.terminology == null) this.terminology = new ArrayList<TerminologyRef>();
         return this.terminology;
     }
 
@@ -681,19 +725,16 @@ public class CqfMeasure extends Measure {
 
     // TODO: Need to rethink this. Do we want all the termionologies to be the same type?
     // This was originally a string so I think the refactor is probably not right or incomplete.
-    public TerminologyRef addTerminology() { //3
+    public TerminologyRef addTerminology() { // 3
         TerminologyRef t = new VersionedTerminologyRef(TerminologyRef.TerminologyRefType.VALUESET, null, null);
-        if (this.terminology == null)
-            this.terminology = new ArrayList<TerminologyRef>();
+        if (this.terminology == null) this.terminology = new ArrayList<TerminologyRef>();
         this.terminology.add(t);
         return t;
     }
 
-    public CqfMeasure addTerminology(TerminologyRef  t) { //3
-        if (t == null)
-            return this;
-        if (this.terminology == null)
-            this.terminology = new ArrayList<TerminologyRef >();
+    public CqfMeasure addTerminology(TerminologyRef t) { // 3
+        if (t == null) return this;
+        if (this.terminology == null) this.terminology = new ArrayList<TerminologyRef>();
         this.terminology.add(t);
         return this;
     }
@@ -712,8 +753,7 @@ public class CqfMeasure extends Measure {
      * @return {@link #dataCriteria} (The data elements referenced in the library.)
      */
     public List<StringType> getDataCriteria() {
-        if (this.dataCriteria == null)
-            this.dataCriteria = new ArrayList<StringType>();
+        if (this.dataCriteria == null) this.dataCriteria = new ArrayList<StringType>();
         return this.dataCriteria;
     }
 
@@ -726,27 +766,21 @@ public class CqfMeasure extends Measure {
     }
 
     public boolean hasDataCriteria() {
-        if (this.dataCriteria == null)
-            return false;
-        for (StringType item : this.dataCriteria)
-            if (!item.isEmpty())
-            return true;
+        if (this.dataCriteria == null) return false;
+        for (StringType item : this.dataCriteria) if (!item.isEmpty()) return true;
         return false;
     }
 
-    public StringType addDataCriteria() { //3
+    public StringType addDataCriteria() { // 3
         StringType t = new StringType();
-        if (this.dataCriteria == null)
-            this.dataCriteria = new ArrayList<StringType>();
+        if (this.dataCriteria == null) this.dataCriteria = new ArrayList<StringType>();
         this.dataCriteria.add(t);
         return t;
     }
 
-    public CqfMeasure addDataCriteria(StringType t) { //3
-        if (t == null)
-            return this;
-        if (this.dataCriteria == null)
-            this.dataCriteria = new ArrayList<StringType>();
+    public CqfMeasure addDataCriteria(StringType t) { // 3
+        if (t == null) return this;
+        if (this.dataCriteria == null) this.dataCriteria = new ArrayList<StringType>();
         this.dataCriteria.add(t);
         return this;
     }
@@ -759,121 +793,169 @@ public class CqfMeasure extends Measure {
             addDataCriteria();
         }
         return getDataCriteria().get(0);
-	}
+    }
 
-	public CqfMeasure() {
-		super();
-	}
+    public CqfMeasure() {
+        super();
+    }
 
     public CqfMeasure(Measure measure) {
         super();
         id = measure.getIdElement() == null ? null : measure.getIdElement().copy();
         meta = measure.getMeta() == null ? null : measure.getMeta().copy();
-        implicitRules = measure.getImplicitRulesElement() == null ? null : measure.getImplicitRulesElement().copy();
-        language = measure.getLanguageElement() == null ? null : measure.getLanguageElement().copy();
+        implicitRules = measure.getImplicitRulesElement() == null
+                ? null
+                : measure.getImplicitRulesElement().copy();
+        language = measure.getLanguageElement() == null
+                ? null
+                : measure.getLanguageElement().copy();
         text = measure.getText() == null ? null : measure.getText().copy();
         if (measure.getContained() != null) {
             contained = new ArrayList<Resource>();
-            for (Resource i : measure.getContained())
-                contained.add(i.copy());
-        };
+            for (Resource i : measure.getContained()) contained.add(i.copy());
+        }
+        ;
         if (measure.getExtension() != null) {
             extension = new ArrayList<Extension>();
-            for (Extension i : measure.getExtension())
-                extension.add(i.copy());
-        };
+            for (Extension i : measure.getExtension()) extension.add(i.copy());
+        }
+        ;
         if (measure.getModifierExtension() != null) {
             modifierExtension = new ArrayList<Extension>();
-            for (Extension i : measure.getModifierExtension())
-                modifierExtension.add(i.copy());
-        };
+            for (Extension i : measure.getModifierExtension()) modifierExtension.add(i.copy());
+        }
+        ;
         url = measure.getUrlElement() == null ? null : measure.getUrlElement().copy();
         if (measure.getIdentifier() != null) {
             identifier = new ArrayList<Identifier>();
-            for (Identifier i : measure.getIdentifier())
-                identifier.add(i.copy());
-        };
-        version = measure.getVersionElement() == null ? null : measure.getVersionElement().copy();
-        name = measure.getNameElement() == null ? null : measure.getNameElement().copy();
-        title = measure.getTitleElement() == null ? null : measure.getTitleElement().copy();
-        status = measure.getStatusElement() == null ? null : measure.getStatusElement().copy();
-        experimental = measure.getExperimentalElement() == null ? null : measure.getExperimentalElement().copy();
-        date = measure.getDateElement() == null ? null : measure.getDateElement().copy();
-        publisher = measure.getPublisherElement() == null ? null : measure.getPublisherElement().copy();
-        description = measure.getDescriptionElement() == null ? null : measure.getDescriptionElement().copy();
-        purpose = measure.getPurposeElement() == null ? null : measure.getPurposeElement().copy();
-        usage = measure.getUsageElement() == null ? null : measure.getUsageElement().copy();
-        approvalDate = measure.getApprovalDateElement() == null ? null : measure.getApprovalDateElement().copy();
-        lastReviewDate = measure.getLastReviewDateElement() == null ? null : measure.getLastReviewDateElement().copy();
-        effectivePeriod = measure.getEffectivePeriod() == null ? null : measure.getEffectivePeriod().copy();
+            for (Identifier i : measure.getIdentifier()) identifier.add(i.copy());
+        }
+        ;
+        version = measure.getVersionElement() == null
+                ? null
+                : measure.getVersionElement().copy();
+        name = measure.getNameElement() == null
+                ? null
+                : measure.getNameElement().copy();
+        title = measure.getTitleElement() == null
+                ? null
+                : measure.getTitleElement().copy();
+        status = measure.getStatusElement() == null
+                ? null
+                : measure.getStatusElement().copy();
+        experimental = measure.getExperimentalElement() == null
+                ? null
+                : measure.getExperimentalElement().copy();
+        date = measure.getDateElement() == null
+                ? null
+                : measure.getDateElement().copy();
+        publisher = measure.getPublisherElement() == null
+                ? null
+                : measure.getPublisherElement().copy();
+        description = measure.getDescriptionElement() == null
+                ? null
+                : measure.getDescriptionElement().copy();
+        purpose = measure.getPurposeElement() == null
+                ? null
+                : measure.getPurposeElement().copy();
+        usage = measure.getUsageElement() == null
+                ? null
+                : measure.getUsageElement().copy();
+        approvalDate = measure.getApprovalDateElement() == null
+                ? null
+                : measure.getApprovalDateElement().copy();
+        lastReviewDate = measure.getLastReviewDateElement() == null
+                ? null
+                : measure.getLastReviewDateElement().copy();
+        effectivePeriod = measure.getEffectivePeriod() == null
+                ? null
+                : measure.getEffectivePeriod().copy();
         if (measure.getUseContext() != null) {
             useContext = new ArrayList<UsageContext>();
-            for (UsageContext i : measure.getUseContext())
-                useContext.add(i.copy());
-        };
+            for (UsageContext i : measure.getUseContext()) useContext.add(i.copy());
+        }
+        ;
         if (measure.getJurisdiction() != null) {
             jurisdiction = new ArrayList<CodeableConcept>();
-            for (CodeableConcept i : measure.getJurisdiction())
-                jurisdiction.add(i.copy());
-        };
+            for (CodeableConcept i : measure.getJurisdiction()) jurisdiction.add(i.copy());
+        }
+        ;
         if (measure.getTopic() != null) {
             topic = new ArrayList<CodeableConcept>();
-            for (CodeableConcept i : measure.getTopic())
-                topic.add(i.copy());
-        };
+            for (CodeableConcept i : measure.getTopic()) topic.add(i.copy());
+        }
+        ;
         if (measure.getAuthor() != null) {
             author = new ArrayList<>();
-            for (ContactDetail i : measure.getAuthor())
-                author.add(i.copy());
-        };
+            for (ContactDetail i : measure.getAuthor()) author.add(i.copy());
+        }
+        ;
         if (measure.getContact() != null) {
             contact = new ArrayList<ContactDetail>();
-            for (ContactDetail i : measure.getContact())
-                contact.add(i.copy());
-        };
-        copyright = measure.getCopyrightElement() == null ? null : measure.getCopyrightElement().copy();
+            for (ContactDetail i : measure.getContact()) contact.add(i.copy());
+        }
+        ;
+        copyright = measure.getCopyrightElement() == null
+                ? null
+                : measure.getCopyrightElement().copy();
         if (measure.getRelatedArtifact() != null) {
             relatedArtifact = new ArrayList<RelatedArtifact>();
-            for (RelatedArtifact i : measure.getRelatedArtifact())
-                relatedArtifact.add(i.copy());
-        };
+            for (RelatedArtifact i : measure.getRelatedArtifact()) relatedArtifact.add(i.copy());
+        }
+        ;
         if (measure.getLibrary() != null) {
             library = new ArrayList<>();
-            for (CanonicalType i : measure.getLibrary())
-                library.add(i.copy());
-        };
-        disclaimer = measure.getDisclaimerElement() == null ? null : measure.getDisclaimerElement().copy();
+            for (CanonicalType i : measure.getLibrary()) library.add(i.copy());
+        }
+        ;
+        disclaimer = measure.getDisclaimerElement() == null
+                ? null
+                : measure.getDisclaimerElement().copy();
         scoring = measure.getScoring() == null ? null : measure.getScoring().copy();
-        compositeScoring = measure.getCompositeScoring() == null ? null : measure.getCompositeScoring().copy();
+        compositeScoring = measure.getCompositeScoring() == null
+                ? null
+                : measure.getCompositeScoring().copy();
         if (measure.getType() != null) {
             type = new ArrayList<CodeableConcept>();
-            for (CodeableConcept i : measure.getType())
-                type.add(i.copy());
-        };
-        riskAdjustment = measure.getRiskAdjustmentElement() == null ? null : measure.getRiskAdjustmentElement().copy();
-        rateAggregation = measure.getRateAggregationElement() == null ? null : measure.getRateAggregationElement().copy();
-        rationale = measure.getRationaleElement() == null ? null : measure.getRationaleElement().copy();
-        clinicalRecommendationStatement = measure.getClinicalRecommendationStatementElement() == null ? null : measure.getClinicalRecommendationStatementElement().copy();
-        improvementNotation = measure.getImprovementNotation() == null ? null : measure.getImprovementNotation().copy();
+            for (CodeableConcept i : measure.getType()) type.add(i.copy());
+        }
+        ;
+        riskAdjustment = measure.getRiskAdjustmentElement() == null
+                ? null
+                : measure.getRiskAdjustmentElement().copy();
+        rateAggregation = measure.getRateAggregationElement() == null
+                ? null
+                : measure.getRateAggregationElement().copy();
+        rationale = measure.getRationaleElement() == null
+                ? null
+                : measure.getRationaleElement().copy();
+        clinicalRecommendationStatement = measure.getClinicalRecommendationStatementElement() == null
+                ? null
+                : measure.getClinicalRecommendationStatementElement().copy();
+        improvementNotation = measure.getImprovementNotation() == null
+                ? null
+                : measure.getImprovementNotation().copy();
         if (measure.getDefinition() != null) {
             definition = new ArrayList<MarkdownType>();
-            for (MarkdownType i : measure.getDefinition())
-                definition.add(i.copy());
-        };
-        guidance = measure.getGuidanceElement() == null ? null : measure.getGuidanceElement().copy();
+            for (MarkdownType i : measure.getDefinition()) definition.add(i.copy());
+        }
+        ;
+        guidance = measure.getGuidanceElement() == null
+                ? null
+                : measure.getGuidanceElement().copy();
         if (measure.getGroup() != null) {
             group = new ArrayList<MeasureGroupComponent>();
-            for (MeasureGroupComponent i : measure.getGroup())
-                group.add(i.copy());
-        };
+            for (MeasureGroupComponent i : measure.getGroup()) group.add(i.copy());
+        }
+        ;
         if (measure.getSupplementalData() != null) {
             supplementalData = new ArrayList<MeasureSupplementalDataComponent>();
-            for (MeasureSupplementalDataComponent i : measure.getSupplementalData())
-                supplementalData.add(i.copy());
-        };
-	}
+            for (MeasureSupplementalDataComponent i : measure.getSupplementalData()) supplementalData.add(i.copy());
+        }
+        ;
+    }
 
-	public String fhirType() {
-		return "CqfMeasure";
-	}
+    public String fhirType() {
+        return "CqfMeasure";
+    }
 }

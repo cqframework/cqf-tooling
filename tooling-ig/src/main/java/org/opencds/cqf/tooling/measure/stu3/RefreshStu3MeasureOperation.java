@@ -5,16 +5,15 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 import com.google.common.base.Strings;
-import org.hl7.fhir.dstu3.model.Measure;
-import org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper;
-import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import org.hl7.fhir.dstu3.model.Measure;
+import org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper;
+import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperation {
 
@@ -22,26 +21,33 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
     private XmlParser xmlParser;
     private SoftwareSystemHelper softwareSystemHelper;
 
-    //NOTE: Only consumed from OperationFactory - that call should come through a proper Operation that calls a processor.
+    // NOTE: Only consumed from OperationFactory - that call should come through a proper Operation that calls a
+    // processor.
     public RefreshStu3MeasureOperation() {
-        super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3",
-                "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3));
+        super(
+                "src/main/resources/org/opencds/cqf/tooling/measure/output/stu3",
+                "-RefreshStu3Measure",
+                FhirContext.forCached(FhirVersionEnum.DSTU3));
         softwareSystemHelper = new SoftwareSystemHelper("src/main/resources/org/opencds/cqf/tooling/measure/output/r4");
-        jsonParser = (JsonParser)super.fhirContext.newJsonParser();
-        xmlParser = (XmlParser)super.fhirContext.newXmlParser();
+        jsonParser = (JsonParser) super.fhirContext.newJsonParser();
+        xmlParser = (XmlParser) super.fhirContext.newXmlParser();
     }
 
     @SuppressWarnings("this-escape")
     public RefreshStu3MeasureOperation(String pathToMeasures) {
-        super(pathToMeasures, "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3),
-                null, pathToMeasures);
+        super(
+                pathToMeasures,
+                "-RefreshStu3Measure",
+                FhirContext.forCached(FhirVersionEnum.DSTU3),
+                null,
+                pathToMeasures);
         if (!Strings.isNullOrEmpty(getOutputPath())) {
             softwareSystemHelper = new SoftwareSystemHelper(getOutputPath());
         } else {
             softwareSystemHelper = new SoftwareSystemHelper();
         }
-        jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
-        xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
+        jsonParser = (JsonParser) this.getFhirContext().newJsonParser();
+        xmlParser = (XmlParser) this.getFhirContext().newXmlParser();
     }
 
     @Override
@@ -51,8 +57,7 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
             for (File f : Optional.ofNullable(measureDir.listFiles()).orElseThrow(NoSuchElementException::new)) {
                 refreshMeasureFromFile(f);
             }
-        }
-        else if (measureDir.isFile()){
+        } else if (measureDir.isFile()) {
             refreshMeasureFromFile(measureDir);
         }
     }
@@ -64,11 +69,10 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
         if (f.isFile()) {
             try {
                 if (f.getName().endsWith("xml")) {
-                    measure = (Measure)xmlParser.parseResource(new FileInputStream(f));
+                    measure = (Measure) xmlParser.parseResource(new FileInputStream(f));
                     encoding = IOUtils.Encoding.XML;
-                }
-                else {
-                    measure = (Measure)jsonParser.parseResource(new FileInputStream(f));
+                } else {
+                    measure = (Measure) jsonParser.parseResource(new FileInputStream(f));
                     encoding = IOUtils.Encoding.JSON;
                 }
             } catch (FileNotFoundException e) {
@@ -86,28 +90,29 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
         if (shouldApplySoftwareSystemStamp) {
             softwareSystemHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
         }
-//        CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(measure, this.libraryResourceProvider);
-//
-//        // Ensure All Related Artifacts for all referenced Libraries
-//        if (!cqfMeasure.getRelatedArtifact().isEmpty()) {
-//            for (RelatedArtifact relatedArtifact : cqfMeasure.getRelatedArtifact()) {
-//                boolean artifactExists = false;
-//                for (RelatedArtifact resourceArtifact : measure.getRelatedArtifact()) {
-//                    if (resourceArtifact.equalsDeep(relatedArtifact)) {
-//                        artifactExists = true;
-//                        break;
-//                    }
-//                }
-//                if (!artifactExists) {
-//                    measure.addRelatedArtifact(relatedArtifact.copy());
-//                }
-//            }
-//        }
-//
-//        Narrative n = this.narrativeProvider.getNarrative(this.getContext(), cqfMeasure);
-//        measure.setText(n.copy());
-//        // logger.info("Narrative: " + n.getDivAsString());
-//        return measure;
+        //        CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(measure,
+        // this.libraryResourceProvider);
+        //
+        //        // Ensure All Related Artifacts for all referenced Libraries
+        //        if (!cqfMeasure.getRelatedArtifact().isEmpty()) {
+        //            for (RelatedArtifact relatedArtifact : cqfMeasure.getRelatedArtifact()) {
+        //                boolean artifactExists = false;
+        //                for (RelatedArtifact resourceArtifact : measure.getRelatedArtifact()) {
+        //                    if (resourceArtifact.equalsDeep(relatedArtifact)) {
+        //                        artifactExists = true;
+        //                        break;
+        //                    }
+        //                }
+        //                if (!artifactExists) {
+        //                    measure.addRelatedArtifact(relatedArtifact.copy());
+        //                }
+        //            }
+        //        }
+        //
+        //        Narrative n = this.narrativeProvider.getNarrative(this.getContext(), cqfMeasure);
+        //        measure.setText(n.copy());
+        //        // logger.info("Narrative: " + n.getDivAsString());
+        //        return measure;
         return measure;
     }
 }

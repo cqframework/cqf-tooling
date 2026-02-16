@@ -1,12 +1,12 @@
 package org.opencds.cqf.tooling.casereporting.tes;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 public class TESPackageGeneratorIT {
     private static final Logger logger = LoggerFactory.getLogger(TESPackageGeneratorIT.class);

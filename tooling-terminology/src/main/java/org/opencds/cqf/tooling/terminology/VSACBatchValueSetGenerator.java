@@ -1,13 +1,12 @@
 package org.opencds.cqf.tooling.terminology;
 
 import java.io.File;
-
 import org.opencds.cqf.tooling.Operation;
 
 public class VSACBatchValueSetGenerator extends Operation {
 
     private String pathToSpreadsheetDirectory; // -pathtospreadsheetdir (-ptsd)
-    private String valueSetSource = "vsac"; //vsac or cms
+    private String valueSetSource = "vsac"; // vsac or cms
     private String baseUrl; // -baseurl (-burl)
     private boolean setName; // -setname (-name)
 
@@ -43,7 +42,8 @@ public class VSACBatchValueSetGenerator extends Operation {
                 case "name":
                     setName = value.toLowerCase().equals("true") ? true : false;
                     break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
         if (pathToSpreadsheetDirectory == null) {
@@ -66,29 +66,36 @@ public class VSACBatchValueSetGenerator extends Operation {
             CMSFlatMultiValueSetGenerator generator;
             for (File valueSet : valueSetFiles) {
                 if (!valueSet.getPath().endsWith(".xlsx")) continue;
-                String[] argsForSpreadsheet = { "-pts=" + valueSet.getPath(), "-op=" + getOutputPath() }; //-pts=${valueSetExcelSpreadSheet} -op=${resourcesValueSetDirectory}
-                generator =  new CMSFlatMultiValueSetGenerator();
+                String[] argsForSpreadsheet = {"-pts=" + valueSet.getPath(), "-op=" + getOutputPath()
+                }; // -pts=${valueSetExcelSpreadSheet} -op=${resourcesValueSetDirectory}
+                generator = new CMSFlatMultiValueSetGenerator();
                 generator.execute(argsForSpreadsheet);
             }
-        }
-        else if (valueSetSource.equals("vsac")) {
+        } else if (valueSetSource.equals("vsac")) {
             VSACValueSetGenerator generator;
             if (baseUrl == null) {
                 baseUrl = VSACValueSetGenerator.VSAC_BASE_URL;
             }
             for (File valueSet : valueSetFiles) {
                 if (!valueSet.getPath().endsWith(".xlsx")) continue;
-                String[] argsForSpreadsheet = { "-VsacXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath(), "-burl=" + baseUrl, "-name=" + (setName ? "true" : "false") };
-                generator =  new VSACValueSetGenerator();
+                String[] argsForSpreadsheet = {
+                    "-VsacXlsxToValueSet",
+                    "-pts=" + valueSet.getAbsolutePath(),
+                    "-op=" + getOutputPath(),
+                    "-burl=" + baseUrl,
+                    "-name=" + (setName ? "true" : "false")
+                };
+                generator = new VSACValueSetGenerator();
                 generator.execute(argsForSpreadsheet);
             }
-        }
-        else if (valueSetSource.equals("hedis")) {
+        } else if (valueSetSource.equals("hedis")) {
             HEDISValueSetGenerator generator;
             for (File valueSet : valueSetFiles) {
                 if (!valueSet.getPath().endsWith(".xlsx")) continue;
-                String[] argsForSpreadsheet = { "-HedisXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath() };
-                generator =  new HEDISValueSetGenerator();
+                String[] argsForSpreadsheet = {
+                    "-HedisXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath()
+                };
+                generator = new HEDISValueSetGenerator();
                 generator.execute(argsForSpreadsheet);
             }
         }

@@ -1,9 +1,8 @@
 package org.opencds.cqf.tooling.modelinfo;
 
+import java.util.*;
 import org.hl7.elm_modelinfo.r1.*;
 import org.hl7.fhir.r4.model.*;
-
-import java.util.*;
 
 public class SearchInfoBuilder {
     protected Atlas atlas;
@@ -39,7 +38,7 @@ public class SearchInfoBuilder {
             return null;
         }
 
-        ClassInfo ci = (ClassInfo)baseType;
+        ClassInfo ci = (ClassInfo) baseType;
 
         SearchInfo si = new SearchInfo();
         si.setName(sp.getCode());
@@ -62,38 +61,54 @@ public class SearchInfoBuilder {
         si.setPath(String.join("|", typePaths));
 
         switch (sp.getType()) {
-            case NUMBER: si.setType("System.Decimal"); break;
-            case DATE: si.setType("System.DateTime"); break;
-            case STRING: si.setType("System.String"); break;
-            case TOKEN: si.setType("System.Code"); break;
-            case REFERENCE: {
-                if (sp.getTarget() != null) {
-                    List<TypeSpecifier> targets = new ArrayList<TypeSpecifier>();
-                    for (CodeType code : sp.getTarget()) {
-                        TypeInfo ti = typeInfos.get(String.format("%s.%s", settings.name, code.getCode()));
-                        if (ti != null && ti instanceof ClassInfo) {
-                            targets.add(new NamedTypeSpecifier().withNamespace(((ClassInfo)ti).getNamespace()).withName(((ClassInfo)ti).getName()));
+            case NUMBER:
+                si.setType("System.Decimal");
+                break;
+            case DATE:
+                si.setType("System.DateTime");
+                break;
+            case STRING:
+                si.setType("System.String");
+                break;
+            case TOKEN:
+                si.setType("System.Code");
+                break;
+            case REFERENCE:
+                {
+                    if (sp.getTarget() != null) {
+                        List<TypeSpecifier> targets = new ArrayList<TypeSpecifier>();
+                        for (CodeType code : sp.getTarget()) {
+                            TypeInfo ti = typeInfos.get(String.format("%s.%s", settings.name, code.getCode()));
+                            if (ti != null && ti instanceof ClassInfo) {
+                                targets.add(new NamedTypeSpecifier()
+                                        .withNamespace(((ClassInfo) ti).getNamespace())
+                                        .withName(((ClassInfo) ti).getName()));
+                            }
+                        }
+                        if (targets.size() > 1) {
+                            si.setTypeSpecifier(new ChoiceTypeSpecifier().withChoice(targets));
+                        } else if (targets.size() == 1) {
+                            NamedTypeSpecifier ts = (NamedTypeSpecifier) targets.get(0);
+                            si.setType(String.format("%s.%s", ts.getNamespace(), ts.getName()));
                         }
                     }
-                    if (targets.size() > 1) {
-                        si.setTypeSpecifier(new ChoiceTypeSpecifier().withChoice(targets));
-                    }
-                    else if (targets.size() == 1) {
-                        NamedTypeSpecifier ts = (NamedTypeSpecifier)targets.get(0);
-                        si.setType(String.format("%s.%s", ts.getNamespace(), ts.getName()));
-                    }
-                }
 
-                if (si.getTypeSpecifier() == null && si.getType() == null) {
-                    si.setType("FHIR.Reference");
+                    if (si.getTypeSpecifier() == null && si.getType() == null) {
+                        si.setType("FHIR.Reference");
+                    }
                 }
-            }
-            break;
-            case QUANTITY: si.setType("System.Quantity"); break;
-            case URI: si.setType("System.String"); break;
-            case SPECIAL: si.setType("System.Any"); break;
-        default:
-            break;
+                break;
+            case QUANTITY:
+                si.setType("System.Quantity");
+                break;
+            case URI:
+                si.setType("System.String");
+                break;
+            case SPECIAL:
+                si.setType("System.Any");
+                break;
+            default:
+                break;
         }
 
         ci.getSearch().add(si);
@@ -118,35 +133,35 @@ public class SearchInfoBuilder {
         return sis;
     }
 
-/*
-    private String primarySearchPath(Iterable<SearchInfo> searches, String typeName) {
-        if (this.settings.primarySearchPath.containsKey(typeName)) {
-            return this.settings.primarySearchPath.get(typeName);
-        }
-        else if (searches != null) {
-            for (SearchInfo s : searches) {
-                if (s.getName().toLowerCase().equals("code")) {
-                    return s.getName();
-                }
-            }
-        }
+    /*
+       private String primarySearchPath(Iterable<SearchInfo> searches, String typeName) {
+           if (this.settings.primarySearchPath.containsKey(typeName)) {
+               return this.settings.primarySearchPath.get(typeName);
+           }
+           else if (searches != null) {
+               for (SearchInfo s : searches) {
+                   if (s.getName().toLowerCase().equals("code")) {
+                       return s.getName();
+                   }
+               }
+           }
 
-        return null;
-    }
- */
+           return null;
+       }
+    */
 
     protected void innerBuild() {
         // for (SearchParameter sp : atlas.getSearchParameters().values()) {
         //     Iterable<SearchInfo> sis = buildSearchInfo(sp);
         //     // NOTE: There is nothing to add here, search infos are added to the classinfos they are part of
         // }
-/*
-        for (TypeInfo ti : typeInfos.values()) {
-            if (ti instanceof ClassInfo) {
-                ClassInfo ci = (ClassInfo)ti;
-                ci.setPrimarySearchPath(primarySearchPath(ci.getSearch(), ci.getName()));
-            }
-        }
-*/
+        /*
+                for (TypeInfo ti : typeInfos.values()) {
+                    if (ti instanceof ClassInfo) {
+                        ClassInfo ci = (ClassInfo)ti;
+                        ci.setPrimarySearchPath(primarySearchPath(ci.getSearch(), ci.getName()));
+                    }
+                }
+        */
     }
 }

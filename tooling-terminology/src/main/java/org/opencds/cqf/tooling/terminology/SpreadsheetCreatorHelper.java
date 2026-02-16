@@ -1,14 +1,12 @@
 package org.opencds.cqf.tooling.terminology;
 
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.xssf.usermodel.*;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.poi.xssf.usermodel.*;
 
 public class SpreadsheetCreatorHelper {
 
@@ -41,7 +39,7 @@ public class SpreadsheetCreatorHelper {
         }
     }
 
-    public static XSSFCellStyle createLinkStyle(XSSFWorkbook workBook, byte xssFontEnum, short hsfColorValue){
+    public static XSSFCellStyle createLinkStyle(XSSFWorkbook workBook, byte xssFontEnum, short hsfColorValue) {
         XSSFCellStyle linkStyle = workBook.createCellStyle();
         XSSFFont linkFont = workBook.createFont();
         linkFont.setUnderline(xssFontEnum);
@@ -51,7 +49,7 @@ public class SpreadsheetCreatorHelper {
         return linkStyle;
     }
 
-    public static XSSFCellStyle createBoldStyle(XSSFWorkbook workBook, byte xssFontEnum){
+    public static XSSFCellStyle createBoldStyle(XSSFWorkbook workBook, byte xssFontEnum) {
         XSSFCellStyle style = workBook.createCellStyle();
         XSSFFont font = workBook.createFont();
         font.setFontHeightInPoints((short) 15);

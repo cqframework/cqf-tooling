@@ -1,13 +1,13 @@
 package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.time.Instant;
+import java.util.Date;
 import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
-import java.util.Date;
-
+@SuppressWarnings("checkstyle:MemberName")
 public class CPGMeta {
 
     private static final Logger logger = LoggerFactory.getLogger(CPGMeta.class);
@@ -36,15 +36,19 @@ public class CPGMeta {
     private String purposeInclusionCriteria;
     private String purposeExclusionCriteria;
 
-    private final String KEYWORD_URL            = "http://hl7.org/fhir/StructureDefinition/valueset-keyWord";
-    private final String WARNING_URL            = "http://hl7.org/fhir/StructureDefinition/valueset-warning";
-    //R4 only
-    private final String RULES_TEXT_URL         = "http://hl7.org/fhir/StructureDefinition/valueset-rules-text";
-    private final String EXPRESSION_URL         = "http://hl7.org/fhir/StructureDefinition/valueset-expression";
-    private final String CLINICAL_FOCUS_URL     = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus";
-    private final String DATA_ELEMENT_SCOPE_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope";
-    private final String INCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria";
-    private final String EXCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria";
+    private final String KEYWORD_URL = "http://hl7.org/fhir/StructureDefinition/valueset-keyWord";
+    private final String WARNING_URL = "http://hl7.org/fhir/StructureDefinition/valueset-warning";
+    // R4 only
+    private final String RULES_TEXT_URL = "http://hl7.org/fhir/StructureDefinition/valueset-rules-text";
+    private final String EXPRESSION_URL = "http://hl7.org/fhir/StructureDefinition/valueset-expression";
+    private final String CLINICAL_FOCUS_URL =
+            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus";
+    private final String DATA_ELEMENT_SCOPE_URL =
+            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope";
+    private final String INCLUSION_CRITERIA_URL =
+            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria";
+    private final String EXCLUSION_CRITERIA_URL =
+            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria";
 
     public ValueSet populate(FhirContext fhirContext, String outputVersion) {
         ValueSet vs = new ValueSet();
@@ -52,7 +56,10 @@ public class CPGMeta {
         vs.setVersion(version);
         vs.setName(name == null ? id.replaceAll("-", "_") : name);
         vs.setTitle(title == null ? id.replaceAll("-", " ") : title);
-        vs.setStatus(status == null ? Enumerations.PublicationStatus.ACTIVE : Enumerations.PublicationStatus.fromCode(status));
+        vs.setStatus(
+                status == null
+                        ? Enumerations.PublicationStatus.ACTIVE
+                        : Enumerations.PublicationStatus.fromCode(status));
         vs.setExperimental(status == null ? true : Boolean.valueOf(experimental));
         vs.setDate(date == null ? Date.from(Instant.now()) : new DateType(date).getValue());
         vs.setDescription(description);
@@ -80,26 +87,26 @@ public class CPGMeta {
             if (purposeExclusionCriteria != null) {
                 vs = setExtension(vs, EXCLUSION_CRITERIA_URL, purposeExclusionCriteria);
             }
-            if (expressionDescription != null || expressionName != null || expressionLanguage != null
-                    || expressionExpression != null || expressionReference != null)
-            {
-                vs.addExtension(
-                        new Extension()
-                                .setUrl(EXPRESSION_URL)
-                                .setValue(
-                                        new Expression()
-                                                .setDescription(expressionDescription)
-                                                .setName(expressionName)
-                                                .setLanguage(expressionLanguage)
-                                                .setExpression(expressionExpression)
-                                                .setReference(expressionReference)
-                                )
-                );
+            if (expressionDescription != null
+                    || expressionName != null
+                    || expressionLanguage != null
+                    || expressionExpression != null
+                    || expressionReference != null) {
+                vs.addExtension(new Extension()
+                        .setUrl(EXPRESSION_URL)
+                        .setValue(new Expression()
+                                .setDescription(expressionDescription)
+                                .setName(expressionName)
+                                .setLanguage(expressionLanguage)
+                                .setExpression(expressionExpression)
+                                .setReference(expressionReference)));
             }
         }
         if (compose != null) {
             try {
-                ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
+                ValueSet tempVs = fhirContext
+                        .newXmlParser()
+                        .parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
                 logger.info("An error occurred in the compose for the sheet with id: {}", this.id);
@@ -110,7 +117,7 @@ public class CPGMeta {
         return vs;
     }
 
-    private ValueSet setExtension(ValueSet vs, String url, String valueToSet){
+    private ValueSet setExtension(ValueSet vs, String url, String valueToSet) {
         vs.addExtension(new Extension().setUrl(url).setValue(new StringType(valueToSet)));
         return vs;
     }

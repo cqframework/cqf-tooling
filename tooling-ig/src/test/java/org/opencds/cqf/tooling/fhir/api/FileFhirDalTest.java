@@ -3,9 +3,10 @@ package org.opencds.cqf.tooling.fhir.api;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Patient;
 import org.opencds.cqf.tooling.SoftwareSystemTest;
@@ -16,107 +17,103 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-
-
 public class FileFhirDalTest implements SoftwareSystemTest {
-  private FileFhirPlatform platform;
-  private FileFhirDal dal;
-  private Patient patient;
-  private final String resourceDir = "target/FileFhirDalTest";
-  private static final Logger logger = LoggerFactory.getLogger(FileFhirDalTest.class);
+    private FileFhirPlatform platform;
+    private FileFhirDal dal;
+    private Patient patient;
+    private final String resourceDir = "target/FileFhirDalTest";
+    private static final Logger logger = LoggerFactory.getLogger(FileFhirDalTest.class);
 
-  public FileFhirDalTest() {
-    FileFhirPlatformParameters platformParams = new FileFhirPlatformParameters();
-    platformParams.fhirContext = FhirContext.forR4();
-    platformParams.encoding = EncodingEnum.JSON;
-    platformParams.resourceDir = this.resourceDir;
+    public FileFhirDalTest() {
+        FileFhirPlatformParameters platformParams = new FileFhirPlatformParameters();
+        platformParams.fhirContext = FhirContext.forR4();
+        platformParams.encoding = EncodingEnum.JSON;
+        platformParams.resourceDir = this.resourceDir;
 
-    this.platform = new FileFhirPlatform(platformParams);
-    this.dal = platform.dal();
+        this.platform = new FileFhirPlatform(platformParams);
+        this.dal = platform.dal();
 
-    this.patient = (Patient) new Patient().setId("TestPatient");
-    this.patient.setId(this.patient.getIdElement().withResourceType("Patient"));
-  }
-
-  @BeforeClass
-  public void setup() {
-    File testDir = new File(resourceDir);
-    if(!testDir.exists()){
-      testDir.mkdirs();
+        this.patient = (Patient) new Patient().setId("TestPatient");
+        this.patient.setId(this.patient.getIdElement().withResourceType("Patient"));
     }
-    logger.info("Beginning Test: FileFhirDalTest");
-  }
 
-  @AfterClass
-  public void tearDown(){
-    File testDir = new File(resourceDir);
-    if(testDir.exists()){
-      try {
-        FileUtils.deleteDirectory(testDir);
-      } catch (IOException e) {
-        e.printStackTrace();
-        throw new RuntimeException("Cannot delete " + testDir + "\n" + e.getMessage());
-      }
+    @BeforeClass
+    public void setup() {
+        File testDir = new File(resourceDir);
+        if (!testDir.exists()) {
+            testDir.mkdirs();
+        }
+        logger.info("Beginning Test: FileFhirDalTest");
     }
-    logger.info("Finished Test: FileFhirDalTest");
-  }
 
-  @Test(priority = 1) // Create
-  public void create(){
-    logger.info("Running: FileFhirDalTest.create...");
+    @AfterClass
+    public void tearDown() {
+        File testDir = new File(resourceDir);
+        if (testDir.exists()) {
+            try {
+                FileUtils.deleteDirectory(testDir);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Cannot delete " + testDir + "\n" + e.getMessage());
+            }
+        }
+        logger.info("Finished Test: FileFhirDalTest");
+    }
 
-    this.patient.setActive(false);
+    @Test(priority = 1) // Create
+    public void create() {
+        logger.info("Running: FileFhirDalTest.create...");
 
-    dal.create(this.patient);
+        this.patient.setActive(false);
 
-    File file = new File(resourceDir + "/Patient/TestPatient.JSON");
+        dal.create(this.patient);
 
-    assertTrue(file.exists());
-  }
+        File file = new File(resourceDir + "/Patient/TestPatient.JSON");
 
-  @Test(priority = 2) // Read
-  public void read(){
-    logger.info("Running: FileFhirDalTest.read...");
+        assertTrue(file.exists());
+    }
 
-    Patient readPatient = (Patient) dal.read(this.patient.getIdElement());
+    @Test(priority = 2) // Read
+    public void read() {
+        logger.info("Running: FileFhirDalTest.read...");
 
-    assertFalse(readPatient.getActive());
-  }
+        Patient readPatient = (Patient) dal.read(this.patient.getIdElement());
 
-  @Test(priority = 3) // Update
-  public void update() {
-    logger.info("Running: FileFhirDalTest.update...");
-    this.patient.setActive(true);
+        assertFalse(readPatient.getActive());
+    }
 
-    dal.update(this.patient);
+    @Test(priority = 3) // Update
+    public void update() {
+        logger.info("Running: FileFhirDalTest.update...");
+        this.patient.setActive(true);
 
-    Patient updatedPatient = (Patient) dal.read(this.patient.getIdElement());
+        dal.update(this.patient);
 
-    assertTrue(updatedPatient.getActive());
-  }
+        Patient updatedPatient = (Patient) dal.read(this.patient.getIdElement());
 
-  @Test(priority = 4) // Delete
-  public void delete(){
-    logger.info("Running: FileFhirDalTest.delete...");
+        assertTrue(updatedPatient.getActive());
+    }
 
-    dal.delete(this.patient.getIdElement());
+    @Test(priority = 4) // Delete
+    public void delete() {
+        logger.info("Running: FileFhirDalTest.delete...");
 
-    File file = new File(resourceDir + "/Patient/TestPatient.JSON");
+        dal.delete(this.patient.getIdElement());
 
-    assertFalse(file.exists());
-  }
+        File file = new File(resourceDir + "/Patient/TestPatient.JSON");
 
-  @Test //No ResourceType
-  public void noResourceType(){
-    logger.info("Running: FileFhirDalTest.noResourceType...");
+        assertFalse(file.exists());
+    }
 
-    Patient patient = (Patient) new Patient().setId("NoResourcePatient");
-    dal.create(patient);
+    @Test // No ResourceType
+    public void noResourceType() {
+        logger.info("Running: FileFhirDalTest.noResourceType...");
 
-    File file = new File(resourceDir + "/Patient/NoResourcePatient.JSON");
+        Patient patient = (Patient) new Patient().setId("NoResourcePatient");
+        dal.create(patient);
 
-    assertFalse(file.exists());
-  }
+        File file = new File(resourceDir + "/Patient/NoResourcePatient.JSON");
+
+        assertFalse(file.exists());
+    }
 }

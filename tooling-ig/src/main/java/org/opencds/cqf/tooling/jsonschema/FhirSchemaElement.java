@@ -1,11 +1,10 @@
 package org.opencds.cqf.tooling.jsonschema;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 public class FhirSchemaElement {
 
@@ -26,20 +25,15 @@ public class FhirSchemaElement {
         for (Map.Entry<String, JsonElement> entry : element.entrySet()) {
             if (entry.getKey().equals("path")) {
                 this.path = entry.getValue().getAsString();
-            }
-            else if (entry.getKey().equals("index")) {
+            } else if (entry.getKey().equals("index")) {
                 this.index = entry.getValue().getAsInt();
-            }
-            else if (entry.getKey().equals("min")) {
+            } else if (entry.getKey().equals("min")) {
                 this.minCard = entry.getValue().getAsInt();
-            }
-            else if (entry.getKey().equals("max")) {
+            } else if (entry.getKey().equals("max")) {
                 this.maxCard = entry.getValue().getAsString();
-            }
-            else if (entry.getKey().equals("short")) {
+            } else if (entry.getKey().equals("short")) {
                 this.description = entry.getValue().getAsString();
-            }
-            else if (entry.getKey().equals("type")) {
+            } else if (entry.getKey().equals("type")) {
                 types = new ArrayList<>();
                 for (JsonElement type : entry.getValue().getAsJsonArray()) {
                     types.add(type.getAsJsonObject().get("code").getAsString());
@@ -80,7 +74,6 @@ public class FhirSchemaElement {
     public String toString() {
         return String.format(
                 "Name: %s ... Path: %s ... Index: %d ... Min: %d ... Max: %s ... Description: %s ... Types: %s",
-                name, path, index, minCard, maxCard, description, types.toString()
-        );
+                name, path, index, minCard, maxCard, description, types.toString());
     }
 }

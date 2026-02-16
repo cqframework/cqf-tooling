@@ -1,25 +1,23 @@
 package org.opencds.cqf.tooling.terminology;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
+import ca.uhn.fhir.context.FhirContext;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class ToJsonValueSetDbOperation extends Operation {
     private String valueSetPath;
 
     @SuppressWarnings("unused")
     private String encoding = IOUtils.Encoding.JSON.toString();
+
     private FhirContext fhirContext;
 
     public FhirContext getFhirContext() {
@@ -44,10 +42,21 @@ public class ToJsonValueSetDbOperation extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "valuesetpath": case "path": case "vsp": valueSetPath = value; break; // -valuesetpath (-vsp, -path)
-                case "encoding": case "e": encoding = value.toLowerCase(); break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                case "outputpath":
+                case "op":
+                    setOutputPath(value);
+                    break; // -outputpath (-op)
+                case "valuesetpath":
+                case "path":
+                case "vsp":
+                    valueSetPath = value;
+                    break; // -valuesetpath (-vsp, -path)
+                case "encoding":
+                case "e":
+                    encoding = value.toLowerCase();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 
@@ -62,23 +71,20 @@ public class ToJsonValueSetDbOperation extends Operation {
                 try {
                     IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), getFhirContext());
                     if (resource instanceof org.hl7.fhir.r4.model.ValueSet) {
-                        org.hl7.fhir.r4.model.ValueSet valueSet = (ValueSet)resource;
+                        org.hl7.fhir.r4.model.ValueSet valueSet = (ValueSet) resource;
                         addValueSetToDb(valueSetDb, valueSet);
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                    // Ignore errors that occur, some files in output directories are json or xml but not FHIR resources...
+                    // Ignore errors that occur, some files in output directories are json or xml but not FHIR
+                    // resources...
                 }
             }
         }
 
         try {
             FileWriter fw = new FileWriter(getOutputPath() + "/valueset-db.json");
-            new GsonBuilder()
-                    .setPrettyPrinting()
-                    .create()
-                    .toJson(valueSetDb, fw);
+            new GsonBuilder().setPrettyPrinting().create().toJson(valueSetDb, fw);
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -99,7 +105,8 @@ public class ToJsonValueSetDbOperation extends Operation {
     private JsonArray toValueSetExpansion(ValueSet valueSet) {
         JsonArray result = new JsonArray();
         if (valueSet.hasExpansion()) {
-            for (ValueSet.ValueSetExpansionContainsComponent cc : valueSet.getExpansion().getContains()) {
+            for (ValueSet.ValueSetExpansionContainsComponent cc :
+                    valueSet.getExpansion().getContains()) {
                 result.add(toCodeEntry(cc));
             }
         }

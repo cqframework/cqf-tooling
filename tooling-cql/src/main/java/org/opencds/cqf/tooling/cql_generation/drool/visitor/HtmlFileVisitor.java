@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
@@ -127,7 +126,8 @@ public class HtmlFileVisitor implements Visitor {
     private String inferLibraryName(ConditionCriteriaRelDTO conditionCriteriaRel) {
         String libraryName = buildName(conditionCriteriaRel);
         if (conditionCriteriaRel.getCriteriaDTO() != null) {
-            libraryName = libraryName.concat("_" + conditionCriteriaRel.getUuid().toString().substring(0, 5));
+            libraryName = libraryName.concat(
+                    "_" + conditionCriteriaRel.getUuid().toString().substring(0, 5));
         }
         return libraryName;
     }
@@ -135,11 +135,20 @@ public class HtmlFileVisitor implements Visitor {
     private String buildName(ConditionCriteriaRelDTO conditionCriteriaRel) {
         String libraryName = null;
         try {
-            if (conditionCriteriaRel.getLabel().length() < 20 && !conditionCriteriaRel.getLabel().contains("=")
+            if (conditionCriteriaRel.getLabel().length() < 20
+                    && !conditionCriteriaRel.getLabel().contains("=")
                     && !conditionCriteriaRel.getLabel().contains("(")) {
-                libraryName = conditionCriteriaRel.getLabel().replaceAll(" ", "").replaceAll("<", "")
-                        .replaceAll(">=", "").replaceAll(",", "").replaceAll(":", "").replaceAll("#", "")
-                        .replaceAll("TEST", "").replaceAll("TEST2", "").replaceAll("TEST3", "")
+                libraryName = conditionCriteriaRel
+                        .getLabel()
+                        .replaceAll(" ", "")
+                        .replaceAll("<", "")
+                        .replaceAll(">=", "")
+                        .replaceAll(",", "")
+                        .replaceAll(":", "")
+                        .replaceAll("#", "")
+                        .replaceAll("TEST", "")
+                        .replaceAll("TEST2", "")
+                        .replaceAll("TEST3", "")
                         .replaceAll("TESTExample-Daryl", "");
             } else {
                 libraryName = "GeneratedCql" + index;
@@ -161,5 +170,4 @@ public class HtmlFileVisitor implements Visitor {
         // TODO Auto-generated method stub
 
     }
-    
 }

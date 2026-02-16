@@ -2,6 +2,12 @@ package org.opencds.cqf.tooling.terminology;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -16,13 +22,6 @@ import org.opencds.cqf.tooling.terminology.fhirservice.FhirTerminologyClient;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.*;
 
 /*
 Parameters as CLI arguments:
@@ -49,7 +48,8 @@ public class SpreadsheetValidateVSandCS extends Operation {
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String urlToTestServer; // -urltotestserver (-uts)  server to validate
     private boolean hasHeader = true; // -hasheader (-hh)
-    private String pathToIG; // -pathToIG (-ptig) path to IG - files installed using "npm --registry https://packages.simplifier.net install hl7.fhir.us.qicore@4.1.1" (or other package)
+    private String pathToIG; // -pathToIG (-ptig) path to IG - files installed using "npm --registry
+    // https://packages.simplifier.net install hl7.fhir.us.qicore@4.1.1" (or other package)
     private String resourcePaths; // -resourcePaths (-rp)
     private Map<String, CodeSystem> csMap;
     private Map<String, ValueSet> vsMap;
@@ -185,7 +185,12 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 if (row.getCell(codeSystemURLCellNumber) != null) {
                     codeSystemURL = row.getCell(codeSystemURLCellNumber).getStringCellValue();
                 }
-                validateRow(valueSetURL, version, codeSystemURL, fhirClient, row.getRowNum() + 1); //add one row number due to header row
+                validateRow(
+                        valueSetURL,
+                        version,
+                        codeSystemURL,
+                        fhirClient,
+                        row.getRowNum() + 1); // add one row number due to header row
             } catch (NullPointerException | ConfigurationException ex) {
                 logger.debug(ex.getMessage());
                 logger.debug(ex.toString());
@@ -193,14 +198,15 @@ public class SpreadsheetValidateVSandCS extends Operation {
         }
         LocalDateTime end = java.time.LocalDateTime.now();
         System.out.println("Beginning Time: " + begin + "     End time: " + end);
-
     }
 
-    private void validateRow(String valueSetURL, String version, String codeSystemURL, FhirTerminologyClient fhirClient, int rowNumber) {
+    private void validateRow(
+            String valueSetURL, String version, String codeSystemURL, FhirTerminologyClient fhirClient, int rowNumber) {
         String vsServerUrl = urlToTestServer + "ValueSet/?url=" + valueSetURL;
         ValueSet vsToValidate = (ValueSet) fhirClient.getResource(vsServerUrl);
         if (vsToValidate != null) {
-            ValueSet vsSourceOfTruth = vsMap.get(vsToValidate.getId().substring(vsToValidate.getId().lastIndexOf(File.separator) + 1));
+            ValueSet vsSourceOfTruth = vsMap.get(
+                    vsToValidate.getId().substring(vsToValidate.getId().lastIndexOf(File.separator) + 1));
             if (vsSourceOfTruth != null) {
                 ValuesetComparator vsCompare = new ValuesetComparator();
                 vsCompare.compareValueSets(vsToValidate, vsSourceOfTruth, vsFailureReport);
@@ -243,11 +249,11 @@ public class SpreadsheetValidateVSandCS extends Operation {
     }
 
     private boolean codeSystemNotReachable(String codeSystemURL) {
-        if (codeSystemURL.toLowerCase().contains("snomed") ||
-                codeSystemURL.toLowerCase().contains("rxnorm") ||
-                codeSystemURL.toLowerCase().contains("unitsofmeasure") ||
-                codeSystemURL.toLowerCase().contains("loinc") ||
-                codeSystemURL.toLowerCase().contains("nucc")) {
+        if (codeSystemURL.toLowerCase().contains("snomed")
+                || codeSystemURL.toLowerCase().contains("rxnorm")
+                || codeSystemURL.toLowerCase().contains("unitsofmeasure")
+                || codeSystemURL.toLowerCase().contains("loinc")
+                || codeSystemURL.toLowerCase().contains("nucc")) {
             return false;
         }
         return true;
@@ -287,7 +293,8 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 report.append("\t\t" + sheetError + newLine);
             });
         }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getOutputPath() + File.separator + "validationReport.txt"))) {
+        try (BufferedWriter writer =
+                new BufferedWriter(new FileWriter(getOutputPath() + File.separator + "validationReport.txt"))) {
             writer.write(report.toString());
         } catch (IOException e) {
             e.printStackTrace();
@@ -326,7 +333,6 @@ public class SpreadsheetValidateVSandCS extends Operation {
                         });
                     }
                 });
-
             });
             report.append(newReport);
         }

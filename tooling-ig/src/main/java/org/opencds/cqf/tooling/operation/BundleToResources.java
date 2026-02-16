@@ -2,12 +2,6 @@ package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.common.ThreadUtils;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -16,6 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.common.ThreadUtils;
 
 public class BundleToResources extends Operation {
 
@@ -23,7 +22,6 @@ public class BundleToResources extends Operation {
     private String path; // -path (-p)
     private String version; // -version (-v) Can be dstu2, stu3, or r4
     private FhirContext context;
-
 
     private final List<Callable<Void>> outputTasks = new CopyOnWriteArrayList<>();
     private final List<Callable<Void>> discoverBundleTasks = new CopyOnWriteArrayList<>();
@@ -59,7 +57,6 @@ public class BundleToResources extends Operation {
             }
             String flag = flagAndValue[0];
             String value = flagAndValue[1];
-
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "encoding":
@@ -105,7 +102,7 @@ public class BundleToResources extends Operation {
         if (file.isDirectory()) {
             bundles = file.listFiles();
         } else {
-            bundles = new File[]{file};
+            bundles = new File[] {file};
         }
 
         if (encoding == null) {
@@ -130,25 +127,21 @@ public class BundleToResources extends Operation {
             }
         }
 
-
         StringBuilder deleteBundlesLog = new StringBuilder();
         if (bundles != null) {
             if (outputPath == null) {
                 outputPath = "src/main/resources/org/opencds/cqf/tooling/bundle/output";
-
             }
             setOutputPath(outputPath);
             String outputPathLocation = new File(outputPath).getAbsolutePath();
 
             discoverBundles(bundles, outputPathLocation);
 
-
             if (!outputTasks.isEmpty()) {
                 System.out.println("\n\rExtracting resources from bundles...");
 
-                //outputTasks has been built up by discoverBundles
+                // outputTasks has been built up by discoverBundles
                 ThreadUtils.executeTasks(outputTasks);
-
 
                 if (deleteBundles) {
 
@@ -158,19 +151,23 @@ public class BundleToResources extends Operation {
                         }
                         try {
                             if (bundleFile.delete()) {
-                                deleteBundlesLog.append("\n\rDeleted: ")
-                                        .append(bundleFile.getAbsolutePath());
+                                deleteBundlesLog.append("\n\rDeleted: ").append(bundleFile.getAbsolutePath());
                             } else {
-                                deleteBundlesLog.append("\n\rFailed to delete: ")
+                                deleteBundlesLog
+                                        .append("\n\rFailed to delete: ")
                                         .append(bundleFile.getAbsolutePath());
                             }
                         } catch (SecurityException se) {
-                            deleteBundlesLog.append("\n\rPermission denied to delete: ")
-                                    .append(bundleFile.getAbsolutePath()).append("\n\r")
+                            deleteBundlesLog
+                                    .append("\n\rPermission denied to delete: ")
+                                    .append(bundleFile.getAbsolutePath())
+                                    .append("\n\r")
                                     .append(se.getMessage());
                         } catch (Exception e) {
-                            deleteBundlesLog.append("\n\rError occurred while deleting: ")
-                                    .append(bundleFile.getAbsolutePath()).append("\n\r")
+                            deleteBundlesLog
+                                    .append("\n\rError occurred while deleting: ")
+                                    .append(bundleFile.getAbsolutePath())
+                                    .append("\n\r")
                                     .append(e.getMessage());
                         }
                     }
@@ -180,8 +177,7 @@ public class BundleToResources extends Operation {
             }
         }
 
-
-        //Organize and report final status:
+        // Organize and report final status:
         outputReportList.sort((sb1, sb2) -> {
             String fileLocation1 = getFileLocation(sb1);
             String fileLocation2 = getFileLocation(sb2);
@@ -215,7 +211,8 @@ public class BundleToResources extends Operation {
         ThreadUtils.executeTasks(discoverBundleTasks);
     }
 
-    private void discoverBundlesRecursively(File[] resources, String outputPathLocation, List<Pair<IBaseResource, File>> bundleResourceList) {
+    private void discoverBundlesRecursively(
+            File[] resources, String outputPathLocation, List<Pair<IBaseResource, File>> bundleResourceList) {
         for (File resourceFile : resources) {
             if (resourceFile.getAbsolutePath().equals(outputPathLocation)) {
                 continue;
@@ -224,15 +221,16 @@ public class BundleToResources extends Operation {
             if (resourceFile.isDirectory()) {
                 File[] nestedFiles = resourceFile.listFiles();
                 if (nestedFiles != null) {
-                    //File is actually a directory, recursively call this method and add all files in THAT
-                    //folder to the discoverBundleTasks list.
+                    // File is actually a directory, recursively call this method and add all files in THAT
+                    // folder to the discoverBundleTasks list.
                     discoverBundlesRecursively(nestedFiles, outputPathLocation, bundleResourceList);
                 }
                 continue;
             }
 
             // Skip unsupported files
-            if (!resourceFile.getAbsolutePath().endsWith(".json") && !resourceFile.getAbsolutePath().endsWith(".xml")) {
+            if (!resourceFile.getAbsolutePath().endsWith(".json")
+                    && !resourceFile.getAbsolutePath().endsWith(".xml")) {
                 continue;
             }
 
@@ -263,7 +261,6 @@ public class BundleToResources extends Operation {
         }
     }
 
-
     private void outputFiles(IBaseResource bundleResource, File bundleResourceFile) {
 
         List<IBaseResource> listOfResources = new ArrayList<>();
@@ -286,18 +283,19 @@ public class BundleToResources extends Operation {
         }
 
         if (!listOfResources.isEmpty()) {
-            String directoryName = bundleResourceFile.getAbsolutePath().replace(path, "").replace(bundleResourceFile.getName(), "");
+            String directoryName =
+                    bundleResourceFile.getAbsolutePath().replace(path, "").replace(bundleResourceFile.getName(), "");
             int extractionCount = 0;
             for (IBaseResource thisResource : listOfResources) {
                 if (output(thisResource, context, directoryName) != null) {
                     extractionCount++;
                 }
             }
-            //give user information on resources extracted
+            // give user information on resources extracted
             synchronized (outputReportList) {
                 String extractionCountStr = "" + extractionCount;
 
-                //try to format to the thousandth
+                // try to format to the thousandth
                 if (extractionCountStr.length() == 1) {
                     extractionCountStr = "   " + extractionCountStr;
                 } else if (extractionCountStr.length() == 2) {
@@ -306,13 +304,13 @@ public class BundleToResources extends Operation {
                     extractionCountStr = " " + extractionCountStr;
                 }
 
-                outputReportList.add(new StringBuilder("\n\r").append(extractionCountStr)
+                outputReportList.add(new StringBuilder("\n\r")
+                        .append(extractionCountStr)
                         .append(" resources extracted from: ")
                         .append(bundleResourceFile.getAbsolutePath().replace(path, "")));
                 bundleFiles.add(bundleResourceFile);
                 reportProgress();
             }
-
         }
     }
 
@@ -346,5 +344,4 @@ public class BundleToResources extends Operation {
 
         return outputFile.getAbsolutePath();
     }
-
 }

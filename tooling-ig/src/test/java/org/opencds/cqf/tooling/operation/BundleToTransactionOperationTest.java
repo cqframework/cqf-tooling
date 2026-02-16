@@ -1,9 +1,8 @@
 package org.opencds.cqf.tooling.operation;
 
+import java.io.File;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.io.File;
 
 public class BundleToTransactionOperationTest {
     private final BundleToTransactionOperation bundleToTransactionOperation = new BundleToTransactionOperation();

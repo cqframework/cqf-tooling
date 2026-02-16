@@ -1,22 +1,21 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
+import static org.testng.Assert.*;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
-
-import static org.testng.Assert.*;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Ignore;
+import org.testng.annotations.Test;
 
 public class DTRContentTest extends BaseContentTest {
 
     public DTRContentTest() {
         super(new Spreadsheet()
-            .path("acceleratorkit/DTR.xlsx")
-            .scope("ASLP")
-            .dataElementPages("ASLP.A1 Adult Sleep Studies"));;
+                .path("acceleratorkit/DTR.xlsx")
+                .scope("ASLP")
+                .dataElementPages("ASLP.A1 Adult Sleep Studies"));
+        ;
     }
 
     @Test
@@ -61,7 +60,8 @@ public class DTRContentTest extends BaseContentTest {
         assertEquals(contactDataElementLines.get(18), "  WC.MostRecent(");
         assertEquals(contactDataElementLines.get(19), "  [Observation: Cx.\"BMI\"] O");
         assertEquals(contactDataElementLines.get(20), "    where O.status in { 'final', 'amended', 'corrected' }");
-        assertEquals(contactDataElementLines.get(21), "      and Last(Split(O.encounter.reference, '/')) = Encounter.id");
+        assertEquals(
+                contactDataElementLines.get(21), "      and Last(Split(O.encounter.reference, '/')) = Encounter.id");
         assertEquals(contactDataElementLines.get(22), "  ).value as FHIR.Quantity");
 
         assertEquals(contactDataElementLines.get(117), "/*");
@@ -73,7 +73,8 @@ public class DTRContentTest extends BaseContentTest {
         assertEquals(contactDataElementLines.get(123), "  WC.MostRecent(");
         assertEquals(contactDataElementLines.get(124), "  [Observation: Cx.\"Weight\"] O");
         assertEquals(contactDataElementLines.get(125), "    where O.status in { 'final', 'amended', 'corrected' }");
-        assertEquals(contactDataElementLines.get(126), "      and Last(Split(O.encounter.reference, '/')) = Encounter.id");
+        assertEquals(
+                contactDataElementLines.get(126), "      and Last(Split(O.encounter.reference, '/')) = Encounter.id");
         assertEquals(contactDataElementLines.get(127), "  ).value as FHIR.Quantity");
     }
 
@@ -95,7 +96,6 @@ public class DTRContentTest extends BaseContentTest {
         assertEquals(dataElementLines.get(18), "  [Observation: Cx.\"BMI\"] O");
         assertEquals(dataElementLines.get(19), "    where O.status in { 'final', 'amended', 'corrected' }");
         assertEquals(dataElementLines.get(23), "  @dataElement: ASLP.A1.DE16 Diagnosis of Obstructive Sleep Apnea");
-
     }
 
     @Test
@@ -104,13 +104,14 @@ public class DTRContentTest extends BaseContentTest {
         var cqlLines = Files.readAllLines(cqlPath().resolve("ASLPConcepts.cql"));
         assertEquals(cqlLines.get(0), "library ASLPConcepts");
         assertEquals(cqlLines.get(2), "// Code Systems");
-        assertEquals(cqlLines.get(15), "codesystem \"ASLP Codes\": 'http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes'");
+        assertEquals(
+                cqlLines.get(15), "codesystem \"ASLP Codes\": 'http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes'");
         assertEquals(cqlLines.get(16), "");
         assertEquals(cqlLines.get(17), "// Value Sets");
         assertEquals(cqlLines.get(23), "// Codes");
-        assertEquals(cqlLines.get(26), "code \"Neck Circumference\": 'ASLP.A1.DE20' from \"ASLP Codes\" display 'Neck Circumference'");
+        assertEquals(
+                cqlLines.get(26),
+                "code \"Neck Circumference\": 'ASLP.A1.DE20' from \"ASLP Codes\" display 'Neck Circumference'");
         assertEquals(cqlLines.get(27), "code \"Height\": 'ASLP.A1.DE20' from \"ASLP Codes\" display 'Height'");
     }
-
-
 }

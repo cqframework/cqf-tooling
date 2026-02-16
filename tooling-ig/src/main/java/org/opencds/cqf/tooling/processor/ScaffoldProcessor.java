@@ -1,16 +1,15 @@
 package org.opencds.cqf.tooling.processor;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
 import java.util.Map;
-
 import org.opencds.cqf.tooling.common.SoftwareSystem;
 import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
 import org.opencds.cqf.tooling.parameter.ScaffoldParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-
+@SuppressWarnings({"checkstyle:ParameterName", "checkstyle:StaticVariableName", "checkstyle:MethodName"})
 public class ScaffoldProcessor extends BaseProcessor {
     private static String LibraryPath = "/input/resources/library";
     private static String MeasurePath = "/input/resources/measure";
@@ -41,7 +40,6 @@ public class ScaffoldProcessor extends BaseProcessor {
                         createMeasure(resourceName);
                         break;
                     default:
-
                 }
             }
         }
@@ -64,7 +62,8 @@ public class ScaffoldProcessor extends BaseProcessor {
                 internalCreateR4Library(name);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+                throw new IllegalArgumentException("Unknown fhir version: "
+                        + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 
@@ -77,7 +76,8 @@ public class ScaffoldProcessor extends BaseProcessor {
                 internalCreateR4Measure(name);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+                throw new IllegalArgumentException("Unknown fhir version: "
+                        + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 
@@ -86,7 +86,8 @@ public class ScaffoldProcessor extends BaseProcessor {
         org.hl7.fhir.dstu3.model.Library newLibrary = new org.hl7.fhir.dstu3.model.Library();
         newLibrary.setId(name);
         newLibrary.setName(name);
-        org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper(igPath);
+        org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper cqfmHelper =
+                new org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper(igPath);
         cqfmHelper.ensureSoftwareSystemExtensionAndDevice(newLibrary, softwareSystems, fhirContext);
 
         IOUtils.writeResource(newLibrary, igPath + LibraryPath, outputEncoding, fhirContext);
@@ -106,7 +107,8 @@ public class ScaffoldProcessor extends BaseProcessor {
         org.hl7.fhir.dstu3.model.Measure newMeasure = new org.hl7.fhir.dstu3.model.Measure();
         newMeasure.setId(name);
         newMeasure.setName(name);
-        org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper(igPath);
+        org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper cqfmHelper =
+                new org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper(igPath);
         cqfmHelper.ensureSoftwareSystemExtensionAndDevice(newMeasure, softwareSystems, fhirContext);
 
         IOUtils.writeResource(newMeasure, igPath + MeasurePath, outputEncoding, fhirContext);

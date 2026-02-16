@@ -11,6 +11,7 @@ import picocli.CommandLine.Parameters;
  * Subclasses provide the operation name and factory method; arguments are passed
  * through in the original {@code -key=value} format after a {@code --} separator.
  */
+@SuppressWarnings("checkstyle:AbstractClassName")
 public abstract class OperationCommand implements Callable<Integer> {
 
     @Parameters(arity = "0..*", description = "Operation arguments in -key=value format (use -- before args)")

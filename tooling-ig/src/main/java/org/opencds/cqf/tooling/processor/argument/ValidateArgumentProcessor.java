@@ -4,8 +4,7 @@ import org.opencds.cqf.tooling.parameter.ValidateParameters;
 
 public class ValidateArgumentProcessor {
 
-	public ValidateParameters parseAndConvert(String[] args) {
-		return null;
-	}
-
+    public ValidateParameters parseAndConvert(String[] args) {
+        return null;
+    }
 }

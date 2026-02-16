@@ -1,11 +1,6 @@
 package org.opencds.cqf.tooling.cql_generation.drool.serialization;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -13,10 +8,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import org.cdsframework.dto.ConditionDTO;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Deserializes RCKMS Drool data
@@ -34,7 +31,8 @@ public class Deserializer {
 
     private ObjectMapper initializeObjectMapper() {
         RCKMSJacksonProvider jacksonProvider = new RCKMSJacksonProvider();
-        ObjectMapper objectMapper = jacksonProvider.createObjectMapper(JsonInclude.Include.NON_NULL, null)
+        ObjectMapper objectMapper = jacksonProvider
+                .createObjectMapper(JsonInclude.Include.NON_NULL, null)
                 .registerModule(new SimpleModule().addDeserializer(Date.class, new UnixTimeStampDeserializer()))
                 .configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
         String dtoClassPackageName = "org.cdsframework.dto";
@@ -46,7 +44,8 @@ public class Deserializer {
     public List<ConditionDTO> deserialize() {
         List<ConditionDTO> conditions = null;
         try {
-            conditions = objectMapper.readValue(JsonFactory.builder().build().createParser(file), new TypeReference<List<ConditionDTO>>(){});
+            conditions = objectMapper.readValue(
+                    JsonFactory.builder().build().createParser(file), new TypeReference<List<ConditionDTO>>() {});
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

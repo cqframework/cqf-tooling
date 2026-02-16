@@ -5,14 +5,14 @@ import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+@SuppressWarnings("checkstyle:ParameterName")
 public class UsPublicHealthValidatorModule implements IValidatorModule {
     private static final Logger logger = LoggerFactory.getLogger(UsPublicHealthValidatorModule.class);
 
@@ -25,7 +25,8 @@ public class UsPublicHealthValidatorModule implements IValidatorModule {
     }
 
     private void validateProfiles(IValidationContext<IBaseResource> theCtx) {
-        List<String> profiles = theCtx.getResource().getMeta().getProfile().stream().map(x -> x.getValueAsString())
+        List<String> profiles = theCtx.getResource().getMeta().getProfile().stream()
+                .map(x -> x.getValueAsString())
                 .collect(Collectors.toList());
         for (String profile : profiles) {
             switch (profile) {
@@ -45,11 +46,9 @@ public class UsPublicHealthValidatorModule implements IValidatorModule {
         }
     }
 
-    private void validateUsPublicHealthTriggeringValueSet(IValidationContext<IBaseResource> theCtx) {
-    }
+    private void validateUsPublicHealthTriggeringValueSet(IValidationContext<IBaseResource> theCtx) {}
 
-    private void validateUsPublicHealthTriggeringValueSetLibrary(IValidationContext<IBaseResource> theCtx) {
-    }
+    private void validateUsPublicHealthTriggeringValueSetLibrary(IValidationContext<IBaseResource> theCtx) {}
 
     private void validateUSPublicHealthPlanDefinition(IValidationContext<IBaseResource> theCtx) {
         PlanDefinition planDefinition = (PlanDefinition) theCtx.getResource();
@@ -57,12 +56,15 @@ public class UsPublicHealthValidatorModule implements IValidatorModule {
     }
 
     private boolean validateExtensions(IValidationContext<IBaseResource> theCtx, PlanDefinition planDefinition) {
-        // if (planDefinition.hasExtension("http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-receiver-address-extension")) {
-        //     String message = "Found expected extension: http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-receiver-address-extension.";
+        // if
+        // (planDefinition.hasExtension("http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-receiver-address-extension")) {
+        //     String message = "Found expected extension:
+        // http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-receiver-address-extension.";
         //     theCtx.addValidationMessage(createInformationMessage(message));
         //     return true;
         // } else {
-        //     String theMessage = "Expected extension: http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-receiver-address-extension.";
+        //     String theMessage = "Expected extension:
+        // http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-receiver-address-extension.";
         //     theCtx.addValidationMessage(createErrorMessage(theMessage));
         //     return false;
         // }
@@ -91,5 +93,4 @@ public class UsPublicHealthValidatorModule implements IValidatorModule {
         errorMessage.setMessage(theMessage);
         return errorMessage;
     }
-
 }

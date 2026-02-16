@@ -1,21 +1,20 @@
 package org.opencds.cqf.tooling.measure.comparer;
 
+import static org.testng.Assert.*;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.r4.model.Quantity;
-import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.measure.adapters.Dstu3MeasureReportAdapter;
 import org.opencds.cqf.tooling.measure.adapters.IMeasureReportAdapter;
 import org.opencds.cqf.tooling.measure.adapters.R4MeasureReportAdapter;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
-
-import java.util.List;
-import java.util.ArrayList;
-
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 public class MeasureReportComparerTest {
 
@@ -37,7 +36,8 @@ public class MeasureReportComparerTest {
         report.setPatient(new org.hl7.fhir.dstu3.model.Reference("Patient/" + id));
         report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.INDIVIDUAL);
         List<org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent> groupList = new ArrayList<>();
-        org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent group1 = new org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent();
+        org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent group1 =
+                new org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent();
         group1.setId("group-1");
         group1.setMeasureScore(1.0);
         groupList.add(group1);
@@ -72,9 +72,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", true));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", true));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", true));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", true));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", true));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters);
     }
@@ -86,7 +91,8 @@ public class MeasureReportComparerTest {
         String testCaseId = "DSTU3ComparerTestMeasureReport";
         org.hl7.fhir.dstu3.model.MeasureReport actualReport = GetDstu3BasicMeasureReportWithId(testCaseId);
 
-        org.hl7.fhir.dstu3.model.Reference measureReference = new org.hl7.fhir.dstu3.model.Reference("Measure/thisshouldresultinamismatch");
+        org.hl7.fhir.dstu3.model.Reference measureReference =
+                new org.hl7.fhir.dstu3.model.Reference("Measure/thisshouldresultinamismatch");
         actualReport.setMeasure(measureReference);
 
         this.actualMeasureReportAdapter = new Dstu3MeasureReportAdapter(actualReport);
@@ -102,9 +108,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", true));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", true));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", true));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters, "Mismatched measureId test");
     }
@@ -116,7 +127,8 @@ public class MeasureReportComparerTest {
         String testCaseId = "DSTU3ComparerTestMeasureReport";
         org.hl7.fhir.dstu3.model.MeasureReport actualReport = GetDstu3BasicMeasureReportWithId(testCaseId);
 
-        org.hl7.fhir.dstu3.model.Reference patientReference = new org.hl7.fhir.dstu3.model.Reference("Patient/thisshouldresultinamismatch");
+        org.hl7.fhir.dstu3.model.Reference patientReference =
+                new org.hl7.fhir.dstu3.model.Reference("Patient/thisshouldresultinamismatch");
         actualReport.setPatient(patientReference);
 
         this.actualMeasureReportAdapter = new Dstu3MeasureReportAdapter(actualReport);
@@ -132,9 +144,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", false));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", true));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", true));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters, "Mismatched patientId test");
     }
@@ -161,9 +178,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", true));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", false));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", true));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters, "Mismatched reportType test");
     }
@@ -189,9 +211,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", true));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", true));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", false));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters, "Mismatched measureScore test");
     }
@@ -204,7 +231,8 @@ public class MeasureReportComparerTest {
         report.setSubject(new org.hl7.fhir.r4.model.Reference("Patient/" + id));
         report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.INDIVIDUAL);
         List<org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent> groupList = new ArrayList<>();
-        org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent group1 = new org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent();
+        org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent group1 =
+                new org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent();
         group1.setId("group-1");
         group1.setMeasureScore(new Quantity(1.0));
         groupList.add(group1);
@@ -232,9 +260,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", true));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", true));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", true));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", true));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", true));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters);
     }
@@ -261,9 +294,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", true));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", true));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", true));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters, "Mismatched measureId test");
     }
@@ -275,7 +313,8 @@ public class MeasureReportComparerTest {
         String testCaseId = "R4ComparerTestMeasureReport";
         org.hl7.fhir.r4.model.MeasureReport actualReport = GetR4BasicMeasureReportWithId(testCaseId);
 
-        org.hl7.fhir.r4.model.Reference patientReference = new org.hl7.fhir.r4.model.Reference("Patient/thisshouldresultinamismatch");
+        org.hl7.fhir.r4.model.Reference patientReference =
+                new org.hl7.fhir.r4.model.Reference("Patient/thisshouldresultinamismatch");
         actualReport.setSubject(patientReference);
 
         this.actualMeasureReportAdapter = new R4MeasureReportAdapter(actualReport);
@@ -291,9 +330,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", false));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", true));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", true));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters, "Mismatched patientId test");
     }
@@ -320,9 +364,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", true));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", false));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", true));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters, "Mismatched reportType test");
     }
@@ -348,9 +397,14 @@ public class MeasureReportComparerTest {
         Boolean containsPatientIdResult = resultParameters.contains(getTestParameter("PatientId", true));
         Boolean containsReportTypeResult = resultParameters.contains(getTestParameter("ReportType", true));
         Boolean groupScoreMatches = resultParameters.contains(getTestParameter("Group[group-1].score", false));
-        Boolean containsTestPassesResult = resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
+        Boolean containsTestPassesResult =
+                resultParameters.contains(getTestParameter("Measure '" + testCaseId + "' Test Passed", false));
 
-        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
+        Boolean resultContainsAllExpectedParameters = containsMeasureIdResult
+                & containsPatientIdResult
+                & containsReportTypeResult
+                & containsTestPassesResult
+                & groupScoreMatches;
 
         assertTrue(resultContainsAllExpectedParameters, "Mismatched measureScore test");
     }

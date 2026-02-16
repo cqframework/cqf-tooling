@@ -1,8 +1,7 @@
 package org.opencds.cqf.tooling.parameter;
 
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
 import java.util.HashSet;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 public class TransformErsdParameters {
     public String pathToBundle; // -pathtobundle (-ptb)

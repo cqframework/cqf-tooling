@@ -6,8 +6,7 @@ import org.opencds.cqf.tooling.processor.IGTestProcessor;
 import org.opencds.cqf.tooling.processor.argument.TestIGArgumentsProcessor;
 
 public class TestIGOperation extends Operation {
-    public TestIGOperation() {
-    }
+    public TestIGOperation() {}
 
     @Override
     public void execute(String[] args) {
@@ -15,8 +14,7 @@ public class TestIGOperation extends Operation {
         try {
             params = new TestIGArgumentsProcessor().parseAndConvert(args);
             new IGTestProcessor().testIg(params);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }
@@ -31,14 +29,14 @@ public class TestIGOperation extends Operation {
             "/Users/Adam/Src/DBCG/connectathon/fhir401/ig.ini",
             "-root-dir",
             "/Users/Adam/Src/DBCG/connectathon/fhir401",
-//            "-igcb",
-//            "http://fhir.org/guides/dbcg/connectathon/ImplementationGuide/fhir.dbcg.connectathon-r4",
+            //            "-igcb",
+            //            "http://fhir.org/guides/dbcg/connectathon/ImplementationGuide/fhir.dbcg.connectathon-r4",
             "-fv",
             "4.0.1",
             "-tcp",
             "/Users/Adam/Src/DBCG/connectathon/fhir401/input/tests",
             "-fs",
-            //"http://localhost:8080/cqf-ruler-r4/fhir"
+            // "http://localhost:8080/cqf-ruler-r4/fhir"
             "http://192.168.2.194:8082/cqf-ruler-r4/fhir"
         });
     }

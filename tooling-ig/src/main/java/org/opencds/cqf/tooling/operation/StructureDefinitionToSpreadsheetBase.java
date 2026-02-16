@@ -5,6 +5,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.acceleratorkit.CanonicalResourceAtlas;
 
+@SuppressWarnings("checkstyle:AbstractClassName")
 public abstract class StructureDefinitionToSpreadsheetBase extends Operation {
     protected String inputPath;
     protected String resourcePaths;
@@ -18,10 +19,14 @@ public abstract class StructureDefinitionToSpreadsheetBase extends Operation {
     protected XSSFCellStyle linkStyle;
 
     protected boolean isParameterListComplete() {
-        if (null == inputPath || inputPath.length() < 1 ||
-                null == modelName || modelName.length() < 1 ||
-                null == modelVersion || modelName.length() < 1 ||
-                null == resourcePaths || resourcePaths.length() < 1) {
+        if (null == inputPath
+                || inputPath.length() < 1
+                || null == modelName
+                || modelName.length() < 1
+                || null == modelVersion
+                || modelName.length() < 1
+                || null == resourcePaths
+                || resourcePaths.length() < 1) {
             System.out.println("These parameters are required: ");
             System.out.println("-modelName/-mn");
             System.out.println("-modelVersion/-mv");

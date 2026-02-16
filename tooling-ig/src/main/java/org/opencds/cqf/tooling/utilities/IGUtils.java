@@ -1,16 +1,6 @@
 package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r5.model.ImplementationGuide;
-import org.hl7.fhir.utilities.Utilities;
-import org.opencds.cqf.tooling.exception.IGInitializationException;
-import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,10 +11,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r5.model.ImplementationGuide;
+import org.hl7.fhir.utilities.Utilities;
+import org.opencds.cqf.tooling.exception.IGInitializationException;
+import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IGUtils {
     private static final Logger logger = LoggerFactory.getLogger(IGUtils.class);
-    private IGUtils () {}
+
+    private IGUtils() {}
+
     public static String getImplementationGuideCanonicalBase(String url) {
         String canonicalBase = null;
 
@@ -37,7 +38,8 @@ public class IGUtils {
 
     public static List<String> extractResourcePaths(String rootDir, ImplementationGuide sourceIg) throws IOException {
         List<String> result = new ArrayList<>();
-        for (ImplementationGuide.ImplementationGuideDefinitionParameterComponent p : sourceIg.getDefinition().getParameter()) {
+        for (ImplementationGuide.ImplementationGuideDefinitionParameterComponent p :
+                sourceIg.getDefinition().getParameter()) {
             if (p.getCode().equals("path-resource")) {
                 result.add(Utilities.path(rootDir, p.getValue()));
             }
@@ -95,8 +97,7 @@ public class IGUtils {
         String combinedPath = null;
         try {
             combinedPath = Utilities.path(rootDir, path);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             return null;
         }
 
@@ -128,10 +129,10 @@ public class IGUtils {
         public IGInfo(FhirContext fhirContext, String rootDir) {
             if (fhirContext == null) {
                 this.fhirContext = FhirContext.forR4Cached();
-                logger.info("The FHIR context was not provided, using {}",
+                logger.info(
+                        "The FHIR context was not provided, using {}",
                         this.fhirContext.getVersion().getVersion().getFhirVersionString());
-            }
-            else {
+            } else {
                 this.fhirContext = fhirContext;
             }
             if (rootDir == null) {
@@ -173,9 +174,9 @@ public class IGUtils {
                         .collect(Collectors.toList());
                 if (pathList.isEmpty()) {
                     logger.error("Unable to determine path to IG ini file");
-                    throw new IGInitializationException("An IG ini file must be present! See https://build.fhir.org/ig/FHIR/ig-guidance/using-templates.html#igroot for more information.");
-                }
-                else if (pathList.size() > 1) {
+                    throw new IGInitializationException(
+                            "An IG ini file must be present! See https://build.fhir.org/ig/FHIR/ig-guidance/using-templates.html#igroot for more information.");
+                } else if (pathList.size() > 1) {
                     logger.warn("Found multiple IG ini files, using {}", pathList.get(0));
                 }
                 return pathList.get(0);
@@ -190,15 +191,15 @@ public class IGUtils {
                 return this.igPath;
             }
             try {
-                List<String> igList = FileUtils.readLines(new File(iniPath), StandardCharsets.UTF_8)
-                        .stream().filter(s -> s.startsWith("ig")).map(
-                                s -> StringUtils.deleteWhitespace(s).replace("ig=", ""))
+                List<String> igList = FileUtils.readLines(new File(iniPath), StandardCharsets.UTF_8).stream()
+                        .filter(s -> s.startsWith("ig"))
+                        .map(s -> StringUtils.deleteWhitespace(s).replace("ig=", ""))
                         .collect(Collectors.toList());
                 if (igList.isEmpty()) {
                     logger.error("Unable to determine path to IG resource file");
-                    throw new IGInitializationException("An IG resource file must be present! See https://build.fhir.org/ig/FHIR/ig-guidance/using-templates.html#igroot-input for more information.");
-                }
-                else if (igList.size() > 1) {
+                    throw new IGInitializationException(
+                            "An IG resource file must be present! See https://build.fhir.org/ig/FHIR/ig-guidance/using-templates.html#igroot-input for more information.");
+                } else if (igList.size() > 1) {
                     logger.warn("Found multiple IG resource files, using {}", igList.get(0));
                 }
                 return FilenameUtils.concat(rootDir, igList.get(0));
@@ -222,7 +223,8 @@ public class IGUtils {
             if (new File(candidate).isDirectory()) {
                 return candidate;
             } else {
-                String message = "Unable to locate CQL binary directory, Please see https://github.com/cqframework/sample-content-ig#directory-structure for guidance on content IG directory structure.";
+                String message =
+                        "Unable to locate CQL binary directory, Please see https://github.com/cqframework/sample-content-ig#directory-structure for guidance on content IG directory structure.";
                 logger.error(message);
                 throw new IGInitializationException(message);
             }
@@ -236,7 +238,8 @@ public class IGUtils {
             if (new File(candidate).isDirectory()) {
                 return candidate;
             } else {
-                String message = "Unable to locate the resources directory, Please see https://github.com/cqframework/sample-content-ig#directory-structure for guidance on content IG directory structure.";
+                String message =
+                        "Unable to locate the resources directory, Please see https://github.com/cqframework/sample-content-ig#directory-structure for guidance on content IG directory structure.";
                 logger.error(message);
                 throw new IGInitializationException(message);
             }
@@ -251,7 +254,8 @@ public class IGUtils {
                 if (new File(candidate).isDirectory()) {
                     return candidate;
                 } else {
-                    logger.warn("Unable to locate the Library resource directory. The base resources path will be used.");
+                    logger.warn(
+                            "Unable to locate the Library resource directory. The base resources path will be used.");
                     return getResourcePath();
                 }
             }
@@ -275,7 +279,8 @@ public class IGUtils {
                 if (new File(candidate).isDirectory()) {
                     return candidate;
                 } else {
-                    logger.warn("Unable to locate the PlanDefinition resource directory. The base resources path will be used.");
+                    logger.warn(
+                            "Unable to locate the PlanDefinition resource directory. The base resources path will be used.");
                     return getResourcePath();
                 }
             }
@@ -299,7 +304,8 @@ public class IGUtils {
                 if (new File(candidate).isDirectory()) {
                     return candidate;
                 } else {
-                    logger.warn("Unable to locate the Measure resource directory. The base resources path will be used.");
+                    logger.warn(
+                            "Unable to locate the Measure resource directory. The base resources path will be used.");
                     return getResourcePath();
                 }
             }
@@ -359,7 +365,8 @@ public class IGUtils {
             if (new File(candidate).isDirectory()) {
                 return candidate;
             } else {
-                logger.warn("Unable to locate the CodeSystem resource directory. The base resources path will be used.");
+                logger.warn(
+                        "Unable to locate the CodeSystem resource directory. The base resources path will be used.");
                 return getResourcePath();
             }
         }
@@ -372,7 +379,8 @@ public class IGUtils {
             if (new File(candidate).isDirectory()) {
                 return candidate;
             } else {
-                logger.warn("Unable to locate the ActivityDefinition resource directory. The base resources path will be used.");
+                logger.warn(
+                        "Unable to locate the ActivityDefinition resource directory. The base resources path will be used.");
                 return getResourcePath();
             }
         }
@@ -385,7 +393,8 @@ public class IGUtils {
             if (new File(candidate).isDirectory()) {
                 return candidate;
             } else {
-                logger.warn("Unable to locate the Questionnaire resource directory. The base resources path will be used.");
+                logger.warn(
+                        "Unable to locate the Questionnaire resource directory. The base resources path will be used.");
                 return getResourcePath();
             }
         }
@@ -396,12 +405,16 @@ public class IGUtils {
             }
             switch (this.fhirContext.getVersion().getVersion()) {
                 case DSTU3:
-                    return (ImplementationGuide) ResourceAndTypeConverter.stu3ToR5Resource(IOUtils.readResource(igPath, this.fhirContext));
+                    return (ImplementationGuide)
+                            ResourceAndTypeConverter.stu3ToR5Resource(IOUtils.readResource(igPath, this.fhirContext));
                 case R4:
-                    return (ImplementationGuide) ResourceAndTypeConverter.r4ToR5Resource(IOUtils.readResource(igPath, this.fhirContext));
-                case R5: return (ImplementationGuide) IOUtils.readResource(igPath, this.fhirContext);
-                default: throw new IGInitializationException(
-                        "Unsupported FHIR context: " + this.fhirContext.getVersion().getVersion().getFhirVersionString());
+                    return (ImplementationGuide)
+                            ResourceAndTypeConverter.r4ToR5Resource(IOUtils.readResource(igPath, this.fhirContext));
+                case R5:
+                    return (ImplementationGuide) IOUtils.readResource(igPath, this.fhirContext);
+                default:
+                    throw new IGInitializationException("Unsupported FHIR context: "
+                            + this.fhirContext.getVersion().getVersion().getFhirVersionString());
             }
         }
 

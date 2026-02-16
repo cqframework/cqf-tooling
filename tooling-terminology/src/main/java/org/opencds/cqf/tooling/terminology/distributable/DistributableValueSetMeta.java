@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.terminology.distributable;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.time.Instant;
 import java.util.Date;
-
 import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -11,11 +11,10 @@ import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("checkstyle:MemberName")
 public class DistributableValueSetMeta {
     private static final Logger logger = LoggerFactory.getLogger(DistributableValueSetMeta.class);
 
@@ -40,10 +39,14 @@ public class DistributableValueSetMeta {
 
     final String RULES_TEXT_URL = "http://hl7.org/fhir/StructureDefinition/valueset-rules-text";
     final String WARNING_URL = "http://hl7.org/fhir/StructureDefinition/valueset-warning";
-    final String CLINICAL_FOCUS_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus";
-    final String DATA_ELEMENT_SCOPE_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope";
-    final String INCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria";
-    final String EXCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria";
+    final String CLINICAL_FOCUS_URL =
+            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus";
+    final String DATA_ELEMENT_SCOPE_URL =
+            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope";
+    final String INCLUSION_CRITERIA_URL =
+            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria";
+    final String EXCLUSION_CRITERIA_URL =
+            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria";
     final String DISTRIBUTABLE_PROFILE_URL = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-distributablevalueset";
     final String PUBLISHABLE_PROFILE_URL = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablevalueset";
 
@@ -52,9 +55,18 @@ public class DistributableValueSetMeta {
         vs.setId(id);
         vs.setMeta(new Meta().addProfile(DISTRIBUTABLE_PROFILE_URL).addProfile(PUBLISHABLE_PROFILE_URL));
         vs.setVersion(version);
-        vs.setName(name == null || name.isEmpty() ? WordUtils.capitalizeFully(id.replaceAll("-", " ")).replaceAll(" ", "_") : WordUtils.capitalizeFully(name));
-        vs.setTitle(title == null || title.isEmpty() ? WordUtils.capitalizeFully(id.replaceAll("-", " ")) : WordUtils.capitalizeFully(title));
-        vs.setStatus(status == null || status.isEmpty() ? Enumerations.PublicationStatus.ACTIVE : Enumerations.PublicationStatus.fromCode(status));
+        vs.setName(
+                name == null || name.isEmpty()
+                        ? WordUtils.capitalizeFully(id.replaceAll("-", " ")).replaceAll(" ", "_")
+                        : WordUtils.capitalizeFully(name));
+        vs.setTitle(
+                title == null || title.isEmpty()
+                        ? WordUtils.capitalizeFully(id.replaceAll("-", " "))
+                        : WordUtils.capitalizeFully(title));
+        vs.setStatus(
+                status == null || status.isEmpty()
+                        ? Enumerations.PublicationStatus.ACTIVE
+                        : Enumerations.PublicationStatus.fromCode(status));
         vs.setExperimental(experimental == null || experimental.isEmpty() || Boolean.parseBoolean(experimental));
         vs.setDate(date == null ? Date.from(Instant.now()) : new DateType(date).getValue());
         vs.setDescription(description);
@@ -70,17 +82,22 @@ public class DistributableValueSetMeta {
             vs.addExtension(new Extension().setUrl(CLINICAL_FOCUS_URL).setValue(new StringType(purposeClinicalFocus)));
         }
         if (purposeDataElementScope != null) {
-            vs.addExtension(new Extension().setUrl(DATA_ELEMENT_SCOPE_URL).setValue(new StringType(purposeDataElementScope)));
+            vs.addExtension(
+                    new Extension().setUrl(DATA_ELEMENT_SCOPE_URL).setValue(new StringType(purposeDataElementScope)));
         }
         if (purposeInclusionCriteria != null) {
-            vs.addExtension(new Extension().setUrl(INCLUSION_CRITERIA_URL).setValue(new StringType(purposeInclusionCriteria)));
+            vs.addExtension(
+                    new Extension().setUrl(INCLUSION_CRITERIA_URL).setValue(new StringType(purposeInclusionCriteria)));
         }
         if (purposeExclusionCriteria != null) {
-            vs.addExtension(new Extension().setUrl(EXCLUSION_CRITERIA_URL).setValue(new StringType(purposeExclusionCriteria)));
+            vs.addExtension(
+                    new Extension().setUrl(EXCLUSION_CRITERIA_URL).setValue(new StringType(purposeExclusionCriteria)));
         }
         if (compose != null) {
             try {
-                ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
+                ValueSet tempVs = fhirContext
+                        .newXmlParser()
+                        .parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
                 //
@@ -226,5 +243,4 @@ public class DistributableValueSetMeta {
     public void setPurposeExclusionCriteria(String purposeExclusionCriteria) {
         this.purposeExclusionCriteria = purposeExclusionCriteria;
     }
-
 }

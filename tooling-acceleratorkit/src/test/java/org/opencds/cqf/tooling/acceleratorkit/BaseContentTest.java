@@ -1,5 +1,8 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,13 +12,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Objects;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.testng.annotations.BeforeClass;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.IParser;
 
 /**
  * This class scaffolds the test setup for the AcceleratorKitProcessor.
@@ -52,17 +50,17 @@ public abstract class BaseContentTest {
     protected void init() throws IOException {
         var p = Path.of(tempPath);
         if (!p.toFile().exists() && !p.toAbsolutePath().toFile().exists()) {
-           Files.createDirectories(p);
+            Files.createDirectories(p);
         }
 
         var testPath = p.resolve("content-test-" + scope());
 
         // Clean out any existing tests.
         if (testPath.toFile().exists()) {
-             Files.walk(testPath)
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
+            Files.walk(testPath)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
         }
 
         var f = Files.createDirectory(testPath);
@@ -80,6 +78,7 @@ public abstract class BaseContentTest {
      */
     protected static class Spreadsheet {
         private String path;
+
         public String path() {
             return path;
         }
@@ -90,6 +89,7 @@ public abstract class BaseContentTest {
         }
 
         private String encoding;
+
         public String encoding() {
             return encoding;
         }
@@ -100,6 +100,7 @@ public abstract class BaseContentTest {
         }
 
         private String scope;
+
         private String scope() {
             return scope;
         }
@@ -110,6 +111,7 @@ public abstract class BaseContentTest {
         }
 
         private String dataElementPages;
+
         public String dataElementPages() {
             return dataElementPages;
         }
@@ -120,6 +122,7 @@ public abstract class BaseContentTest {
         }
 
         private String testCases;
+
         public String testCases() {
             return testCases;
         }
@@ -139,7 +142,8 @@ public abstract class BaseContentTest {
             "-e", encoding(),
             "-tc", testCasesPath() != null ? testCasesPath().toAbsolutePath().toString() : null
         };
-    };
+    }
+    ;
 
     protected String[] args() {
 

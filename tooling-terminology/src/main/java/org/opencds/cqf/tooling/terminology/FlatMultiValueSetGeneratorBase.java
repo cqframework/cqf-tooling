@@ -4,6 +4,8 @@
 */
 package org.opencds.cqf.tooling.terminology;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
@@ -12,7 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -22,37 +23,48 @@ import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-
+@SuppressWarnings("checkstyle:AbstractClassName")
 public abstract class FlatMultiValueSetGeneratorBase extends Operation {
 
-    private String pathToSpreadsheet;        // -pathtospreadsheet (-pts)
-    private String outputPath = "src/main/resources/org/opencds/cqf/tooling/terminology/output";  // -outputpath (-op)
-    private String encoding = "json";        // -encoding (-e) { "xml", "json" }
-    private String publisher;                // -publisher (-p)                   // Publisher name
-    private String publisherNamespace;       // -publishernamespace (-pns)        // Publisher namespace
+    private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
+    private String outputPath = "src/main/resources/org/opencds/cqf/tooling/terminology/output"; // -outputpath (-op)
+    private String encoding = "json"; // -encoding (-e) { "xml", "json" }
+    private String publisher; // -publisher (-p)                   // Publisher name
+    private String publisherNamespace; // -publishernamespace (-pns)        // Publisher namespace
     private String valueSetIdentifierSystem; // -valuesetidentifiersystem (-vsis) // ValueSet.Identifier System
 
     // Code sheet defaults
-    private int codeSheetNum = 2;         // -codesheetnum (-csn)         // Codes Sheet // -1 indicates load all sheets
-    private int codeListRow = 1;          // -codelistrow (-clr)          // Row at which the codes start
-    private int valueSetTitleCol = 0;     // -valuesettitlecol (-vstc)    // ValueSet Title
-    private int valueSetOidCol = 1;       // -valuesetoidcol (-vsoc)      // ValueSet OID
-    private int valueSetVersionCol = 2;   // -valuesetversioncol (-vsvc)  // ValueSet Version
-    private int codeCol = 3;              // -codecol (-cc)               // Code column
-    private int descriptionCol = 4;       // -descriptioncol (-dc)        // Code Description Column
-    private int systemNameCol = 5;        // -systemnamecol (-snc)        // Code System Name Column
-    private int systemOidCol = 6;         // -systemoidcol (-soc)         // Code System OID Column
-    private int versionCol = 7;           // -versioncol (-vc)            // Code System Version Column
-    private int expansionIdCol = -1;      // -expansionidcol (-eic)       // Expansion ID Column
+    private int codeSheetNum = 2; // -codesheetnum (-csn)         // Codes Sheet // -1 indicates load all sheets
+    private int codeListRow = 1; // -codelistrow (-clr)          // Row at which the codes start
+    private int valueSetTitleCol = 0; // -valuesettitlecol (-vstc)    // ValueSet Title
+    private int valueSetOidCol = 1; // -valuesetoidcol (-vsoc)      // ValueSet OID
+    private int valueSetVersionCol = 2; // -valuesetversioncol (-vsvc)  // ValueSet Version
+    private int codeCol = 3; // -codecol (-cc)               // Code column
+    private int descriptionCol = 4; // -descriptioncol (-dc)        // Code Description Column
+    private int systemNameCol = 5; // -systemnamecol (-snc)        // Code System Name Column
+    private int systemOidCol = 6; // -systemoidcol (-soc)         // Code System OID Column
+    private int versionCol = 7; // -versioncol (-vc)            // Code System Version Column
+    private int expansionIdCol = -1; // -expansionidcol (-eic)       // Expansion ID Column
 
     private Map<Integer, ValueSet> valueSets = new HashMap<>();
 
-    public FlatMultiValueSetGeneratorBase(String outputPath, String encoding, String publisher, String publisherNamespace, String valueSetIdentifierSystem,
-        int codeSheetNum, int codeListRow, int valueSetTitleCol, int valueSetOidCol, int valueSetVersionCol, int codeCol,
-        int descriptionCol, int systemNameCol, int systemOidCol, int versionCol, int expansionIdCol)
-    {
+    public FlatMultiValueSetGeneratorBase(
+            String outputPath,
+            String encoding,
+            String publisher,
+            String publisherNamespace,
+            String valueSetIdentifierSystem,
+            int codeSheetNum,
+            int codeListRow,
+            int valueSetTitleCol,
+            int valueSetOidCol,
+            int valueSetVersionCol,
+            int codeCol,
+            int descriptionCol,
+            int systemNameCol,
+            int systemOidCol,
+            int versionCol,
+            int expansionIdCol) {
         this.outputPath = outputPath;
         this.encoding = encoding;
         this.publisher = publisher;
@@ -77,7 +89,8 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
 
         for (String arg : args) {
 
-            if (Arrays.asList("-HedisXlsxToValueSet", "-VsacMultiXlsxToValueSet").contains(arg)) {
+            if (Arrays.asList("-HedisXlsxToValueSet", "-VsacMultiXlsxToValueSet")
+                    .contains(arg)) {
                 continue;
             }
 
@@ -89,24 +102,76 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break;
-                case "encoding": case "e": encoding = value.toLowerCase(); break;
-                case "publisher": case "p": publisher = value; break;
-                case "publishernamespace": case "pns": publisherNamespace = value; break;
-                case "codesheetnum": case "csn": codeSheetNum = Integer.valueOf(value); break;
-                case "codelistrow": case "clr": codeListRow = Integer.valueOf(value); break;
-                case "valuesettitlecol": case "vstc": valueSetTitleCol = Integer.valueOf(value); break;
-                case "valuesetoidcol": case "vsoc": valueSetOidCol = Integer.valueOf(value); break;
-                case "valuesetversioncol": case "vsvc" : valueSetVersionCol = Integer.valueOf(value); break;
-                case "valuesetidentifiersystem": case "vsis": valueSetIdentifierSystem = value; break;
-                case "codecol": case "cc": codeCol = Integer.valueOf(value); break;
-                case "descriptioncol": case "dc": descriptionCol = Integer.valueOf(value); break;
-                case "systemnamecol": case "snc": systemNameCol = Integer.valueOf(value); break;
-                case "systemoidcol": case "soc": systemOidCol = Integer.valueOf(value); break;
-                case "versioncol": case "vc": versionCol = Integer.valueOf(value); break;
-                case "expansionidcol": case "eic": expansionIdCol = Integer.valueOf(value); break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                case "outputpath":
+                case "op":
+                    setOutputPath(value);
+                    break; // -outputpath (-op)
+                case "pathtospreadsheet":
+                case "pts":
+                    pathToSpreadsheet = value;
+                    break;
+                case "encoding":
+                case "e":
+                    encoding = value.toLowerCase();
+                    break;
+                case "publisher":
+                case "p":
+                    publisher = value;
+                    break;
+                case "publishernamespace":
+                case "pns":
+                    publisherNamespace = value;
+                    break;
+                case "codesheetnum":
+                case "csn":
+                    codeSheetNum = Integer.valueOf(value);
+                    break;
+                case "codelistrow":
+                case "clr":
+                    codeListRow = Integer.valueOf(value);
+                    break;
+                case "valuesettitlecol":
+                case "vstc":
+                    valueSetTitleCol = Integer.valueOf(value);
+                    break;
+                case "valuesetoidcol":
+                case "vsoc":
+                    valueSetOidCol = Integer.valueOf(value);
+                    break;
+                case "valuesetversioncol":
+                case "vsvc":
+                    valueSetVersionCol = Integer.valueOf(value);
+                    break;
+                case "valuesetidentifiersystem":
+                case "vsis":
+                    valueSetIdentifierSystem = value;
+                    break;
+                case "codecol":
+                case "cc":
+                    codeCol = Integer.valueOf(value);
+                    break;
+                case "descriptioncol":
+                case "dc":
+                    descriptionCol = Integer.valueOf(value);
+                    break;
+                case "systemnamecol":
+                case "snc":
+                    systemNameCol = Integer.valueOf(value);
+                    break;
+                case "systemoidcol":
+                case "soc":
+                    systemOidCol = Integer.valueOf(value);
+                    break;
+                case "versioncol":
+                case "vc":
+                    versionCol = Integer.valueOf(value);
+                    break;
+                case "expansionidcol":
+                case "eic":
+                    expansionIdCol = Integer.valueOf(value);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 
@@ -118,12 +183,10 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
         processWorkbook(workbook);
     }
 
-    protected void processWorkbook(Workbook workbook)
-    {
+    protected void processWorkbook(Workbook workbook) {
         if (codeSheetNum != -1) {
             loadSheet(workbook.getSheetAt(codeSheetNum));
-        }
-        else {
+        } else {
             Iterator<Sheet> it = workbook.sheetIterator();
             while (it.hasNext()) {
                 Sheet sheet = it.next();
@@ -135,7 +198,7 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
 
     protected void loadSheet(Sheet sheet) {
         Iterator<Row> it = sheet.rowIterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Row row = it.next();
             if (row.getRowNum() < codeListRow) {
                 continue;
@@ -144,7 +207,8 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
             // ValueSet.OID.
             String valueSetOid = SpreadsheetHelper.getCellAsString(row.getCell(valueSetOidCol));
             if (valueSetOid == null || valueSetOid.isEmpty()) {
-                throw new IllegalArgumentException(String.format("No value set Oid value found on row: %d", row.getRowNum()));
+                throw new IllegalArgumentException(
+                        String.format("No value set Oid value found on row: %d", row.getRowNum()));
             }
             int valueSetHash = valueSetOid.hashCode();
 
@@ -160,7 +224,8 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
             String valueSetUrl = publisherNamespace.concat("/ValueSet/").concat(valueSetOid);
 
             // ValueSet.Expansion.Identifier
-            String valueSetExpansionId = expansionIdCol >= 0 ? SpreadsheetHelper.getCellAsString(row.getCell(expansionIdCol)) : null;
+            String valueSetExpansionId =
+                    expansionIdCol >= 0 ? SpreadsheetHelper.getCellAsString(row.getCell(expansionIdCol)) : null;
 
             // Code
             String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
@@ -205,8 +270,7 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
                 vs.getExpansion().setTimestamp(java.util.Date.from(Instant.now()));
                 vs.getExpansion().getContains().add(component);
                 valueSets.put(valueSetHash, vs);
-            }
-            else {
+            } else {
                 ValueSet targetValueSet = valueSets.get(valueSetHash);
                 targetValueSet.getExpansion().getContains().add(component);
             }
@@ -215,42 +279,37 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
 
     protected String getCodeSystemFromRow(Row row) {
         String system = SpreadsheetHelper.getCellAsString(row.getCell(systemNameCol));
-        if (system == null)  {
+        if (system == null) {
             system = SpreadsheetHelper.getCellAsString(row.getCell(systemOidCol));
             if (system == null) {
                 throw new IllegalArgumentException(String.format("No system value found on row: %d", row.getRowNum()));
             }
             system = CodeSystemLookupDictionary.getUrlFromOid(system);
-        }
-        else {
+        } else {
             system = CodeSystemLookupDictionary.getUrlFromName(system);
         }
         return system;
     }
 
-    protected void writeValueSetsToFiles(Map<Integer, ValueSet> valueSets)
-    {
+    protected void writeValueSetsToFiles(Map<Integer, ValueSet> valueSets) {
         for (Map.Entry<Integer, ValueSet> vsEntry : valueSets.entrySet()) {
             writeValueSetToFile("valueset-" + vsEntry.getValue().getId() + "." + encoding, vsEntry.getValue());
         }
     }
 
     protected void writeValueSetToFile(String fileName, ValueSet vs) {
-        IParser parser =
-            encoding == null
+        IParser parser = encoding == null
                 ? FhirContext.forDstu3Cached().newJsonParser()
                 : encoding.toLowerCase().startsWith("j")
-                ? FhirContext.forDstu3Cached().newJsonParser()
-                : FhirContext.forDstu3Cached().newXmlParser();
+                        ? FhirContext.forDstu3Cached().newJsonParser()
+                        : FhirContext.forDstu3Cached().newXmlParser();
 
         try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), fileName))) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("Error writing ValueSet to file: " + e.getMessage());
         }
     }
 }
-

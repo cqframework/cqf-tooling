@@ -1,13 +1,12 @@
 package org.opencds.cqf.tooling.operations.stripcontent;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.io.File;
 import java.util.Collection;
-
 import org.apache.commons.io.FileUtils;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkArgument;
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 /**
  * This class executes the StripContent command line operation. It picks the correct version
@@ -70,7 +69,7 @@ public class StripContentExecutor {
     }
 
     private Collection<File> listResourceFiles(File file) {
-        return FileUtils.listFiles(file, new String[] { "json", "xml"}, true);
+        return FileUtils.listFiles(file, new String[] {"json", "xml"}, true);
     }
 
     private FhirVersionEnum versionForString(String version) {

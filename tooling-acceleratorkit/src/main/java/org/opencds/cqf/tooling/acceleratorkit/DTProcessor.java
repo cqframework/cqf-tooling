@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -37,8 +37,6 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
-
 public class DTProcessor extends Operation {
 
     private static final Logger logger = LoggerFactory.getLogger(DTProcessor.class);
@@ -47,15 +45,20 @@ public class DTProcessor extends Operation {
     private String encoding = "json"; // -encoding (-e)
 
     // Decision Tables
-    private String decisionTablePages; // -decisiontablepages (-dtp) comma-separated list of the names of pages in the workbook to be processed
-    private String decisionTablePagePrefix; // -decisiontablepageprefix (-dtpf) all pages with a name starting with this prefix will be processed
+    private String
+            decisionTablePages; // -decisiontablepages (-dtp) comma-separated list of the names of pages in the workbook
+    // to be processed
+    private String
+            decisionTablePagePrefix; // -decisiontablepageprefix (-dtpf) all pages with a name starting with this prefix
+    // will be processed
 
     // Canonical Base
     private String canonicalBase = null;
 
     private String newLine = System.lineSeparator();
     private Map<String, PlanDefinition> planDefinitions = new LinkedHashMap<String, PlanDefinition>();
-    // private Map<String, List<PlanDefinition>> planDefinitionsByActivity = new LinkedHashMap<String, List<PlanDefinition>>();
+    // private Map<String, List<PlanDefinition>> planDefinitionsByActivity = new LinkedHashMap<String,
+    // List<PlanDefinition>>();
     private Map<String, Library> libraries = new LinkedHashMap<String, Library>();
     private Map<String, StringBuilder> libraryCQL = new LinkedHashMap<String, StringBuilder>();
 
@@ -76,12 +79,28 @@ public class DTProcessor extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
-                case "encoding": case "e": encoding = value.toLowerCase(); break; // -encoding (-e)
-                case "decisiontablepages": case "dtp": decisionTablePages = value; break; // -decisiontablepages (-dtp)
-                case "decisiontablepageprefix": case "dtpf": decisionTablePagePrefix = value; break; // -decisiontablepageprefix (-dtpf)
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                case "outputpath":
+                case "op":
+                    setOutputPath(value);
+                    break; // -outputpath (-op)
+                case "pathtospreadsheet":
+                case "pts":
+                    pathToSpreadsheet = value;
+                    break; // -pathtospreadsheet (-pts)
+                case "encoding":
+                case "e":
+                    encoding = value.toLowerCase();
+                    break; // -encoding (-e)
+                case "decisiontablepages":
+                case "dtp":
+                    decisionTablePages = value;
+                    break; // -decisiontablepages (-dtp)
+                case "decisiontablepageprefix":
+                case "dtpf":
+                    decisionTablePagePrefix = value;
+                    break; // -decisiontablepageprefix (-dtpf)
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 
@@ -127,8 +146,7 @@ public class DTProcessor extends Operation {
         Sheet sheet = workbook.getSheet(page);
         if (sheet == null) {
             logger.info(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
-        }
-        else {
+        } else {
             logger.info(String.format("Processing Sheet %s.", page));
             processDecisionTableSheet(workbook, sheet);
         }
@@ -186,7 +204,10 @@ public class DTProcessor extends Operation {
         Coding activity = activityMap.get(activityCode);
 
         if (activity == null) {
-            activity = new Coding().setCode(activityCode).setSystem(activityCodeSystem).setDisplay(activityDisplay);
+            activity = new Coding()
+                    .setCode(activityCode)
+                    .setSystem(activityCodeSystem)
+                    .setDisplay(activityDisplay);
             activityMap.put(activityCode, activity);
         }
 
@@ -239,7 +260,10 @@ public class DTProcessor extends Operation {
         planDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
         planDefinition.setDate(java.util.Date.from(Instant.now()));
         planDefinition.setExperimental(false);
-        planDefinition.setType(new CodeableConcept().addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/plan-definition-type").setCode("eca-rule")));
+        planDefinition.setType(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/plan-definition-type")
+                        .setCode("eca-rule")));
 
         if (!it.hasNext()) {
             throw new IllegalArgumentException("Expected Trigger row");
@@ -268,8 +292,8 @@ public class DTProcessor extends Operation {
                     .setCode(new Coding()
                             .setCode("task")
                             .setSystem("http://terminology.hl7.org/CodeSystem/usage-context-type")
-                            .setDisplay("Workflow Task")
-                    ).setValue(new CodeableConcept().addCoding(activityCoding)));
+                            .setDisplay("Workflow Task"))
+                    .setValue(new CodeableConcept().addCoding(activityCoding)));
         }
 
         if (!it.hasNext()) {
@@ -287,26 +311,22 @@ public class DTProcessor extends Operation {
         while (cells.hasNext()) {
             cell = cells.next();
             if (cell.getStringCellValue().toLowerCase().startsWith("input")
-                || cell.getStringCellValue().toLowerCase().startsWith("inputs")
-                || cell.getStringCellValue().toLowerCase().startsWith("input(s)")) {
+                    || cell.getStringCellValue().toLowerCase().startsWith("inputs")
+                    || cell.getStringCellValue().toLowerCase().startsWith("input(s)")) {
                 inputColumnIndex = cell.getColumnIndex();
-            }
-            else if (cell.getStringCellValue().toLowerCase().startsWith("output")
+            } else if (cell.getStringCellValue().toLowerCase().startsWith("output")
                     || cell.getStringCellValue().toLowerCase().startsWith("outputs")
                     || cell.getStringCellValue().toLowerCase().startsWith("output(s)")) {
                 outputColumnIndex = cell.getColumnIndex();
-            }
-            else if (cell.getStringCellValue().toLowerCase().startsWith("action")
+            } else if (cell.getStringCellValue().toLowerCase().startsWith("action")
                     || cell.getStringCellValue().toLowerCase().startsWith("actions")
                     || cell.getStringCellValue().toLowerCase().startsWith("action(s)")) {
                 actionColumnIndex = cell.getColumnIndex();
-            }
-            else if (cell.getStringCellValue().toLowerCase().startsWith("annotation")
+            } else if (cell.getStringCellValue().toLowerCase().startsWith("annotation")
                     || cell.getStringCellValue().toLowerCase().startsWith("annotations")
                     || cell.getStringCellValue().toLowerCase().startsWith("annotation(s)")) {
                 annotationColumnIndex = cell.getColumnIndex();
-            }
-            else if (cell.getStringCellValue().toLowerCase().startsWith("reference")
+            } else if (cell.getStringCellValue().toLowerCase().startsWith("reference")
                     || cell.getStringCellValue().toLowerCase().startsWith("references")
                     || cell.getStringCellValue().toLowerCase().startsWith("reference(s)")) {
                 referenceColumnIndex = cell.getColumnIndex();
@@ -317,8 +337,16 @@ public class DTProcessor extends Operation {
         int actionId = 1;
         PlanDefinition.PlanDefinitionActionComponent currentAction = null;
         String currentAnnotationValue = null;
-        for (;;) {
-            PlanDefinition.PlanDefinitionActionComponent subAction = processAction(it, inputColumnIndex, outputColumnIndex, actionColumnIndex, annotationColumnIndex, actionId, currentAnnotationValue, referenceColumnIndex);
+        for (; ; ) {
+            PlanDefinition.PlanDefinitionActionComponent subAction = processAction(
+                    it,
+                    inputColumnIndex,
+                    outputColumnIndex,
+                    actionColumnIndex,
+                    annotationColumnIndex,
+                    actionId,
+                    currentAnnotationValue,
+                    referenceColumnIndex);
 
             if (subAction == null) {
                 break;
@@ -344,8 +372,7 @@ public class DTProcessor extends Operation {
 
                 currentAnnotationValue = subAction.getTextEquivalent();
                 action.getAction().add(subAction);
-            }
-            else {
+            } else {
                 mergeActions(currentAction, subAction);
             }
         }
@@ -354,20 +381,29 @@ public class DTProcessor extends Operation {
     }
 
     // Merge action conditions as an Or, given that the actions are equal
-    private void mergeActions(PlanDefinition.PlanDefinitionActionComponent currentAction, PlanDefinition.PlanDefinitionActionComponent newAction) {
+    private void mergeActions(
+            PlanDefinition.PlanDefinitionActionComponent currentAction,
+            PlanDefinition.PlanDefinitionActionComponent newAction) {
         PlanDefinition.PlanDefinitionActionConditionComponent currentCondition = currentAction.getConditionFirstRep();
         PlanDefinition.PlanDefinitionActionConditionComponent newCondition = newAction.getConditionFirstRep();
 
         if (currentCondition == null) {
             currentAction.getCondition().add(newCondition);
-        }
-        else if (newCondition != null) {
-            currentCondition.getExpression().setDescription(String.format("(%s)%n  OR (%s)", currentCondition.getExpression().getDescription(), newCondition.getExpression().getDescription()));
+        } else if (newCondition != null) {
+            currentCondition
+                    .getExpression()
+                    .setDescription(String.format(
+                            "(%s)%n  OR (%s)",
+                            currentCondition.getExpression().getDescription(),
+                            newCondition.getExpression().getDescription()));
         }
     }
 
-    // Returns true if the given actions are equal (i.e. are for the same thing, meaning they have the same title, textEquivalent, description, and subactions)
-    private boolean actionsEqual(PlanDefinition.PlanDefinitionActionComponent currentAction, PlanDefinition.PlanDefinitionActionComponent newAction) {
+    // Returns true if the given actions are equal (i.e. are for the same thing, meaning they have the same title,
+    // textEquivalent, description, and subactions)
+    private boolean actionsEqual(
+            PlanDefinition.PlanDefinitionActionComponent currentAction,
+            PlanDefinition.PlanDefinitionActionComponent newAction) {
         if (currentAction == null) {
             return false;
         }
@@ -375,10 +411,11 @@ public class DTProcessor extends Operation {
         List<PlanDefinition.PlanDefinitionActionComponent> currentActionSubs = currentAction.getAction();
         List<PlanDefinition.PlanDefinitionActionComponent> newActionSubs = newAction.getAction();
 
-
-        String currentActionDescription = currentActionSubs.stream().map(PlanDefinition.PlanDefinitionActionComponent::getTitle)
+        String currentActionDescription = currentActionSubs.stream()
+                .map(PlanDefinition.PlanDefinitionActionComponent::getTitle)
                 .collect(Collectors.joining(" AND "));
-        String newActionDescription = newActionSubs.stream().map(PlanDefinition.PlanDefinitionActionComponent::getTitle)
+        String newActionDescription = newActionSubs.stream()
+                .map(PlanDefinition.PlanDefinitionActionComponent::getTitle)
                 .collect(Collectors.joining(" AND "));
 
         return stringsEqual(currentAction.getTitle(), newAction.getTitle())
@@ -391,7 +428,9 @@ public class DTProcessor extends Operation {
         return (left == null && right == null) || (left != null && left.equals(right));
     }
 
-    private boolean subActionsEqual(List<PlanDefinition.PlanDefinitionActionComponent> left, List<PlanDefinition.PlanDefinitionActionComponent> right) {
+    private boolean subActionsEqual(
+            List<PlanDefinition.PlanDefinitionActionComponent> left,
+            List<PlanDefinition.PlanDefinitionActionComponent> right) {
         if (left == null && right == null) {
             return true;
         }
@@ -416,9 +455,9 @@ public class DTProcessor extends Operation {
 
     private boolean rowIsValid(Row row, int inputColumnIndex, int actionColumnIndex, int annotationColumnIndex) {
         // Currently considered "valid" if any of the four known columns have a non-null, non-empty string value.
-        int[] valueColumnIndexes = new int[] { inputColumnIndex, actionColumnIndex, annotationColumnIndex };
+        int[] valueColumnIndexes = new int[] {inputColumnIndex, actionColumnIndex, annotationColumnIndex};
 
-        for (int i=0; i < valueColumnIndexes.length - 1; i++) {
+        for (int i = 0; i < valueColumnIndexes.length - 1; i++) {
             int columnIndex = valueColumnIndexes[i];
             Cell cell = row.getCell(columnIndex);
             if (cell != null) {
@@ -429,15 +468,20 @@ public class DTProcessor extends Operation {
             } else {
                 return false;
             }
-
         }
 
         return true;
     }
 
-    private PlanDefinition.PlanDefinitionActionComponent processAction(Iterator<Row> it, int inputColumnIndex,
-           int outputColumnIndex, int actionColumnIndex, int annotationColumnIndex, int actionId, String currentAnnotationValue,
-           int referenceColumnIndex) {
+    private PlanDefinition.PlanDefinitionActionComponent processAction(
+            Iterator<Row> it,
+            int inputColumnIndex,
+            int outputColumnIndex,
+            int actionColumnIndex,
+            int annotationColumnIndex,
+            int actionId,
+            String currentAnnotationValue,
+            int referenceColumnIndex) {
         if (it.hasNext()) {
             Row row = it.next();
             // If the row is not valid, do not process it.
@@ -455,7 +499,10 @@ public class DTProcessor extends Operation {
                 cell = row.getCell(inputIndex);
                 if (cell != null) {
                     String inputCondition = cell.getStringCellValue();
-                    if (inputCondition != null && !inputCondition.isEmpty() && !inputCondition.equals("") && !inputCondition.toLowerCase().startsWith("decision")) {
+                    if (inputCondition != null
+                            && !inputCondition.isEmpty()
+                            && !inputCondition.equals("")
+                            && !inputCondition.toLowerCase().startsWith("decision")) {
                         conditionValues.add(inputCondition);
                     }
                 }
@@ -469,8 +516,7 @@ public class DTProcessor extends Operation {
             StringBuilder applicabilityCondition = new StringBuilder();
             if (conditionValues.size() == 1) {
                 applicabilityCondition.append(conditionValues.get(0));
-            }
-            else {
+            } else {
                 for (String conditionValue : conditionValues) {
                     if (applicabilityCondition.length() > 0) {
                         applicabilityCondition.append(String.format("%n  AND "));
@@ -481,9 +527,12 @@ public class DTProcessor extends Operation {
                 }
             }
 
-            PlanDefinition.PlanDefinitionActionConditionComponent condition = new PlanDefinition.PlanDefinitionActionConditionComponent();
+            PlanDefinition.PlanDefinitionActionConditionComponent condition =
+                    new PlanDefinition.PlanDefinitionActionConditionComponent();
             condition.setKind(PlanDefinition.ActionConditionKind.APPLICABILITY);
-            condition.setExpression(new Expression().setLanguage("text/cql-identifier").setDescription(applicabilityCondition.toString()));
+            condition.setExpression(new Expression()
+                    .setLanguage("text/cql-identifier")
+                    .setDescription(applicabilityCondition.toString()));
             action.getCondition().add(condition);
 
             List<String> actionValues = new ArrayList<String>();
@@ -502,11 +551,11 @@ public class DTProcessor extends Operation {
 
             if (actionValues.size() == 1) {
                 action.setTitle(actionValues.get(0).replace(System.getProperty("line.separator"), ""));
-            }
-            else {
+            } else {
                 action.setTitle(actionValues.get(0).replace(System.getProperty("line.separator"), ""));
                 for (String actionValue : actionValues) {
-                    PlanDefinition.PlanDefinitionActionComponent subAction = new PlanDefinition.PlanDefinitionActionComponent();
+                    PlanDefinition.PlanDefinitionActionComponent subAction =
+                            new PlanDefinition.PlanDefinitionActionComponent();
                     subAction.setTitle(actionValue);
                     action.getAction().add(subAction);
                 }
@@ -554,14 +603,15 @@ public class DTProcessor extends Operation {
         library.setUrl(canonicalBase + "/Library/" + id);
         library.setTitle(planDefinition.getTitle());
         library.setDescription(planDefinition.getDescription());
-        library.addContent((Attachment)new Attachment().setId("ig-loader-" + id + ".cql"));
+        library.addContent((Attachment) new Attachment().setId("ig-loader-" + id + ".cql"));
 
-        planDefinition.getLibrary().add((CanonicalType)new CanonicalType().setValue(library.getUrl()));
+        planDefinition.getLibrary().add((CanonicalType) new CanonicalType().setValue(library.getUrl()));
 
         StringBuilder cql = new StringBuilder();
         writeLibraryHeader(cql, library);
 
-        for (PlanDefinition.PlanDefinitionActionComponent action : planDefinition.getActionFirstRep().getAction()) {
+        for (PlanDefinition.PlanDefinitionActionComponent action :
+                planDefinition.getActionFirstRep().getAction()) {
             if (action.hasCondition()) {
                 writeActionCondition(cql, action);
             }
@@ -574,9 +624,13 @@ public class DTProcessor extends Operation {
     private void writeActionCondition(StringBuilder cql, PlanDefinition.PlanDefinitionActionComponent action) {
         PlanDefinition.PlanDefinitionActionConditionComponent condition = action.getConditionFirstRep();
         if (condition.getExpression().getExpression() == null) {
-            condition.getExpression().setExpression(
-                    String.format("Should %s", action.hasDescription()
-                            ? action.getDescription().replace("\"", "\\\"") : "perform action"));
+            condition
+                    .getExpression()
+                    .setExpression(String.format(
+                            "Should %s",
+                            action.hasDescription()
+                                    ? action.getDescription().replace("\"", "\\\"")
+                                    : "perform action"));
         }
         cql.append("/*");
         cql.append(newLine);
@@ -584,7 +638,9 @@ public class DTProcessor extends Operation {
         cql.append(newLine);
         cql.append("*/");
         cql.append(newLine);
-        cql.append(String.format("define \"%s\":%n", action.getConditionFirstRep().getExpression().getExpression()));
+        cql.append(String.format(
+                "define \"%s\":%n",
+                action.getConditionFirstRep().getExpression().getExpression()));
         cql.append("  false"); // Output false, manual process to convert the pseudo-code to CQL
         cql.append(newLine);
         cql.append(newLine);
@@ -627,15 +683,13 @@ public class DTProcessor extends Operation {
         if (libraryCQL != null && libraryCQL.size() > 0) {
             for (Map.Entry<String, StringBuilder> entry : libraryCQL.entrySet()) {
                 String outputDirectoryPath = IOUtils.concatFilePath(outputPath, "input", "cql");
-                String outputFilePath = IOUtils.concatFilePath(outputDirectoryPath,
-                        entry.getKey() + ".cql");
+                String outputFilePath = IOUtils.concatFilePath(outputDirectoryPath, entry.getKey() + ".cql");
                 ensurePath(outputDirectoryPath);
 
                 try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
                     writer.write(entry.getValue().toString().getBytes());
                     writer.flush();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                     throw new IllegalArgumentException("Error writing CQL: " + entry.getKey());
                 }
@@ -646,8 +700,7 @@ public class DTProcessor extends Operation {
     private void writePlanDefinitions(String outputPath) {
         if (planDefinitions != null && planDefinitions.size() > 0) {
             for (PlanDefinition planDefinition : planDefinitions.values()) {
-                String outputFilePath = IOUtils.concatFilePath(outputPath,
-                        "input", "resources", "plandefinition");
+                String outputFilePath = IOUtils.concatFilePath(outputPath, "input", "resources", "plandefinition");
                 ensurePath(outputFilePath);
                 writeResource(outputFilePath, planDefinition);
             }
@@ -656,18 +709,28 @@ public class DTProcessor extends Operation {
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
-        String outputFilePath = IOUtils.concatFilePath(path,
-                resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
+        String outputFilePath = IOUtils.concatFilePath(
+                path,
+                resource.getResourceType().toString().toLowerCase() + "-"
+                        + resource.getIdElement().getIdPart() + "." + encoding);
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                     encoding.equals("json")
-                            ? FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                            : FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-            );
+                            ? FhirContext.forR4Cached()
+                                    .newJsonParser()
+                                    .setPrettyPrint(true)
+                                    .encodeResourceToString(resource)
+                                    .getBytes()
+                            : FhirContext.forR4Cached()
+                                    .newXmlParser()
+                                    .setPrettyPrint(true)
+                                    .encodeResourceToString(resource)
+                                    .getBytes());
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new IllegalArgumentException("Error writing resource: " + resource.getIdElement().getIdPart());
+            throw new IllegalArgumentException(
+                    "Error writing resource: " + resource.getIdElement().getIdPart());
         }
     }
 
@@ -682,7 +745,8 @@ public class DTProcessor extends Operation {
         index.append(newLine);
 
         for (PlanDefinition pd : planDefinitions.values()) {
-            index.append(String.format("|[%s](PlanDefinition-%s.html)|%s|", pd.getTitle(), pd.getId(), pd.getDescription()));
+            index.append(
+                    String.format("|[%s](PlanDefinition-%s.html)|%s|", pd.getTitle(), pd.getId(), pd.getDescription()));
             index.append(newLine);
         }
 
@@ -697,8 +761,7 @@ public class DTProcessor extends Operation {
         try (FileOutputStream writer = new FileOutputStream(outputFile)) {
             writer.write(buildPlanDefinitionIndex().getBytes());
             writer.flush();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("Error writing plandefinition index");
         }

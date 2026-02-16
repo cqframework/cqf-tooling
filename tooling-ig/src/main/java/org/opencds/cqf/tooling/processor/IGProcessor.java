@@ -1,7 +1,13 @@
 package org.opencds.cqf.tooling.processor;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
@@ -13,13 +19,6 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Objects.requireNonNull;
 
 public class IGProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(IGProcessor.class);
@@ -35,7 +34,7 @@ public class IGProcessor extends BaseProcessor {
 
     private final List<String> refreshedResourcesNames = new ArrayList<>();
 
-    //mega ig method
+    // mega ig method
     public void publishIG(RefreshIGParameters params) throws IOException {
         if (params.skipPackages == null) {
             params.skipPackages = false;
@@ -52,7 +51,7 @@ public class IGProcessor extends BaseProcessor {
         var rootDirProvided = params.rootDir != null && !params.rootDir.isEmpty();
         var igPathProvided = params.igPath != null && !params.igPath.isEmpty();
 
-        //presence of -x arg means give error details instead of just error count during cql processing
+        // presence of -x arg means give error details instead of just error count during cql processing
         verboseMessaging = (params.verboseMessaging != null ? params.verboseMessaging : false);
 
         if (!iniProvided && (!rootDirProvided || !igPathProvided)) {
@@ -81,42 +80,42 @@ public class IGProcessor extends BaseProcessor {
 
         var fhirContext = IGProcessor.getIgFhirContext(this.getFhirVersion());
 
-        //Use case 1
-        //Scaffold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
-        //Give it a name and generate all the files, cql, library, measure... should be very basic template
-        //ScaffoldProcessor.scaffold(ScaffoldParameters);
+        // Use case 1
+        // Scaffold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
+        // Give it a name and generate all the files, cql, library, measure... should be very basic template
+        // ScaffoldProcessor.scaffold(ScaffoldParameters);
 
-        //Use case 2 while developing in Atom refresh content and run tests for either entire IG or targeted Artifact
-        //refreshContent
+        // Use case 2 while developing in Atom refresh content and run tests for either entire IG or targeted Artifact
+        // refreshContent
         refreshIG(params);
-        //validate
-        //ValidateProcessor.validate(ValidateParameters);
-        //run all tests
-        //IGTestProcessor.testIg(IGTestParameters);
+        // validate
+        // ValidateProcessor.validate(ValidateParameters);
+        // run all tests
+        // IGTestProcessor.testIg(IGTestParameters);
 
-        //Use case 3
-        //package everything
+        // Use case 3
+        // package everything
         var skipPackages = params.skipPackages;
 
         if (Boolean.FALSE.equals(skipPackages)) {
-            new IGBundleProcessor(params.verboseMessaging, new LibraryProcessor(), new CDSHooksProcessor()).bundleIg(
-                    refreshedResourcesNames,
-                    rootDir,
-                    getBinaryPaths(),
-                    params.outputEncoding,
-                    params.includeELM,
-                    params.includeDependencies,
-                    params.includeTerminology,
-                    params.includePatientScenarios,
-                    params.versioned,
-                    params.addBundleTimestamp,
-                    fhirContext,
-                    params.fhirUri
-            );
+            new IGBundleProcessor(params.verboseMessaging, new LibraryProcessor(), new CDSHooksProcessor())
+                    .bundleIg(
+                            refreshedResourcesNames,
+                            rootDir,
+                            getBinaryPaths(),
+                            params.outputEncoding,
+                            params.includeELM,
+                            params.includeDependencies,
+                            params.includeTerminology,
+                            params.includePatientScenarios,
+                            params.versioned,
+                            params.addBundleTimestamp,
+                            fhirContext,
+                            params.fhirUri);
         }
-        //test everything
-        //IGTestProcessor.testIg(IGTestParameters);
-        //Publish?
+        // test everything
+        // IGTestProcessor.testIg(IGTestParameters);
+        // Publish?
     }
 
     public void refreshIG(RefreshIGParameters params) throws IOException {
@@ -142,37 +141,59 @@ public class IGProcessor extends BaseProcessor {
 
         IOUtils.resourceDirectories.addAll(resourceDirs);
         var fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
-        IGProcessor.ensure(rootDir, params.includePatientScenarios, params.includeTerminology,
-                IOUtils.resourceDirectories);
+        IGProcessor.ensure(
+                rootDir, params.includePatientScenarios, params.includeTerminology, IOUtils.resourceDirectories);
 
         var libraryProcessor = new LibraryProcessor();
-        refreshedResourcesNames.addAll(libraryProcessor
-                .refreshIgLibraryContent(this, params.outputEncoding,
-                        params.libraryPath, params.libraryOutputPath, params.versioned,
-                        fhirContext, params.shouldApplySoftwareSystemStamp));
+        refreshedResourcesNames.addAll(libraryProcessor.refreshIgLibraryContent(
+                this,
+                params.outputEncoding,
+                params.libraryPath,
+                params.libraryOutputPath,
+                params.versioned,
+                fhirContext,
+                params.shouldApplySoftwareSystemStamp));
 
         var measureProcessor = new MeasureProcessor();
         if (Strings.isNullOrEmpty(params.measureOutputPath)) {
             refreshedResourcesNames.addAll(measureProcessor.refreshIgMeasureContent(
-                    this, params.outputEncoding, params.versioned,
-                    fhirContext, params.measureToRefreshPath, params.shouldApplySoftwareSystemStamp,
+                    this,
+                    params.outputEncoding,
+                    params.versioned,
+                    fhirContext,
+                    params.measureToRefreshPath,
+                    params.shouldApplySoftwareSystemStamp,
                     params.includePopulationLevelDataRequirements));
         } else {
             refreshedResourcesNames.addAll(measureProcessor.refreshIgMeasureContent(
-                    this, params.outputEncoding, params.measureOutputPath, params.versioned,
-                    fhirContext, params.measureToRefreshPath, params.shouldApplySoftwareSystemStamp,
+                    this,
+                    params.outputEncoding,
+                    params.measureOutputPath,
+                    params.versioned,
+                    fhirContext,
+                    params.measureToRefreshPath,
+                    params.shouldApplySoftwareSystemStamp,
                     params.includePopulationLevelDataRequirements));
         }
 
         var planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor);
         if (Strings.isNullOrEmpty(params.planDefinitionOutputPath)) {
             refreshedResourcesNames.addAll(planDefinitionProcessor.refreshIgPlanDefinitionContent(
-                    this, params.outputEncoding, params.versioned, fhirContext,
-                    params.planDefinitionToRefreshPath, params.shouldApplySoftwareSystemStamp));
+                    this,
+                    params.outputEncoding,
+                    params.versioned,
+                    fhirContext,
+                    params.planDefinitionToRefreshPath,
+                    params.shouldApplySoftwareSystemStamp));
         } else {
             refreshedResourcesNames.addAll(planDefinitionProcessor.refreshIgPlanDefinitionContent(
-                    this, params.outputEncoding, params.planDefinitionOutputPath, params.versioned,
-                    fhirContext, params.planDefinitionToRefreshPath, params.shouldApplySoftwareSystemStamp));
+                    this,
+                    params.outputEncoding,
+                    params.planDefinitionOutputPath,
+                    params.versioned,
+                    fhirContext,
+                    params.planDefinitionToRefreshPath,
+                    params.shouldApplySoftwareSystemStamp));
         }
 
         if (refreshedResourcesNames.isEmpty()) {
@@ -184,7 +205,10 @@ public class IGProcessor extends BaseProcessor {
             var testCaseProcessor = new TestCaseProcessor();
             testCaseProcessor.refreshTestCases(
                     FilenameUtils.concat(rootDir, IGProcessor.TEST_CASE_PATH_ELEMENT),
-                    params.outputEncoding, fhirContext, refreshedResourcesNames, verboseMessaging);
+                    params.outputEncoding,
+                    fhirContext,
+                    refreshedResourcesNames,
+                    verboseMessaging);
         }
     }
 
@@ -212,7 +236,8 @@ public class IGProcessor extends BaseProcessor {
         return FilenameUtils.concat(igPath, BUNDLE_PATH_ELEMENT);
     }
 
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, List<String> resourcePaths) {
+    public static void ensure(
+            String igPath, Boolean includePatientScenarios, Boolean includeTerminology, List<String> resourcePaths) {
         var directory = new File(getBundlesPath(igPath));
         if (!directory.exists() && !directory.mkdir()) {
             logger.warn("Bundle path: {} was not created", getBundlesPath(igPath));
@@ -242,7 +267,8 @@ public class IGProcessor extends BaseProcessor {
         if (!directory.exists()) {
             throw new RuntimeException("Convention requires the following directory:" + pathElement);
         }
-        // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)
+        // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g.,
+        // IOUtils.setupActivityDefinitionPaths)
         // that resourceDirectories contains a set of proper "resource" directories. Adding non-resource directories
         // leads to surprising results when bundling like picking up resources from the /tests directory.
         IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));
@@ -253,7 +279,8 @@ public class IGProcessor extends BaseProcessor {
         if (!directory.exists()) {
             logger.info("No directory found by convention for: {}", directory.getName());
         } else {
-            // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)
+            // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g.,
+            // IOUtils.setupActivityDefinitionPaths)
             // that resourceDirectories contains a set of proper "resource" directories. Adding non-resource directories
             // leads to surprising results when bundling like picking up resources from the /tests directory.
             IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));

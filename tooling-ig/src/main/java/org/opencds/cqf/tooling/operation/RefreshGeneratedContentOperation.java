@@ -1,13 +1,12 @@
 package org.opencds.cqf.tooling.operation;
 
+import ca.uhn.fhir.context.FhirContext;
+import com.google.common.base.Strings;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import com.google.common.base.Strings;
-
-import ca.uhn.fhir.context.FhirContext;
-
+@SuppressWarnings("checkstyle:AbstractClassName")
 public abstract class RefreshGeneratedContentOperation extends Operation {
     // private String igPath;
     protected FhirContext fhirContext;
@@ -24,10 +23,13 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
         this(outputPath, operationName, fhirContext, null, null);
     }
 
-
     @SuppressWarnings("this-escape")
-    public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext,
-                                            String pathToLibraries, String pathToMeasures) {
+    public RefreshGeneratedContentOperation(
+            String outputPath,
+            String operationName,
+            FhirContext fhirContext,
+            String pathToLibraries,
+            String pathToMeasures) {
         setOutputPath(outputPath);
         this.operationName = operationName;
         this.fhirContext = fhirContext;
@@ -71,7 +73,8 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
                 case "ts":
                     this.addBundleTimestamp = Boolean.parseBoolean(value);
                     break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 

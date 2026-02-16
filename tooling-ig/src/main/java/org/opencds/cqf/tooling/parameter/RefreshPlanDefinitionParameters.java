@@ -6,8 +6,8 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 
 public class RefreshPlanDefinitionParameters {
     /*
-     The ig ini file
-      */
+    The ig ini file
+     */
     public String ini;
 
     /*

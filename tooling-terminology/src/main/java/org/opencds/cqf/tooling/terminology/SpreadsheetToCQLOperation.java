@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -28,8 +27,7 @@ public class SpreadsheetToCQLOperation extends Operation {
     private String getHeader(Row header, int columnIndex) {
         if (header != null && SpreadsheetHelper.getCellAsString(header, columnIndex) != null) {
             return SpreadsheetHelper.getCellAsString(header, columnIndex).trim();
-        }
-        else {
+        } else {
             return CellReference.convertNumToColString(columnIndex);
         }
     }
@@ -47,10 +45,20 @@ public class SpreadsheetToCQLOperation extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
-                case "hasheader": case "hh": hasHeader = Boolean.valueOf(value); break; // -hasheader (-hh)
-                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                case "pathtospreadsheet":
+                case "pts":
+                    pathToSpreadsheet = value;
+                    break; // -pathtospreadsheet (-pts)
+                case "hasheader":
+                case "hh":
+                    hasHeader = Boolean.valueOf(value);
+                    break; // -hasheader (-hh)
+                case "outputpath":
+                case "op":
+                    setOutputPath(value);
+                    break; // -outputpath (-op)
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 
@@ -104,8 +112,7 @@ public class SpreadsheetToCQLOperation extends Operation {
 
                 if (firstRow) {
                     firstRow = false;
-                }
-                else {
+                } else {
                     result.append(",");
                     result.append(System.lineSeparator());
                 }
@@ -116,8 +123,7 @@ public class SpreadsheetToCQLOperation extends Operation {
                 while (cells.hasNext()) {
                     if (firstCell) {
                         firstCell = false;
-                    }
-                    else {
+                    } else {
                         result.append(", ");
                     }
                     Cell cell = cells.next();
@@ -139,7 +145,8 @@ public class SpreadsheetToCQLOperation extends Operation {
             result.append(System.lineSeparator());
         }
 
-        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(),spreadsheetName + ".cql"))) {
+        try (FileOutputStream writer =
+                new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), spreadsheetName + ".cql"))) {
             writer.write(result.toString().getBytes());
             writer.flush();
         } catch (IOException e) {

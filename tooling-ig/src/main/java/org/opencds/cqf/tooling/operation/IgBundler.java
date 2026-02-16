@@ -1,18 +1,10 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 package org.opencds.cqf.tooling.operation;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,19 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 
 /**
  *
@@ -51,8 +35,7 @@ import ca.uhn.fhir.parser.IParser;
  *  -encoding (-e) Preferred encoding. XML and JSON are supported (JSON by default) (optional)
  *
  * */
-public class IgBundler extends Operation
-{
+public class IgBundler extends Operation {
     private String pathToIg; // -pathtoig | -ptig
     private String encoding = "json"; // -encoding (-e)
 
@@ -72,8 +55,7 @@ public class IgBundler extends Operation
         setOutputPath("src/main/resources/org/opencds/cqf/tooling/igtools/output"); // default
 
         for (final String arg : args) {
-            if (arg.equals("-BundleIg"))
-                continue;
+            if (arg.equals("-BundleIg")) continue;
             final String[] flagAndValue = arg.split("=");
             if (flagAndValue.length < 2) {
                 throw new IllegalArgumentException("Invalid argument: " + arg);
@@ -115,7 +97,7 @@ public class IgBundler extends Operation
 
     /***
      * Parse the ig.json configuration file.
-     * 
+     *
      * @return JsonObject representation of the ig.json
      */
     private JsonObject getIgControl() {
@@ -129,7 +111,7 @@ public class IgBundler extends Operation
 
     /***
      * Determine the FHIR version from the ig.json configuration.
-     * 
+     *
      * @param igControl JsonObject representation of the ig.json
      */
     private void setFhirContext(final JsonObject igControl) {
@@ -147,7 +129,7 @@ public class IgBundler extends Operation
 
     /***
      * Determine the paths to directories containing resources defined by the IG.
-     * 
+     *
      * @param igControl JsonObject representation of the ig.json
      */
     private void setResourcePaths(final JsonObject igControl) {
@@ -171,19 +153,22 @@ public class IgBundler extends Operation
 
     /***
      * Determine the ig resources file names specified in the ig.json.
-     * 
+     *
      * @param igControl JsonObject representation of the ig.json
      */
     private void setResourceFiles(final JsonObject igControl) {
         if (igControl.has("resources") && igControl.get("resources").isJsonObject()) {
-            for (final Map.Entry<String, JsonElement> resources : igControl.get("resources").getAsJsonObject()
-                    .entrySet()) {
-                if (resources.getKey().startsWith("Bundle") || resources.getKey().startsWith("StructureDefinition")) {
+            for (final Map.Entry<String, JsonElement> resources :
+                    igControl.get("resources").getAsJsonObject().entrySet()) {
+                if (resources.getKey().startsWith("Bundle")
+                        || resources.getKey().startsWith("StructureDefinition")) {
                     continue;
                 }
-                if (resources.getValue().isJsonObject() && resources.getValue().getAsJsonObject().has("source")
+                if (resources.getValue().isJsonObject()
+                        && resources.getValue().getAsJsonObject().has("source")
                         && resources.getValue().getAsJsonObject().get("source").isJsonPrimitive()) {
-                    resourceFiles.add(resources.getValue().getAsJsonObject().get("source").getAsString());
+                    resourceFiles.add(
+                            resources.getValue().getAsJsonObject().get("source").getAsString());
                 }
             }
         }
@@ -200,7 +185,8 @@ public class IgBundler extends Operation
             bundle.setType(Bundle.BundleType.TRANSACTION);
 
             try (Stream<Path> paths = Files.walk(Paths.get(path))) {
-                paths.filter(Files::isRegularFile).filter(x -> resourceFiles.contains(x.getFileName().toString()))
+                paths.filter(Files::isRegularFile)
+                        .filter(x -> resourceFiles.contains(x.getFileName().toString()))
                         .forEach(x -> addArtifactToBundle(x, bundle));
             } catch (final IOException ioe) {
                 throw new RuntimeException(ioe.getMessage());
@@ -218,7 +204,7 @@ public class IgBundler extends Operation
     /***
      * Parse artifact file and add to Bundle. NOTE: this method assumes FHIR STU3
      * artifacts are being used.
-     * 
+     *
      * @param path   Path to artifact
      * @param bundle Bundle to populate
      */
@@ -237,8 +223,10 @@ public class IgBundler extends Operation
             throw new RuntimeException("Error reading file: " + path.toString());
         }
 
-        bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) resource)
-                .setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT)
+        bundle.addEntry(new Bundle.BundleEntryComponent()
+                .setResource((Resource) resource)
+                .setRequest(new Bundle.BundleEntryRequestComponent()
+                        .setMethod(Bundle.HTTPVerb.PUT)
                         .setUrl(((Resource) resource).getId())));
     }
 
@@ -247,14 +235,20 @@ public class IgBundler extends Operation
      */
     private void outputBundles() {
         for (final Map.Entry<String, IBaseResource> set : outputBundles.entrySet()) {
-            try (FileOutputStream writer = new FileOutputStream(
-                    IOUtils.concatFilePath(getOutputPath(), set.getKey() + "." + encoding))) {
-                writer.write(encoding.equals("json")
-                        ? jsonParser.setPrettyPrint(true).encodeResourceToString(set.getValue()).getBytes()
-                        : xmlParser.setPrettyPrint(true).encodeResourceToString(set.getValue()).getBytes());
+            try (FileOutputStream writer =
+                    new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), set.getKey() + "." + encoding))) {
+                writer.write(
+                        encoding.equals("json")
+                                ? jsonParser
+                                        .setPrettyPrint(true)
+                                        .encodeResourceToString(set.getValue())
+                                        .getBytes()
+                                : xmlParser
+                                        .setPrettyPrint(true)
+                                        .encodeResourceToString(set.getValue())
+                                        .getBytes());
                 writer.flush();
-            } catch (final IOException e)
-            {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Error writing Bundle to file: " + e.getMessage());
             }

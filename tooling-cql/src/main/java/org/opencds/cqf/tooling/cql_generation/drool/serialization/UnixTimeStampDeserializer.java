@@ -1,14 +1,13 @@
 package org.opencds.cqf.tooling.cql_generation.drool.serialization;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Instant;
-import java.util.Date;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * Deserializes Unix Time Stamps
@@ -27,7 +26,7 @@ public class UnixTimeStampDeserializer extends DateDeserializer {
             try {
 
                 BigInteger dateLong = jp.getBigIntegerValue();
-                
+
                 Instant instant = Instant.ofEpochMilli(dateLong.longValue());
                 return Date.from(instant);
             } catch (Exception e) {

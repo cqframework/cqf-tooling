@@ -1,8 +1,7 @@
 package org.opencds.cqf.tooling.operations.stripcontent;
 
-import org.hl7.fhir.r5.model.Resource;
-
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.r5.model.Resource;
 
 class ContentStripperR5 extends BaseContentStripper<Resource> {
     @Override

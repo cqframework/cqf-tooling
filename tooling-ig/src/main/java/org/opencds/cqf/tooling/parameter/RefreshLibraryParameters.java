@@ -1,9 +1,8 @@
 package org.opencds.cqf.tooling.parameter;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.processor.IProcessorContext;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class RefreshLibraryParameters {
     /*

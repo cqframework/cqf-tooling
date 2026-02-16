@@ -1,17 +1,16 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
-
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-
+@SuppressWarnings("checkstyle:AbstractClassName")
 public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
 
     protected IGenericClient fhirServer;
@@ -41,15 +40,15 @@ public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
         String periodEnd = simpleFormat.format(this.getPeriodEnd());
 
         // IMeasureReportAdapter expectedAdapter = this.getExpectedMeasureReportAdapter();
-        String path = fhirServer.getServerBase() + "/Measure/" + measureId + "/$evaluate-measure?patient=" + patientId + "&periodStart=" + periodStart + "&periodEnd=" + periodEnd;
+        String path = fhirServer.getServerBase() + "/Measure/" + measureId + "/$evaluate-measure?patient=" + patientId
+                + "&periodStart=" + periodStart + "&periodEnd=" + periodEnd;
         try {
             String response = HttpClientUtils.get(path);
             IMeasureReportAdapter measureReportAdapter = parseEvaluatedResponse(response);
             return measureReportAdapter;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             LogUtils.putException(path, ex);
-            //TODO: Error/Message handling
+            // TODO: Error/Message handling
             return null;
         }
     }

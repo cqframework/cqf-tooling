@@ -1,6 +1,10 @@
 package org.opencds.cqf.tooling.measure;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -16,11 +20,6 @@ import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 public class MeasureProcessor extends BaseProcessor {
     public static final String RESOURCE_PREFIX = "measure-";
     protected List<Object> identifiers;
@@ -29,18 +28,37 @@ public class MeasureProcessor extends BaseProcessor {
         return RESOURCE_PREFIX + baseId;
     }
 
-    public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext,
-                                                String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp, Boolean shouldIncludePopDataRequirements) throws IOException {
+    public List<String> refreshIgMeasureContent(
+            BaseProcessor parentContext,
+            Encoding outputEncoding,
+            Boolean versioned,
+            FhirContext fhirContext,
+            String measureToRefreshPath,
+            Boolean shouldApplySoftwareSystemStamp,
+            Boolean shouldIncludePopDataRequirements)
+            throws IOException {
 
-        return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath,
-                shouldApplySoftwareSystemStamp, shouldIncludePopDataRequirements);
+        return refreshIgMeasureContent(
+                parentContext,
+                outputEncoding,
+                null,
+                versioned,
+                fhirContext,
+                measureToRefreshPath,
+                shouldApplySoftwareSystemStamp,
+                shouldIncludePopDataRequirements);
     }
 
-
-
-    public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, String measureOutputDirectory,
-                                                Boolean versioned, FhirContext fhirContext, String measureToRefreshPath,
-                                                Boolean shouldApplySoftwareSystemStamp, Boolean shouldIncludePopDataRequirements) throws IOException {
+    public List<String> refreshIgMeasureContent(
+            BaseProcessor parentContext,
+            Encoding outputEncoding,
+            String measureOutputDirectory,
+            Boolean versioned,
+            FhirContext fhirContext,
+            String measureToRefreshPath,
+            Boolean shouldApplySoftwareSystemStamp,
+            Boolean shouldIncludePopDataRequirements)
+            throws IOException {
 
         logger.info("[Refreshing Measures]");
 
@@ -53,8 +71,8 @@ public class MeasureProcessor extends BaseProcessor {
                 measureProcessor = new R4MeasureProcessor();
                 break;
             default:
-                throw new IllegalArgumentException(
-                        "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+                throw new IllegalArgumentException("Unknown fhir version: "
+                        + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
         var measurePath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.MEASURE_PATH_ELEMENT);
@@ -95,7 +113,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
         // for each Measure, refresh the measure based on the primary measure library
-       var resources = new ArrayList<Measure>();
+        var resources = new ArrayList<Measure>();
         var processor = new MeasureRefreshProcessor();
         var libraryManager = getCqlProcessor().getLibraryManager();
         var cqlTranslatorOptions = getCqlProcessor().getCqlTranslatorOptions();
@@ -111,8 +129,11 @@ public class MeasureProcessor extends BaseProcessor {
         return resources;
     }
 
-    private Measure refreshGeneratedContent(Measure measure, MeasureRefreshProcessor processor,
-                                            LibraryManager libraryManager, CqlTranslatorOptions cqlTranslatorOptions) {
+    private Measure refreshGeneratedContent(
+            Measure measure,
+            MeasureRefreshProcessor processor,
+            LibraryManager libraryManager,
+            CqlTranslatorOptions cqlTranslatorOptions) {
         var libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
         var primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
         var errors = new CopyOnWriteArrayList<CqlCompilerException>();
@@ -120,9 +141,10 @@ public class MeasureProcessor extends BaseProcessor {
         logger.info(CqlProcessor.buildStatusMessage(errors, measure.getName(), verboseMessaging));
         boolean hasSevereErrors = CqlProcessor.hasSevereErrors(errors);
 
-        //refresh measures without severe errors:
+        // refresh measures without severe errors:
         if (!hasSevereErrors) {
-            return processor.refreshMeasure(measure, libraryManager, compiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
+            return processor.refreshMeasure(
+                    measure, libraryManager, compiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
         }
 
         return measure;

@@ -5,7 +5,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
-
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.testng.annotations.Test;
 
@@ -42,9 +41,8 @@ public class ANCMiniContentTest extends BaseContentTest {
 
     @Test
     public void validateCodeSystem() {
-        var codeSystem = resourceAtPath(
-                CodeSystem.class,
-                vocabularyPath().resolve("codesystem/codesystem-ancm-codes.json"));
+        var codeSystem =
+                resourceAtPath(CodeSystem.class, vocabularyPath().resolve("codesystem/codesystem-ancm-codes.json"));
         assertEquals(codeSystem.getTitle(), "ANCM Codes");
     }
 

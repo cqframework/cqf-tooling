@@ -3,12 +3,13 @@ package org.opencds.cqf.tooling.library.cqloptions;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Objects;
-
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.tooling.RefreshTest;
@@ -19,11 +20,9 @@ import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-
 public class CqlOptionsLibraryProcessorTest extends LibraryProcessorTest {
     private final String resourceDirectory = "cqloptions";
+
     public CqlOptionsLibraryProcessorTest() {
         super(new R4LibraryProcessor(), FhirContext.forCached(FhirVersionEnum.R4), "CqlOptionsLibraryProcessorTest");
     }
@@ -32,7 +31,7 @@ public class CqlOptionsLibraryProcessorTest extends LibraryProcessorTest {
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
         ResourceDiscovery.clearDevicePaths();
-        File dir  = new File("target" + separator + "refreshLibraries" + separator + "cqloptions");
+        File dir = new File("target" + separator + "refreshLibraries" + separator + "cqloptions");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -47,17 +46,19 @@ public class CqlOptionsLibraryProcessorTest extends LibraryProcessorTest {
         if (!targetDirectory.exists()) {
             targetDirectory.mkdirs();
         }
-        String resourceDirPath = Objects.requireNonNull(RefreshTest.class.getResource(resourceDirectory)).getPath();
+        String resourceDirPath = Objects.requireNonNull(RefreshTest.class.getResource(resourceDirectory))
+                .getPath();
         assertEquals(Objects.requireNonNull(targetDirectory.listFiles()).length, 0);
 
-        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
+        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator
+                + "library-EXM124_FHIR4-8.2.000.json";
         runRefresh(
-            resourceDirPath,
-            resourceDirPath + libraryPath,
-            targetDirectory.getAbsolutePath(),
-            resourceDirPath + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
-            false
-        );
+                resourceDirPath,
+                resourceDirPath + libraryPath,
+                targetDirectory.getAbsolutePath(),
+                resourceDirPath + separator + "input" + separator + "pagecontent" + separator + "cql" + separator
+                        + "EXM124_FHIR4-8.2.000.cql",
+                false);
 
         assertTrue(Objects.requireNonNull(targetDirectory.listFiles()).length > 0);
 

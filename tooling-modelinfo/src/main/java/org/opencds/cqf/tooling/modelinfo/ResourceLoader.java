@@ -1,5 +1,8 @@
 package org.opencds.cqf.tooling.modelinfo;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -9,9 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.io.Files;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -19,9 +19,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StructureDefinition;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +33,8 @@ public class ResourceLoader {
         String[] paths = resourcePaths.split(";");
         for (String path : paths) {
             logger.info("Reading {} StructureDefinitions", path);
-            resources.addAll(this.readStructureDefFromFolder(Paths.get(basePath, path).toString()));
+            resources.addAll(
+                    this.readStructureDefFromFolder(Paths.get(basePath, path).toString()));
         }
 
         logger.info("Indexing StructureDefinitions by Id");
@@ -50,7 +48,6 @@ public class ResourceLoader {
         }
 
         return url;
-
     }
 
     private Map<String, StructureDefinition> indexResources(List<StructureDefinition> resources) {
@@ -87,7 +84,6 @@ public class ResourceLoader {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-
             }
         }
 
@@ -116,5 +112,4 @@ public class ResourceLoader {
 
         return resources;
     }
-
 }

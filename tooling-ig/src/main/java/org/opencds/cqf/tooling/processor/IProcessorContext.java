@@ -1,10 +1,9 @@
 package org.opencds.cqf.tooling.processor;
 
+import java.util.List;
 import org.cqframework.fhir.npm.NpmPackageManager;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r5.model.ImplementationGuide;
-
-import java.util.List;
 
 public interface IProcessorContext {
     String getRootDir();

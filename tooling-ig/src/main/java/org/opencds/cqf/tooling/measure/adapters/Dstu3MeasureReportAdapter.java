@@ -1,15 +1,15 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
-import org.hl7.fhir.dstu3.model.MeasureReport;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import org.hl7.fhir.dstu3.model.MeasureReport;
 
 public class Dstu3MeasureReportAdapter implements IMeasureReportAdapter {
     private MeasureReport measureReport;
+
     public Dstu3MeasureReportAdapter(MeasureReport measureReport) {
         this.measureReport = measureReport;
     }

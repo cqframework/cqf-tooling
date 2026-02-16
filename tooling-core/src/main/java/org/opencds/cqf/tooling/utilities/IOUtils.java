@@ -5,6 +5,12 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -12,18 +18,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class IOUtils {
     private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
 
     public enum Encoding {
-        CQL("cql"), JSON("json"), XML("xml"), UNKNOWN("");
+        CQL("cql"),
+        JSON("json"),
+        XML("xml"),
+        UNKNOWN("");
 
         private final String value;
 
@@ -64,13 +66,15 @@ public class IOUtils {
         return encodeResource(resource, encoding, fhirContext, false);
     }
 
-    public static byte[] encodeResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext,
-                                        boolean prettyPrintOutput) {
+    public static byte[] encodeResource(
+            IBaseResource resource, Encoding encoding, FhirContext fhirContext, boolean prettyPrintOutput) {
         if (encoding == Encoding.UNKNOWN) {
-            return new byte[] { };
+            return new byte[] {};
         }
         IParser parser = getParser(encoding, fhirContext);
-        return parser.setPrettyPrint(prettyPrintOutput).encodeResourceToString(resource).getBytes();
+        return parser.setPrettyPrint(prettyPrintOutput)
+                .encodeResourceToString(resource)
+                .getBytes();
     }
 
     public static String getFileContent(File file) {
@@ -90,37 +94,49 @@ public class IOUtils {
         return parser.setPrettyPrint(true).encodeResourceToString(resource);
     }
 
-    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding,
-                                                               FhirContext fhirContext) {
+    public static <T extends IBaseResource> void writeResource(
+            T resource, String path, Encoding encoding, FhirContext fhirContext) {
         writeResource(resource, path, encoding, fhirContext, true);
     }
 
-    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding,
-                                                               FhirContext fhirContext, Boolean versioned) {
+    public static <T extends IBaseResource> void writeResource(
+            T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned) {
         writeResource(resource, path, encoding, fhirContext, versioned, null, true);
     }
 
-    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding,
-                                                               FhirContext fhirContext, Boolean versioned,
-                                                               String outputFileName) {
+    public static <T extends IBaseResource> void writeResource(
+            T resource,
+            String path,
+            Encoding encoding,
+            FhirContext fhirContext,
+            Boolean versioned,
+            String outputFileName) {
         writeResource(resource, path, encoding, fhirContext, versioned, outputFileName, true);
     }
 
-    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding,
-                                                               FhirContext fhirContext, Boolean versioned,
-                                                               boolean prettyPrintOutput) {
+    public static <T extends IBaseResource> void writeResource(
+            T resource,
+            String path,
+            Encoding encoding,
+            FhirContext fhirContext,
+            Boolean versioned,
+            boolean prettyPrintOutput) {
         writeResource(resource, path, encoding, fhirContext, versioned, null, prettyPrintOutput);
     }
 
-    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding,
-                                                               FhirContext fhirContext, Boolean versioned,
-                                                               String outputFileName, boolean prettyPrintOutput) {
+    public static <T extends IBaseResource> void writeResource(
+            T resource,
+            String path,
+            Encoding encoding,
+            FhirContext fhirContext,
+            Boolean versioned,
+            String outputFileName,
+            boolean prettyPrintOutput) {
         String outputPath;
         File file = new File(path);
         if (file.isFile()) {
             outputPath = path;
-        }
-        else {
+        } else {
             ensurePath(path);
 
             String baseName;
@@ -142,12 +158,13 @@ public class IOUtils {
         }
     }
 
-    public static <T extends IBaseResource> void writeResources(List<T> resources, String path,
-                                                                Encoding encoding, FhirContext fhirContext) {
+    public static <T extends IBaseResource> void writeResources(
+            List<T> resources, String path, Encoding encoding, FhirContext fhirContext) {
         resources.forEach(resource -> writeResource(resource, path, encoding, fhirContext));
     }
 
-    public static <T extends IBaseResource> void writeResources(Map<String, T> resources, String path, Encoding encoding, FhirContext fhirContext) {
+    public static <T extends IBaseResource> void writeResources(
+            Map<String, T> resources, String path, Encoding encoding, FhirContext fhirContext) {
         for (Map.Entry<String, T> set : resources.entrySet()) {
             writeResource(set.getValue(), path, encoding, fhirContext);
         }
@@ -157,24 +174,47 @@ public class IOUtils {
         writeBundle(bundle, path, encoding, fhirContext, null);
     }
 
-    public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext, String outputFileName) {
+    public static void writeBundle(
+            Object bundle, String path, Encoding encoding, FhirContext fhirContext, String outputFileName) {
         writeBundle(bundle, path, encoding, fhirContext, outputFileName, false);
     }
 
-    public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext, boolean prettyPrintOutput) {
+    public static void writeBundle(
+            Object bundle, String path, Encoding encoding, FhirContext fhirContext, boolean prettyPrintOutput) {
         writeBundle(bundle, path, encoding, fhirContext, null, prettyPrintOutput);
     }
 
-    public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext, String outputFileName, boolean prettyPrintOutput) {
+    public static void writeBundle(
+            Object bundle,
+            String path,
+            Encoding encoding,
+            FhirContext fhirContext,
+            String outputFileName,
+            boolean prettyPrintOutput) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
-                writeResource(((org.hl7.fhir.dstu3.model.Bundle)bundle), path, encoding, fhirContext, true, outputFileName, prettyPrintOutput);
+                writeResource(
+                        ((org.hl7.fhir.dstu3.model.Bundle) bundle),
+                        path,
+                        encoding,
+                        fhirContext,
+                        true,
+                        outputFileName,
+                        prettyPrintOutput);
                 break;
             case R4:
-                writeResource(((org.hl7.fhir.r4.model.Bundle)bundle), path, encoding, fhirContext, true, outputFileName, prettyPrintOutput);
+                writeResource(
+                        ((org.hl7.fhir.r4.model.Bundle) bundle),
+                        path,
+                        encoding,
+                        fhirContext,
+                        true,
+                        outputFileName,
+                        prettyPrintOutput);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+                throw new IllegalArgumentException("Unknown fhir version: "
+                        + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 
@@ -191,19 +231,22 @@ public class IOUtils {
     private static final Map<String, String> alreadyCopied = new ConcurrentHashMap<>();
 
     public static void copyFile(String inputPath, String outputPath) {
-        if ((inputPath == null || inputPath.isEmpty()) &&
-                (outputPath == null || outputPath.isEmpty())) {
-            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
+        if ((inputPath == null || inputPath.isEmpty()) && (outputPath == null || outputPath.isEmpty())) {
+            LogUtils.putException(
+                    "IOUtils.copyFile",
+                    new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
             return;
         }
 
         if (inputPath == null || inputPath.isEmpty()) {
-            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            LogUtils.putException(
+                    "IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
             return;
         }
 
         if (outputPath == null || outputPath.isEmpty()) {
-            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            LogUtils.putException(
+                    "IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
             return;
         }
 
@@ -219,7 +262,8 @@ public class IOUtils {
             alreadyCopied.put(key, outputPath);
         } catch (IOException e) {
             logger.error(e.getMessage());
-            LogUtils.putException("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
+            LogUtils.putException(
+                    "IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
                     new RuntimeException("Error copying file: " + e.getMessage()));
         }
     }
@@ -227,7 +271,8 @@ public class IOUtils {
     public static String getTypeQualifiedResourceId(String path, FhirContext fhirContext) {
         IBaseResource resource = readResource(path, fhirContext, true);
         if (resource != null) {
-            return resource.getIdElement().getResourceType() + "/" + resource.getIdElement().getIdPart();
+            return resource.getIdElement().getResourceType() + "/"
+                    + resource.getIdElement().getIdPart();
         }
         return null;
     }
@@ -236,16 +281,17 @@ public class IOUtils {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 if (resource instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
-                    return ((org.hl7.fhir.dstu3.model.MetadataResource)resource).getVersion();
+                    return ((org.hl7.fhir.dstu3.model.MetadataResource) resource).getVersion();
                 }
                 break;
             case R4:
                 if (resource instanceof org.hl7.fhir.r4.model.MetadataResource) {
-                    return ((org.hl7.fhir.r4.model.MetadataResource)resource).getVersion();
+                    return ((org.hl7.fhir.r4.model.MetadataResource) resource).getVersion();
                 }
                 break;
             default:
-                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+                throw new IllegalArgumentException("Unknown fhir version: "
+                        + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
         return null;
     }
@@ -255,6 +301,7 @@ public class IOUtils {
     }
 
     private static final Map<String, IBaseResource> cachedResources = new LinkedHashMap<>();
+
     public static IBaseResource readResource(String path, FhirContext fhirContext, Boolean safeRead) {
         Encoding encoding = getEncoding(path);
         if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
@@ -282,7 +329,8 @@ public class IOUtils {
             }
             cachedResources.put(path, resource);
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Error reading resource from path %s: %s", path, e.getMessage()), e);
+            throw new RuntimeException(
+                    String.format("Error reading resource from path %s: %s", path, e.getMessage()), e);
         }
         return resource;
     }
@@ -302,7 +350,8 @@ public class IOUtils {
         return resources;
     }
 
-    public static IBaseResource readJsonResourceIgnoreElements(String path, FhirContext fhirContext, String... elements) {
+    public static IBaseResource readJsonResourceIgnoreElements(
+            String path, FhirContext fhirContext, String... elements) {
         Encoding encoding = getEncoding(path);
         if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL || encoding == Encoding.XML) {
             return null;
@@ -325,9 +374,10 @@ public class IOUtils {
         }
     }
 
-    public static List<IBaseResource> getResourcesInDirectory(String directoryPath, FhirContext fhirContext, Boolean recursive) {
+    public static List<IBaseResource> getResourcesInDirectory(
+            String directoryPath, FhirContext fhirContext, Boolean recursive) {
         var resources = new ArrayList<IBaseResource>();
-        var fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
+        var fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[] {"xml", "json"}, recursive);
         while (fileIterator.hasNext()) {
             var resource = readResource(fileIterator.next().getAbsolutePath(), fhirContext, true);
             if (resource != null) {
@@ -337,9 +387,10 @@ public class IOUtils {
         return resources;
     }
 
-    public static List<IBaseResource> getResourcesOfTypeInDirectory(String directoryPath, FhirContext fhirContext, Class<? extends IBaseResource> clazz, Boolean recursive) {
+    public static List<IBaseResource> getResourcesOfTypeInDirectory(
+            String directoryPath, FhirContext fhirContext, Class<? extends IBaseResource> clazz, Boolean recursive) {
         var resources = new ArrayList<IBaseResource>();
-        var fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
+        var fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[] {"xml", "json"}, recursive);
         while (fileIterator.hasNext()) {
             var resource = readResource(fileIterator.next().getAbsolutePath(), fhirContext, true);
             if (resource != null && resource.getClass().isAssignableFrom(clazz)) {
@@ -349,18 +400,22 @@ public class IOUtils {
         return resources;
     }
 
-    public static IBaseBundle bundleResourcesInDirectory(String directoryPath, FhirContext fhirContext, Boolean recursive) {
+    public static IBaseBundle bundleResourcesInDirectory(
+            String directoryPath, FhirContext fhirContext, Boolean recursive) {
         BundleBuilder builder = new BundleBuilder(fhirContext);
-        Iterator<File> fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
+        Iterator<File> fileIterator =
+                FileUtils.iterateFiles(new File(directoryPath), new String[] {"xml", "json"}, recursive);
         while (fileIterator.hasNext()) {
             builder.addCollectionEntry(readResource(fileIterator.next().getAbsolutePath(), fhirContext));
         }
         return builder.getBundle();
     }
 
-    public static IBaseBundle bundleResourcesInDirectoryAsTransaction(String directoryPath, FhirContext fhirContext, Boolean recursive) {
+    public static IBaseBundle bundleResourcesInDirectoryAsTransaction(
+            String directoryPath, FhirContext fhirContext, Boolean recursive) {
         BundleBuilder builder = new BundleBuilder(fhirContext);
-        Iterator<File> fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
+        Iterator<File> fileIterator =
+                FileUtils.iterateFiles(new File(directoryPath), new String[] {"xml", "json"}, recursive);
         while (fileIterator.hasNext()) {
             builder.addTransactionUpdateEntry(readResource(fileIterator.next().getAbsolutePath(), fhirContext));
         }
@@ -383,8 +438,8 @@ public class IOUtils {
         }
         File inputDir = new File(directoryPath);
         ArrayList<File> files = inputDir.isDirectory()
-                ? new ArrayList<>(Arrays.asList(Optional.ofNullable(
-                inputDir.listFiles()).orElseThrow(NoSuchElementException::new)))
+                ? new ArrayList<>(Arrays.asList(
+                        Optional.ofNullable(inputDir.listFiles()).orElseThrow(NoSuchElementException::new)))
                 : new ArrayList<>();
 
         for (File file : files) {
@@ -400,8 +455,13 @@ public class IOUtils {
         return filePaths;
     }
 
-    public static String getResourceFileName(String resourcePath, IBaseResource resource, Encoding encoding,
-                                             FhirContext fhirContext, boolean versioned, boolean prefixed) {
+    public static String getResourceFileName(
+            String resourcePath,
+            IBaseResource resource,
+            Encoding encoding,
+            FhirContext fhirContext,
+            boolean versioned,
+            boolean prefixed) {
         String resourceVersion = IOUtils.getCanonicalResourceVersion(resource, fhirContext);
         String filename = resource.getIdElement().getIdPart();
         if (!versioned && resourceVersion != null) {
@@ -417,8 +477,8 @@ public class IOUtils {
         }
 
         String resourceType = resource.fhirType().toLowerCase();
-        return Paths.get(resourcePath, resourceType, (prefixed ? (resourceType + "-") : "")
-                + filename) + getFileExtension(encoding);
+        return Paths.get(resourcePath, resourceType, (prefixed ? (resourceType + "-") : "") + filename)
+                + getFileExtension(encoding);
     }
 
     public static String getResourceDirectory(String path) {
@@ -446,8 +506,8 @@ public class IOUtils {
         List<File> directories;
         File parentDirectory = new File(path);
         try {
-            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles())
-                    .orElseThrow(NoSuchElementException::new));
+            directories = Arrays.asList(
+                    Optional.ofNullable(parentDirectory.listFiles()).orElseThrow(NoSuchElementException::new));
         } catch (Exception e) {
             return directoryPaths;
         }
@@ -500,7 +560,7 @@ public class IOUtils {
         return Encoding.parse(FilenameUtils.getExtension(path));
     }
 
-    //users should protect against Encoding.UNKNOWN or Encoding.CQL
+    // users should protect against Encoding.UNKNOWN or Encoding.CQL
     private static IParser getParser(Encoding encoding, FhirContext fhirContext) {
         switch (encoding) {
             case XML:
@@ -515,9 +575,12 @@ public class IOUtils {
     public static Boolean pathEndsWithElement(String igPath, String pathElement) {
         boolean result = false;
         try {
-            String baseElement = FilenameUtils.getBaseName(igPath).isEmpty() ? FilenameUtils.getBaseName(FilenameUtils.getFullPathNoEndSeparator(igPath)) : FilenameUtils.getBaseName(igPath);
+            String baseElement = FilenameUtils.getBaseName(igPath).isEmpty()
+                    ? FilenameUtils.getBaseName(FilenameUtils.getFullPathNoEndSeparator(igPath))
+                    : FilenameUtils.getBaseName(igPath);
             result = baseElement.equals(pathElement);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return result;
     }
 
@@ -582,8 +645,7 @@ public class IOUtils {
 
     public static boolean isXMLOrJson(String fileDirPath, String libraryName) {
         String fileExtension = libraryName.substring(libraryName.lastIndexOf(".") + 1);
-        if (fileExtension.equalsIgnoreCase("xml") ||
-                fileExtension.equalsIgnoreCase("json")) {
+        if (fileExtension.equalsIgnoreCase("xml") || fileExtension.equalsIgnoreCase("json")) {
             return true;
         }
         logger.warn("The file {}{} is not the right type of file.", fileDirPath, libraryName);
@@ -592,13 +654,15 @@ public class IOUtils {
 
     public static String getMeasureTestDirectory(String pathString) {
         Path path = Paths.get(pathString);
-        String[] testDirs = java.util.stream.StreamSupport.stream(path.spliterator(), false).map(Path::toString).toArray(String[]::new);
+        String[] testDirs = java.util.stream.StreamSupport.stream(path.spliterator(), false)
+                .map(Path::toString)
+                .toArray(String[]::new);
         return testDirs[testDirs.length - 2];
     }
 
     public static String concatFilePath(String basePath, String... pathsToAppend) {
         String filePath = basePath;
-        for (String pathToAppend: pathsToAppend) {
+        for (String pathToAppend : pathsToAppend) {
             filePath = FilenameUtils.concat(filePath, pathToAppend);
         }
         return filePath;

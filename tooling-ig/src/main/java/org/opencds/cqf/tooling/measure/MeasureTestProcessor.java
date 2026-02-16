@@ -1,8 +1,9 @@
 package org.opencds.cqf.tooling.measure;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.io.File;
 import java.util.Objects;
-
 import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -16,25 +17,20 @@ import org.opencds.cqf.tooling.processor.ITestProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-
 public class MeasureTestProcessor implements ITestProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureTestProcessor.class);
 
-    //TODO: Should probably introduce a BaseTestProcessor and this would belong there.
-    public static final String TestPassedKey  = "Test Passed";
+    // TODO: Should probably introduce a BaseTestProcessor and this would belong there.
+    public static final String TestPassedKey = "Test Passed";
 
     private FhirContext fhirContext;
 
-    public MeasureTestProcessor(FhirContext fhirContext)
-    {
+    public MeasureTestProcessor(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
     }
 
-    public Parameters executeTest(String testPath, String contentBundlePath, String fhirServer)
-    {
+    public Parameters executeTest(String testPath, String contentBundlePath, String fhirServer) {
         MeasureTestAdapter adapter = getMeasureTestAdapter(testPath, contentBundlePath, fhirServer);
         MeasureReportComparer comparer = new MeasureReportComparer(this.fhirContext);
 
@@ -49,8 +45,7 @@ public class MeasureTestProcessor implements ITestProcessor {
         return results;
     }
 
-    public Parameters executeTest(IBaseResource testBundle, IBaseResource contentBundle, String fhirServer)
-    {
+    public Parameters executeTest(IBaseResource testBundle, IBaseResource contentBundle, String fhirServer) {
         MeasureTestAdapter adapter = getMeasureTestAdapter(testBundle, contentBundle, fhirServer);
         MeasureReportComparer comparer = new MeasureReportComparer(this.fhirContext);
 
@@ -73,19 +68,22 @@ public class MeasureTestProcessor implements ITestProcessor {
 
             if (parameter.getName().getValue().indexOf(TestPassedKey) >= 0) {
                 assertionString = ": ";
-            }
-            else {
+            } else {
                 assertionString = " matched expected value: ";
             }
-            logger.info(parameter.getName().getValue() + assertionString + parameter.getValueBoolean().isValue().toString());
+            logger.info(parameter.getName().getValue()
+                    + assertionString
+                    + parameter.getValueBoolean().isValue().toString());
         }
     }
 
-    public MeasureTestAdapter getMeasureTestAdapter(IBaseResource testBundle, IBaseResource contentBundle, String fhirServer) {
+    public MeasureTestAdapter getMeasureTestAdapter(
+            IBaseResource testBundle, IBaseResource contentBundle, String fhirServer) {
         Objects.requireNonNull(testBundle, "            testBundle can not be null");
 
         if ((fhirServer == null || fhirServer.trim().isEmpty()) && (contentBundle == null)) {
-            throw new IllegalArgumentException("If fhirServer is not specified, contentBundle can not be null or empty.");
+            throw new IllegalArgumentException(
+                    "If fhirServer is not specified, contentBundle can not be null or empty.");
         }
 
         if (fhirServer == null) {
@@ -96,9 +94,9 @@ public class MeasureTestProcessor implements ITestProcessor {
 
         if (contentBundle == null) {
             return new ReadOnlyFhirServerMeasureTestAdapter(this.fhirContext, fhirClient, testBundle);
-        }
-        else {
-            return new ContentLoadingFhirServerMeasureTestAdapter(this.fhirContext, fhirClient, testBundle, contentBundle);
+        } else {
+            return new ContentLoadingFhirServerMeasureTestAdapter(
+                    this.fhirContext, fhirClient, testBundle, contentBundle);
         }
     }
 
@@ -106,12 +104,12 @@ public class MeasureTestProcessor implements ITestProcessor {
         Objects.requireNonNull(testPath, "          testPath can not be null");
 
         File testFile = new File(testPath);
-        if(!testFile.exists())
-        {
+        if (!testFile.exists()) {
             throw new IllegalArgumentException(String.format("          testPath file not found: %s", testPath));
         }
 
-        if ((fhirServer == null || fhirServer.trim().isEmpty()) && (contentBundlePath == null || contentBundlePath.trim().isEmpty())) {
+        if ((fhirServer == null || fhirServer.trim().isEmpty())
+                && (contentBundlePath == null || contentBundlePath.trim().isEmpty())) {
             throw new IllegalArgumentException("If fhirServer is not specified, contentBundlePath can not be null.");
         }
 
@@ -123,9 +121,9 @@ public class MeasureTestProcessor implements ITestProcessor {
 
         if (contentBundlePath == null) {
             return new ReadOnlyFhirServerMeasureTestAdapter(this.fhirContext, fhirClient, testPath);
-        }
-        else {
-            return new ContentLoadingFhirServerMeasureTestAdapter(this.fhirContext, fhirClient, testPath, contentBundlePath);
+        } else {
+            return new ContentLoadingFhirServerMeasureTestAdapter(
+                    this.fhirContext, fhirClient, testPath, contentBundlePath);
         }
     }
 }

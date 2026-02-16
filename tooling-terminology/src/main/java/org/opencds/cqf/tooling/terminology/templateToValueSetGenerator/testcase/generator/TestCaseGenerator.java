@@ -1,5 +1,9 @@
 package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.generator;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,10 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -22,12 +22,10 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.DataElement;
 import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.TestCase;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("checkstyle:MemberName")
 public class TestCaseGenerator extends Operation {
 
     private static final Logger logger = LoggerFactory.getLogger(TestCaseGenerator.class);
@@ -55,18 +53,17 @@ public class TestCaseGenerator extends Operation {
     private HashMap<String, Integer> sortedLogicSheets;
     private HashMap<String, Integer> sortedDictSheets;
 
-    private final String[] sheetOperands = { "if", "=", "-and/or-", "on more than one contact", ","};
+    private final String[] sheetOperands = {"if", "=", "-and/or-", "on more than one contact", ","};
     private final String[] dciPossibleInputs = {
-            "More than 2 cups of coffee (brewed, filter, instant or espresso)",
-            "More than 4 cups of tea",
-            "More than 12 bars (50g) of chocolate",
-            "More than one can of soda or energy drink",
-            "None of the above daily caffeine intake",
+        "More than 2 cups of coffee (brewed, filter, instant or espresso)",
+        "More than 4 cups of tea",
+        "More than 12 bars (50g) of chocolate",
+        "More than one can of soda or energy drink",
+        "None of the above daily caffeine intake",
     };
 
     @Override
     public void execute(String[] args) {
-
 
         // Parsing run args
         for (String arg : args) {
@@ -76,25 +73,41 @@ public class TestCaseGenerator extends Operation {
             String value = arg.split("=")[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "outputpath":        case "op":  outputPath     = value; break;
-                case "outputprefix":      case "opp": outputPrefix   = value; break;
-                case "logicinputpath":    case "lip": logicInputPath = value; break;
-                case "dictinputpath":     case "dip": dictInputPath  = value; break;
-                case "input":             case "in":  inputPath      = value; break;
+                case "outputpath":
+                case "op":
+                    outputPath = value;
+                    break;
+                case "outputprefix":
+                case "opp":
+                    outputPrefix = value;
+                    break;
+                case "logicinputpath":
+                case "lip":
+                    logicInputPath = value;
+                    break;
+                case "dictinputpath":
+                case "dip":
+                    dictInputPath = value;
+                    break;
+                case "input":
+                case "in":
+                    inputPath = value;
+                    break;
 
-                default: throw new IllegalArgumentException("Unknown -> " + flag);
+                default:
+                    throw new IllegalArgumentException("Unknown -> " + flag);
             }
         }
 
         // Instantiating workbook objects from user args
         logicWorkbook = SpreadsheetHelper.getWorkbook(logicInputPath);
-        dictWorkbook  = SpreadsheetHelper.getWorkbook(dictInputPath);
+        dictWorkbook = SpreadsheetHelper.getWorkbook(dictInputPath);
         inputWorkbook = SpreadsheetHelper.getWorkbook(inputPath);
 
         Sheet logicSheet = logicWorkbook.getSheet("ANC.DT.15 Behaviour counselling");
         String activityId = Helper.getIdFromTrigger(logicSheet);
 
-        HashMap<String, TestCase> caseMap     = getInputTestCases(inputWorkbook.getSheet("Test Case List"));
+        HashMap<String, TestCase> caseMap = getInputTestCases(inputWorkbook.getSheet("Test Case List"));
         HashMap<String, DataElement> logicMap = getInputLogic(inputWorkbook.getSheet("Test Case Logic"));
         performLogic(caseMap, logicMap);
 
@@ -104,18 +117,15 @@ public class TestCaseGenerator extends Operation {
          * the original unaltered input string.
          * Solution: Hashmap logic below.
          */
-        HashMap<String, String>logicInputCorrelations = buildInputCorrelatedHashmap(logicSheet, true, 5);
+        HashMap<String, String> logicInputCorrelations = buildInputCorrelatedHashmap(logicSheet, true, 5);
 
         for (Map.Entry<String, String> i : logicInputCorrelations.entrySet())
             logger.info("{} : {}", i.getKey(), i.getValue());
 
         sortedLogicSheets = Helper.getSortedSheets(logicWorkbook);
-        sortedDictSheets  = Helper.getSortedSheets(dictWorkbook);
+        sortedDictSheets = Helper.getSortedSheets(dictWorkbook);
         Sheet triggerDict = dictWorkbook.getSheet(Helper.substrToSheetName(sortedDictSheets, "ANC.B10"));
         HashMap<String, String> correlatedMap = buildInputCorrelatedHashmap(logicSheet, true, 5);
-
-
-
     }
 
     private HashMap<String, TestCase> getInputTestCases(Sheet listSheet) {
@@ -124,7 +134,6 @@ public class TestCaseGenerator extends Operation {
 
         // Skip 0 and 1 rows.
         for (int i = 0; i < 2; i++) rowIterator.next();
-
 
         while (rowIterator.hasNext()) {
             Row currentRow = rowIterator.next();
@@ -151,19 +160,20 @@ public class TestCaseGenerator extends Operation {
 
         while (rowIterator.hasNext()) {
             Row currentRow = rowIterator.next();
-//            ElementDefinition elementDefinition = new ElementDefinition();
+            //            ElementDefinition elementDefinition = new ElementDefinition();
             DataElement elementDefinition = new DataElement();
 
-            if (Helper.isRowEmpty(currentRow))
-                continue;
+            if (Helper.isRowEmpty(currentRow)) continue;
 
             elementDefinition.setId(Helper.properlyGetCell(currentRow, 0).getStringCellValue());
-//            elementDefinition.setLabel(new org.hl7.fhir.String().withValue(TestCaseGenerator.properlyGetCell(currentRow, 1).getStringCellValue()));
+            //            elementDefinition.setLabel(new
+            // org.hl7.fhir.String().withValue(TestCaseGenerator.properlyGetCell(currentRow, 1).getStringCellValue()));
             elementDefinition.setLabel(Helper.properlyGetCell(currentRow, 1).getStringCellValue());
-//            elementDefinition.setValue(new org.hl7.fhir.String().withValue(TestCaseGenerator.properlyGetCell(currentRow, 2).getStringCellValue()));
+            //            elementDefinition.setValue(new
+            // org.hl7.fhir.String().withValue(TestCaseGenerator.properlyGetCell(currentRow, 2).getStringCellValue()));
             elementDefinition.setValue(Helper.properlyGetCell(currentRow, 2).getStringCellValue());
 
-//            DataElement dataElement = new DataElement().withElement(elementDefinition);
+            //            DataElement dataElement = new DataElement().withElement(elementDefinition);
 
             logicMap.put(elementDefinition.getId(), elementDefinition);
         }
@@ -177,17 +187,18 @@ public class TestCaseGenerator extends Operation {
      * @param rowSkipCount
      * @return
      */
-    private HashMap<String, String> buildInputCorrelatedHashmap(Sheet sheet, boolean shouldRemoveOperands, int rowSkipCount) {
+    private HashMap<String, String> buildInputCorrelatedHashmap(
+            Sheet sheet, boolean shouldRemoveOperands, int rowSkipCount) {
         HashMap<String, String> ret = new HashMap<>();
 
         Iterator<Row> rowIterator = skipIterations(sheet.rowIterator(), 5);
         while (rowIterator.hasNext()) {
-           Row currentRow = rowIterator.next();
-           Cell inputCell;
-           String unalteredInput;
-           String alteredInput;
+            Row currentRow = rowIterator.next();
+            Cell inputCell;
+            String unalteredInput;
+            String alteredInput;
 
-           if (Helper.isRowEmpty(currentRow)) continue;
+            if (Helper.isRowEmpty(currentRow)) continue;
 
             inputCell = Helper.properlyGetCell(currentRow, 1);
             unalteredInput = inputCell.getStringCellValue().toLowerCase();
@@ -231,15 +242,11 @@ public class TestCaseGenerator extends Operation {
         GuidanceResponse guidanceResponse = new GuidanceResponse();
         Cell nextCell = Helper.properlyGetCell(row, 1);
 
-        if (alteredInput.charAt(0) == '-')
-            guidanceResponse.setId("patient" + alteredInput);
-        else
-            guidanceResponse.setId("patient-" + alteredInput);
+        if (alteredInput.charAt(0) == '-') guidanceResponse.setId("patient" + alteredInput);
+        else guidanceResponse.setId("patient-" + alteredInput);
 
-        guidanceResponse.addExtension(new Extension()
-                .setUrl(INPUTPARAMURL)
-                .setValue(new Reference("Parameters/patient" + alteredInput))
-        );
+        guidanceResponse.addExtension(
+                new Extension().setUrl(INPUTPARAMURL).setValue(new Reference("Parameters/patient" + alteredInput)));
         // I don't understand this 100%. Talk to Bryn or someone.
         // Surely this must be the expected result given a specific reference..?
         guidanceResponse.setStatus(GuidanceResponse.GuidanceResponseStatus.fromCode("success"));
@@ -252,16 +259,11 @@ public class TestCaseGenerator extends Operation {
     private String getCounselType(String checkAgainst) {
         String ret = "";
 
-        if (checkAgainst.toLowerCase().contains("tobacco"))
-            ret = "tobacco";
-        else if (checkAgainst.toLowerCase().contains("caffeine"))
-            ret = "caffeine";
-        else if (checkAgainst.toLowerCase().contains("condom"))
-            ret = "condom";
-        else if (checkAgainst.toLowerCase().contains("alcohol"))
-            ret = "alcohol";
-        else if (checkAgainst.toLowerCase().contains("smoke"))
-            ret = "smoke";
+        if (checkAgainst.toLowerCase().contains("tobacco")) ret = "tobacco";
+        else if (checkAgainst.toLowerCase().contains("caffeine")) ret = "caffeine";
+        else if (checkAgainst.toLowerCase().contains("condom")) ret = "condom";
+        else if (checkAgainst.toLowerCase().contains("alcohol")) ret = "alcohol";
+        else if (checkAgainst.toLowerCase().contains("smoke")) ret = "smoke";
 
         return ret;
     }
@@ -278,11 +280,11 @@ public class TestCaseGenerator extends Operation {
     }
 
     private void output(TestCase testCase) {
-        String guidanceResponsePath = outputPath + "/testCase-" + testCase.getId().replace("/", "-").toLowerCase() + ".json";
+        String guidanceResponsePath =
+                outputPath + "/testCase-" + testCase.getId().replace("/", "-").toLowerCase() + ".json";
         logger.info(testCase.getId());
 
-        if (guidanceResponsePath.contains("="))
-            guidanceResponsePath = guidanceResponsePath.replace("=", "");
+        if (guidanceResponsePath.contains("=")) guidanceResponsePath = guidanceResponsePath.replace("=", "");
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -295,11 +297,7 @@ public class TestCaseGenerator extends Operation {
     }
 
     private String removeInputFormatting(String input) {
-        return input
-                .replace("\"", "")
-                .replace(" ", "-")
-                .replace("(", "-")
-                .replace(")", "");
+        return input.replace("\"", "").replace(" ", "-").replace("(", "-").replace(")", "");
     }
 
     private Iterator<Row> skipIterations(Iterator<Row> iterator, int count) {
@@ -318,8 +316,7 @@ public class TestCaseGenerator extends Operation {
             }
         }
 
-        if (inputString.contains("--"))
-            inputString = inputString.replace("--", "-");
+        if (inputString.contains("--")) inputString = inputString.replace("--", "-");
 
         return inputString;
     }

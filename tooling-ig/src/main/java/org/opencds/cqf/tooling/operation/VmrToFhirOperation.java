@@ -4,13 +4,13 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.parameter.VmrToFhirParameters;
 import org.opencds.cqf.tooling.processor.VmrToFhirProcessor;
 import org.opencds.cqf.tooling.processor.argument.VmrToFhirArgumentProcessor;
+
 /**
  * @author Joshua Reynolds
  */
 public class VmrToFhirOperation extends Operation {
 
-    public VmrToFhirOperation() {
-    }
+    public VmrToFhirOperation() {}
 
     @Override
     public void execute(String[] args) {
@@ -18,8 +18,7 @@ public class VmrToFhirOperation extends Operation {
         VmrToFhirParameters params = null;
         try {
             params = new VmrToFhirArgumentProcessor().parseAndConvert(args);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }

@@ -1,22 +1,22 @@
 package org.opencds.cqf.tooling.terminology.fhirservice;
 
-import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.opencds.cqf.tooling.utilities.CanonicalUtils;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IOperationUntyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
+import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 
 public class FhirTerminologyClient implements TerminologyService {
 
     private IGenericClient client;
+
     public FhirTerminologyClient(IGenericClient client) {
         if (client == null) {
             throw new IllegalArgumentException("client is required");
@@ -27,6 +27,7 @@ public class FhirTerminologyClient implements TerminologyService {
 
     private FhirContext context;
     private Endpoint endpoint;
+
     public FhirTerminologyClient(FhirContext context, Endpoint endpoint, String userName, String password) {
         if (context == null) {
             throw new IllegalArgumentException("context is required");
@@ -59,42 +60,48 @@ public class FhirTerminologyClient implements TerminologyService {
     private RuntimeException toException(OperationOutcome outcome) {
         // TODO: Improve outcome to exception processing
         if (outcome.hasIssue()) {
-            return new RuntimeException(String.format("%s.%s", outcome.getIssueFirstRep().getCode(), outcome.getIssueFirstRep().getDetails()));
-        }
-        else {
+            return new RuntimeException(String.format(
+                    "%s.%s",
+                    outcome.getIssueFirstRep().getCode(),
+                    outcome.getIssueFirstRep().getDetails()));
+        } else {
             return new RuntimeException("Errors occurred but no details were returned");
         }
     }
 
     private boolean treatCanonicalTailAsLogicalId = false;
+
     public boolean getTreatCanonicalTailAsLogicalId() {
         return this.treatCanonicalTailAsLogicalId;
     }
+
     public FhirTerminologyClient setTreatCanonicalTailAsLogicalId(boolean treatCanonicalTailAsLogicalId) {
         this.treatCanonicalTailAsLogicalId = treatCanonicalTailAsLogicalId;
         return this;
     }
 
     private Object prepareExpand(String url) {
-        String canonical = url; //CanonicalUtils.stripVersion(url); //baustin - not in current CanonicalUtils/nor in past git versions--  no longer needed??
+        String canonical =
+                url; // CanonicalUtils.stripVersion(url); //baustin - not in current CanonicalUtils/nor in past git
+        // versions--  no longer needed??
         String version = CanonicalUtils.getVersion(url);
         IOperationUntyped operation = null;
         IOperationUntypedWithInputAndPartialOutput<Parameters> operationWithInput = null;
         if (treatCanonicalTailAsLogicalId) {
-            operation = this.client.operation()
+            operation = this.client
+                    .operation()
                     .onInstance(String.format("ValueSet/%s", CanonicalUtils.getId(canonical)))
                     .named("expand");
             if (version != null) {
-                operationWithInput = operation.withParameter(Parameters.class, "valueSetVersion", new StringType().setValue(version));
+                operationWithInput = operation.withParameter(
+                        Parameters.class, "valueSetVersion", new StringType().setValue(version));
             }
-        }
-        else {
-            operation = this.client.operation()
-                    .onType(ValueSet.class)
-                    .named("expand");
+        } else {
+            operation = this.client.operation().onType(ValueSet.class).named("expand");
             operationWithInput = operation.withParameter(Parameters.class, "url", new UriType().setValue(canonical));
             if (version != null) {
-                operationWithInput = operationWithInput.andParameter("valueSetVersion", new StringType().setValue(version));
+                operationWithInput =
+                        operationWithInput.andParameter("valueSetVersion", new StringType().setValue(version));
             }
         }
         return operationWithInput != null ? operationWithInput : operation;
@@ -102,50 +109,64 @@ public class FhirTerminologyClient implements TerminologyService {
 
     private ValueSet processResultAsValueSet(Object result, String operation) {
         if (result instanceof ValueSet) {
-            return (ValueSet)result;
-        }
-        else if (result instanceof OperationOutcome) {
-            throw toException((OperationOutcome)result);
-        }
-        else if (result == null) {
+            return (ValueSet) result;
+        } else if (result instanceof OperationOutcome) {
+            throw toException((OperationOutcome) result);
+        } else if (result == null) {
             throw new RuntimeException(String.format("No result returned when invoking %s", operation));
-        }
-        else {
-            throw new RuntimeException(String.format("Unexpected result type %s when invoking %s", result.getClass().getName(), operation));
+        } else {
+            throw new RuntimeException(String.format(
+                    "Unexpected result type %s when invoking %s",
+                    result.getClass().getName(), operation));
         }
     }
 
     @Override
-    @SuppressWarnings("unchecked") // Probably shouldn't be doing this, but it tells me I have an unchecked cast, but it won't let me check the instance of the parameterized generic...
+    @SuppressWarnings(
+            "unchecked") // Probably shouldn't be doing this, but it tells me I have an unchecked cast, but it won't let
+    // me check the instance of the parameterized generic...
     public ValueSet expand(String url) {
         Object operationObject = prepareExpand(url);
-        IOperationUntyped operation = operationObject instanceof IOperationUntyped ? (IOperationUntyped)operationObject : null;
-        IOperationUntypedWithInputAndPartialOutput<Parameters> operationWithInput = operationObject instanceof IOperationUntypedWithInputAndPartialOutput
-                ? (IOperationUntypedWithInputAndPartialOutput<Parameters>)operationObject : null;
+        IOperationUntyped operation =
+                operationObject instanceof IOperationUntyped ? (IOperationUntyped) operationObject : null;
+        IOperationUntypedWithInputAndPartialOutput<Parameters> operationWithInput =
+                operationObject instanceof IOperationUntypedWithInputAndPartialOutput
+                        ? (IOperationUntypedWithInputAndPartialOutput<Parameters>) operationObject
+                        : null;
 
-        Object result = operationWithInput != null ? operationWithInput.execute() : operation.withNoParameters(Parameters.class).execute();
+        Object result = operationWithInput != null
+                ? operationWithInput.execute()
+                : operation.withNoParameters(Parameters.class).execute();
         return processResultAsValueSet(result, "expand");
     }
 
     @Override
-    @SuppressWarnings("unchecked") // Probably shouldn't be doing this, but it tells me I have an unchecked cast, but it won't let me check the instance of the parameterized generic...
+    @SuppressWarnings(
+            "unchecked") // Probably shouldn't be doing this, but it tells me I have an unchecked cast, but it won't let
+    // me check the instance of the parameterized generic...
     public ValueSet expand(String url, Iterable<String> systemVersion) {
         Object operationObject = prepareExpand(url);
-        IOperationUntyped operation = operationObject instanceof IOperationUntyped ? (IOperationUntyped)operationObject : null;
-        IOperationUntypedWithInputAndPartialOutput<Parameters> operationWithInput = operationObject instanceof IOperationUntypedWithInputAndPartialOutput
-                ? (IOperationUntypedWithInputAndPartialOutput<Parameters>)operationObject : null;
+        IOperationUntyped operation =
+                operationObject instanceof IOperationUntyped ? (IOperationUntyped) operationObject : null;
+        IOperationUntypedWithInputAndPartialOutput<Parameters> operationWithInput =
+                operationObject instanceof IOperationUntypedWithInputAndPartialOutput
+                        ? (IOperationUntypedWithInputAndPartialOutput<Parameters>) operationObject
+                        : null;
         if (systemVersion != null) {
             for (String sv : systemVersion) {
                 if (operationWithInput == null) {
-                    operationWithInput = operation.withParameter(Parameters.class, "system-version", new CanonicalType().setValue(sv));
-                }
-                else {
-                    operationWithInput = operationWithInput.andParameter("system-version", new CanonicalType().setValue(sv));
+                    operationWithInput = operation.withParameter(
+                            Parameters.class, "system-version", new CanonicalType().setValue(sv));
+                } else {
+                    operationWithInput =
+                            operationWithInput.andParameter("system-version", new CanonicalType().setValue(sv));
                 }
             }
         }
 
-        Object result = operationWithInput != null ? operationWithInput.execute() : operation.withNoParameters(Parameters.class).execute();
+        Object result = operationWithInput != null
+                ? operationWithInput.execute()
+                : operation.withNoParameters(Parameters.class).execute();
         return processResultAsValueSet(result, "expand");
     }
 
@@ -202,15 +223,17 @@ public class FhirTerminologyClient implements TerminologyService {
     @Override
     public IBaseResource getResource(String url) {
         try {
-            Bundle readBundle = this.client.search().byUrl(url).returnBundle(Bundle.class).execute();
+            Bundle readBundle =
+                    this.client.search().byUrl(url).returnBundle(Bundle.class).execute();
             if (readBundle.hasEntry()) {
                 IBaseResource resourceToValidate = null;
-                    resourceToValidate = readBundle.getEntry().get(0).getResource();
+                resourceToValidate = readBundle.getEntry().get(0).getResource();
                 return resourceToValidate;
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
-        };
+        }
+        ;
         return null;
     }
 }

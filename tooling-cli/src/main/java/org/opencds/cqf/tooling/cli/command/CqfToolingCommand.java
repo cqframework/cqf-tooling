@@ -23,7 +23,8 @@ import picocli.CommandLine.Spec;
         versionProvider = CqfToolingCommand.VersionProvider.class)
 public class CqfToolingCommand implements Runnable {
 
-    @Spec CommandSpec spec;
+    @Spec
+    CommandSpec spec;
 
     @Override
     public void run() {

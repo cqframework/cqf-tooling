@@ -1,6 +1,8 @@
 package org.opencds.cqf.tooling.plandefinition;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.hl7.fhir.r5.model.PlanDefinition;
@@ -14,9 +16,6 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PlanDefinitionProcessor extends BaseProcessor {
 
     protected List<Object> identifiers;
@@ -27,37 +26,50 @@ public class PlanDefinitionProcessor extends BaseProcessor {
         this.libraryProcessor = libraryProcessor;
     }
 
-    public List<String> refreshIgPlanDefinitionContent(BaseProcessor parentContext, Encoding outputEncoding,
-                                                       Boolean versioned, FhirContext fhirContext,
-                                                       String planDefinitionToRefreshPath,
-                                                       Boolean shouldApplySoftwareSystemStamp) {
-        return refreshIgPlanDefinitionContent(parentContext, outputEncoding, null, versioned,
-                fhirContext, planDefinitionToRefreshPath, shouldApplySoftwareSystemStamp);
+    public List<String> refreshIgPlanDefinitionContent(
+            BaseProcessor parentContext,
+            Encoding outputEncoding,
+            Boolean versioned,
+            FhirContext fhirContext,
+            String planDefinitionToRefreshPath,
+            Boolean shouldApplySoftwareSystemStamp) {
+        return refreshIgPlanDefinitionContent(
+                parentContext,
+                outputEncoding,
+                null,
+                versioned,
+                fhirContext,
+                planDefinitionToRefreshPath,
+                shouldApplySoftwareSystemStamp);
     }
 
-    public List<String> refreshIgPlanDefinitionContent(BaseProcessor parentContext, Encoding outputEncoding,
-                                                       String planDefinitionOutputDirectory, Boolean versioned,
-                                                       FhirContext fhirContext, String planDefinitionToRefreshPath,
-                                                       Boolean shouldApplySoftwareSystemStamp) {
+    public List<String> refreshIgPlanDefinitionContent(
+            BaseProcessor parentContext,
+            Encoding outputEncoding,
+            String planDefinitionOutputDirectory,
+            Boolean versioned,
+            FhirContext fhirContext,
+            String planDefinitionToRefreshPath,
+            Boolean shouldApplySoftwareSystemStamp) {
         logger.info("Refreshing PlanDefinitions...");
 
         PlanDefinitionProcessor planDefinitionProcessor;
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
-                planDefinitionProcessor = new org.opencds.cqf.tooling.plandefinition.stu3.PlanDefinitionProcessor(
-                        libraryProcessor);
+                planDefinitionProcessor =
+                        new org.opencds.cqf.tooling.plandefinition.stu3.PlanDefinitionProcessor(libraryProcessor);
                 break;
             case R4:
-                planDefinitionProcessor = new org.opencds.cqf.tooling.plandefinition.r4.PlanDefinitionProcessor(
-                        libraryProcessor);
+                planDefinitionProcessor =
+                        new org.opencds.cqf.tooling.plandefinition.r4.PlanDefinitionProcessor(libraryProcessor);
                 break;
             default:
-                throw new IllegalArgumentException(
-                        "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+                throw new IllegalArgumentException("Unknown fhir version: "
+                        + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
-        var planDefinitionPath = FilenameUtils.concat(
-                parentContext.getRootDir(), IGProcessor.PLAN_DEFINITION_PATH_ELEMENT);
+        var planDefinitionPath =
+                FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.PLAN_DEFINITION_PATH_ELEMENT);
         var params = new RefreshPlanDefinitionParameters();
         params.planDefinitionPath = planDefinitionPath;
         params.parentContext = parentContext;
@@ -120,10 +132,10 @@ public class PlanDefinitionProcessor extends BaseProcessor {
                 }
             }
             if (!hasErrors) {
-                return processor.refreshPlanDefinition(planDefinition, libraryManager, compiledLibrary, cqlCompilerOptions);
+                return processor.refreshPlanDefinition(
+                        planDefinition, libraryManager, compiledLibrary, cqlCompilerOptions);
             }
         }
         return planDefinition;
     }
-
 }

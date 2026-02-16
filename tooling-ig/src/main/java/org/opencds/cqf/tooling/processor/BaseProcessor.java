@@ -1,5 +1,15 @@
 package org.opencds.cqf.tooling.processor;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 import org.cqframework.fhir.npm.LibraryLoader;
 import org.cqframework.fhir.npm.NpmPackageManager;
 import org.fhir.ucum.UcumEssenceService;
@@ -22,17 +32,7 @@ import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
+@SuppressWarnings("checkstyle:AbstractClassName")
 public class BaseProcessor implements IProcessorContext, ILoggingService {
 
     protected static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
@@ -194,9 +194,15 @@ public class BaseProcessor implements IProcessorContext, ILoggingService {
             if (packageManager == null) {
                 throw new IllegalStateException("packageManager is null. It should be initialized at this point.");
             }
-            cqlProcessor = new CqlProcessor(new CopyOnWriteArrayList<>(cleanPackageList(packageManager.getNpmList())),
-                    new CopyOnWriteArrayList<>(binaryPaths), reader, this, ucumService,
-                    packageId, canonicalBase, verboseMessaging);
+            cqlProcessor = new CqlProcessor(
+                    new CopyOnWriteArrayList<>(cleanPackageList(packageManager.getNpmList())),
+                    new CopyOnWriteArrayList<>(binaryPaths),
+                    reader,
+                    this,
+                    ucumService,
+                    packageId,
+                    canonicalBase,
+                    verboseMessaging);
         }
 
         return cqlProcessor;
@@ -204,7 +210,8 @@ public class BaseProcessor implements IProcessorContext, ILoggingService {
 
     private List<NpmPackage> cleanPackageList(List<NpmPackage> originalPackageList) {
         Set<String> pathSet = new HashSet<>();
-        return originalPackageList.stream().filter(e -> pathSet.add(e.getPath()))
+        return originalPackageList.stream()
+                .filter(e -> pathSet.add(e.getPath()))
                 .collect(Collectors.toList());
     }
 
@@ -215,8 +222,8 @@ public class BaseProcessor implements IProcessorContext, ILoggingService {
             } catch (IOException | FHIRException e) {
                 try {
                     var versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-                    sourceIg = (ImplementationGuide) versionConvertor_40_50
-                            .convertResource(org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath));
+                    sourceIg = (ImplementationGuide) versionConvertor_40_50.convertResource(
+                            org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath));
                 } catch (IOException | FHIRException ex) {
                     var src = TextFile.fileToBytes(igPath);
                     var fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
@@ -260,10 +267,8 @@ public class BaseProcessor implements IProcessorContext, ILoggingService {
     }
 
     private String determineCanonical(String url) {
-        if (url == null)
-            return url;
-        if (url.contains("/ImplementationGuide/"))
-            return url.substring(0, url.indexOf("/ImplementationGuide/"));
+        if (url == null) return url;
+        if (url.contains("/ImplementationGuide/")) return url.substring(0, url.indexOf("/ImplementationGuide/"));
         return url;
     }
 

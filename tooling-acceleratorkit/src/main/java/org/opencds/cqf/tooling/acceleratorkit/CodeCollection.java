@@ -1,10 +1,9 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
-import org.hl7.fhir.r4.model.Coding;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.r4.model.Coding;
 
 public class CodeCollection {
     public CodeCollection() {
@@ -16,6 +15,7 @@ public class CodeCollection {
     }
 
     private List<DictionaryCode> codes;
+
     public List<DictionaryCode> getCodes() {
         if (this.codes == null) {
             this.codes = new ArrayList<>();
@@ -40,6 +40,7 @@ public class CodeCollection {
     }
 
     private ArrayList<String> codeSystemUrls;
+
     public List<String> getCodeSystemUrls() {
         if (this.codeSystemUrls == null) {
             this.codeSystemUrls = new ArrayList<>();

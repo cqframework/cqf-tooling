@@ -15,5 +15,4 @@ public class STU3MeasureProcessorTest {
     public void testRefreshMeasureContent() throws Exception {
         // Not finished yet.
     }
-    
 }

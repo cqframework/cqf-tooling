@@ -1,0 +1,84 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = false
+max_line_length = 100
+tab_width = 4
+ij_formatter_tags_enabled = false
+
+[*.md]
+insert_final_newline = true
+indent_size = 4
+
+[*.json]
+indent_size = 2
+tab_width = 2
+max_line_length = 80
+ij_json_space_after_colon = true
+ij_json_space_after_comma = true
+
+[*.java]
+ij_java_imports_layout = $*,|,*
+ij_java_class_brace_style = end_of_line
+ij_java_method_brace_style = end_of_line
+ij_java_space_before_method_call_parentheses = false
+ij_java_space_before_method_parentheses = false
+ij_java_space_before_if_parentheses = true
+ij_java_space_before_while_parentheses = true
+ij_java_space_before_for_parentheses = true
+ij_java_space_before_switch_parentheses = true
+ij_java_space_before_catch_parentheses = true
+ij_java_space_before_synchronized_parentheses = true
+ij_java_space_around_assignment_operators = true
+ij_java_space_around_logical_operators = true
+ij_java_space_around_equality_operators = true
+ij_java_space_around_relational_operators = true
+ij_java_space_around_bitwise_operators = true
+ij_java_space_around_additive_operators = true
+ij_java_space_around_multiplicative_operators = true
+ij_java_space_around_shift_operators = true
+ij_java_spaces_within_parentheses = false
+ij_java_spaces_within_method_call_parentheses = false
+ij_java_spaces_within_method_parentheses = false
+ij_java_spaces_within_if_parentheses = false
+ij_java_spaces_within_while_parentheses = false
+ij_java_spaces_within_for_parentheses = false
+ij_java_spaces_within_switch_parentheses = false
+ij_java_spaces_within_catch_parentheses = false
+ij_java_spaces_within_synchronized_parentheses = false
+ij_java_spaces_within_cast_parentheses = false
+ij_java_spaces_within_brackets = false
+ij_java_spaces_within_braces = false
+ij_java_spaces_within_array_initializer_braces = false
+ij_java_keep_line_breaks = true
+ij_java_keep_blank_lines_in_declarations = 1
+ij_java_keep_blank_lines_in_code = 1
+ij_java_keep_blank_lines_before_rbrace = 0
+ij_java_blank_lines_after_class_header = 0
+ij_java_blank_lines_after_package = 1
+ij_java_blank_lines_before_package = 0
+ij_java_blank_lines_before_imports = 1
+ij_java_blank_lines_after_imports = 1
+ij_java_doc_add_blank_line_after_description = true
+ij_java_doc_add_blank_line_after_param_comments = false
+ij_java_doc_add_blank_line_after_return = false
+ij_java_doc_align_param_comments = false
+ij_java_doc_align_exception_comments = false
+ij_java_doc_enable_formatting = true
+ij_java_doc_enable_leading_asterisks = true
+ij_java_doc_keep_empty_parameter_tag = true
+ij_java_doc_keep_empty_return_tag = true
+ij_java_doc_keep_empty_throws_tag = true
+ij_java_binary_operation_sign_on_next_line = true
+ij_java_continuation_indent_size = 4
+ij_java_ternary_operation_signs_on_next_line = true
+ij_java_wrap_comments = true
+
+[{*.xml,*.xsl,*.xsd}]
+ij_continuation_indent_size = 2
+ij_xml_block_comment_at_first_column = true
+ij_xml_line_comment_at_first_column = true

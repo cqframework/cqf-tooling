@@ -1,5 +1,8 @@
 package org.opencds.cqf.tooling.modelinfo;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -10,17 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import com.google.common.io.Files;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,69 +41,82 @@ public class Atlas {
     }
 
     private Map<String, Resource> resources;
+
     public Map<String, Resource> getResources() {
         return resources;
     }
 
     private Map<String, CapabilityStatement> capabilityStatements;
+
     public Map<String, CapabilityStatement> getCapabilityStatements() {
         return capabilityStatements;
     }
 
     private Map<String, CompartmentDefinition> compartmentDefinitions;
+
     public Map<String, CompartmentDefinition> getCompartmentDefinitions() {
         return compartmentDefinitions;
     }
 
     private Map<String, StructureDefinition> structureDefinitions;
+
     public Map<String, StructureDefinition> getStructureDefinitions() {
         return structureDefinitions;
     }
 
     private Map<String, OperationDefinition> operationDefinitions;
+
     public Map<String, OperationDefinition> getOperationDefinitions() {
         return operationDefinitions;
     }
 
     private Map<String, SearchParameter> searchParameters;
+
     public Map<String, SearchParameter> getSearchParameters() {
         return searchParameters;
     }
 
     public SearchParameter resolveSearchParameter(String resourceTypeName, String searchParameterName) {
-        Optional<SearchParameter> result =
-            searchParameters.values().stream().filter(x -> x.getBase().stream().anyMatch(t -> t.toString().equals(resourceTypeName))
-                && x.getName().equals(searchParameterName)).findFirst();
+        Optional<SearchParameter> result = searchParameters.values().stream()
+                .filter(x -> x.getBase().stream().anyMatch(t -> t.toString().equals(resourceTypeName))
+                        && x.getName().equals(searchParameterName))
+                .findFirst();
 
         return result.isPresent() ? result.get() : null;
     }
 
     private Map<String, ImplementationGuide> implementationGuides;
+
     public Map<String, ImplementationGuide> getImplementationGuides() {
         return implementationGuides;
     }
 
     private Map<String, CodeSystem> codeSystems;
+
     public Map<String, CodeSystem> getCodeSystems() {
         return codeSystems;
     }
 
     private Map<String, ValueSet> valueSets;
+
     public Map<String, ValueSet> getValueSets() {
         return valueSets;
     }
 
     private Map<String, ConceptMap> conceptMaps;
+
     public Map<String, ConceptMap> getConceptMaps() {
         return conceptMaps;
     }
 
     private Map<String, NamingSystem> namingSystems;
+
     public Map<String, NamingSystem> getNamingSystems() {
         return namingSystems;
     }
 
     private Map<String, Parameters> parameters;
+
     public Map<String, Parameters> getParameters() {
         return parameters;
     }
@@ -126,7 +136,6 @@ public class Atlas {
         }
 
         return url;
-
     }
 
     @SuppressWarnings("unused")
@@ -150,12 +159,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(capabilityStatement.getUrl());
             if (!capabilityStatements.containsKey(id)) {
                 capabilityStatements.put(id, capabilityStatement);
-            }
-            else {
+            } else {
                 logger.info("Duplicate CapabilityStatement with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", capabilityStatement.getUrl());
         }
     }
@@ -166,12 +173,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(compartmentDefinition.getUrl());
             if (!compartmentDefinitions.containsKey(id)) {
                 compartmentDefinitions.put(id, compartmentDefinition);
-            }
-            else {
+            } else {
                 logger.info("Duplicate CompartmentDefinition with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", compartmentDefinition.getUrl());
         }
     }
@@ -182,12 +187,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(structureDefinition.getUrl());
             if (!structureDefinitions.containsKey(id)) {
                 structureDefinitions.put(id, structureDefinition);
-            }
-            else {
+            } else {
                 logger.info("Duplicate StructureDefinition with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", structureDefinition.getUrl());
         }
     }
@@ -198,12 +201,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(operationDefinition.getUrl());
             if (!operationDefinitions.containsKey(id)) {
                 operationDefinitions.put(id, operationDefinition);
-            }
-            else {
+            } else {
                 logger.info("Duplicate OperationDefinition with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", operationDefinition.getUrl());
         }
     }
@@ -214,12 +215,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(searchParameter.getUrl());
             if (!searchParameters.containsKey(id)) {
                 searchParameters.put(id, searchParameter);
-            }
-            else {
+            } else {
                 logger.info("Duplicate SearchParameter with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", searchParameter.getUrl());
         }
     }
@@ -230,12 +229,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(implementationGuide.getUrl());
             if (!implementationGuides.containsKey(id)) {
                 implementationGuides.put(id, implementationGuide);
-            }
-            else {
+            } else {
                 logger.info("Duplicate ImplementationGuide with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", implementationGuide.getUrl());
         }
     }
@@ -246,12 +243,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(codeSystem.getUrl());
             if (!codeSystems.containsKey(id)) {
                 codeSystems.put(id, codeSystem);
-            }
-            else {
+            } else {
                 logger.info("Duplicate CodeSystem with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", codeSystem.getUrl());
         }
     }
@@ -262,12 +257,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(valueSet.getUrl());
             if (!valueSets.containsKey(id)) {
                 valueSets.put(id, valueSet);
-            }
-            else {
+            } else {
                 logger.info("Duplicate ValueSet with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", valueSet.getUrl());
         }
     }
@@ -278,12 +271,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(conceptMap.getUrl());
             if (!conceptMaps.containsKey(id)) {
                 conceptMaps.put(id, conceptMap);
-            }
-            else {
+            } else {
                 logger.info("Duplicate ConceptMap with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", conceptMap.getUrl());
         }
     }
@@ -294,12 +285,10 @@ public class Atlas {
             String id = CanonicalUtils.getTail(namingSystem.getUrl());
             if (!namingSystems.containsKey(id)) {
                 namingSystems.put(id, namingSystem);
-            }
-            else {
+            } else {
                 logger.info("Duplicate NamingSystem with id {}", id);
             }
-        }
-        else {
+        } else {
             logger.info("Duplicate url found for: {}", namingSystem.getUrl());
         }
     }
@@ -308,47 +297,35 @@ public class Atlas {
         String id = parameters.getId();
         if (!this.parameters.containsKey(id)) {
             this.parameters.put(id, parameters);
-        }
-        else {
+        } else {
             logger.info("Duplicate Parameters with id {}", id);
         }
     }
 
     private void indexResource(IBaseResource resource) {
         if (resource instanceof CapabilityStatement) {
-            indexCapabilityStatement((CapabilityStatement)resource);
-        }
-        else if (resource instanceof CompartmentDefinition) {
-            indexCompartmentDefinition((CompartmentDefinition)resource);
-        }
-        else if (resource instanceof StructureDefinition) {
-            indexStructureDefinition((StructureDefinition)resource);
-        }
-        else if (resource instanceof OperationDefinition) {
-            indexOperationDefinition((OperationDefinition)resource);
-        }
-        else if (resource instanceof SearchParameter) {
-            indexSearchParameter((SearchParameter)resource);
-        }
-        else if (resource instanceof ImplementationGuide) {
-            indexImplementationGuide((ImplementationGuide)resource);
-        }
-        else if (resource instanceof CodeSystem) {
-            indexCodeSystem((CodeSystem)resource);
-        }
-        else if (resource instanceof ValueSet) {
-            indexValueSet((ValueSet)resource);
-        }
-        else if (resource instanceof ConceptMap) {
-            indexConceptMap((ConceptMap)resource);
-        }
-        else if (resource instanceof NamingSystem) {
-            indexNamingSystem((NamingSystem)resource);
-        }
-        else if (resource instanceof Parameters) {
-            indexParameters((Parameters)resource);
-        }
-        else {
+            indexCapabilityStatement((CapabilityStatement) resource);
+        } else if (resource instanceof CompartmentDefinition) {
+            indexCompartmentDefinition((CompartmentDefinition) resource);
+        } else if (resource instanceof StructureDefinition) {
+            indexStructureDefinition((StructureDefinition) resource);
+        } else if (resource instanceof OperationDefinition) {
+            indexOperationDefinition((OperationDefinition) resource);
+        } else if (resource instanceof SearchParameter) {
+            indexSearchParameter((SearchParameter) resource);
+        } else if (resource instanceof ImplementationGuide) {
+            indexImplementationGuide((ImplementationGuide) resource);
+        } else if (resource instanceof CodeSystem) {
+            indexCodeSystem((CodeSystem) resource);
+        } else if (resource instanceof ValueSet) {
+            indexValueSet((ValueSet) resource);
+        } else if (resource instanceof ConceptMap) {
+            indexConceptMap((ConceptMap) resource);
+        } else if (resource instanceof NamingSystem) {
+            indexNamingSystem((NamingSystem) resource);
+        } else if (resource instanceof Parameters) {
+            indexParameters((Parameters) resource);
+        } else {
             logger.info("Resource with id {} skipped", resource.getIdElement());
         }
     }
@@ -367,11 +344,10 @@ public class Atlas {
                 IBaseResource resource = parser.parseResource(content);
 
                 if (resource instanceof Bundle) {
-                    for (IBaseResource R : unrollBundles((Bundle)resource)) {
+                    for (IBaseResource R : unrollBundles((Bundle) resource)) {
                         indexResource(R);
                     }
-                }
-                else {
+                } else {
                     indexResource(resource);
                 }
             } catch (IOException e) {
@@ -392,9 +368,8 @@ public class Atlas {
                 if (entry.hasResource()) {
                     Resource r = entry.getResource();
                     if (r.getResourceType() == ResourceType.Bundle) {
-                        resources.addAll(unrollBundles((Bundle)r));
-                    }
-                    else {
+                        resources.addAll(unrollBundles((Bundle) r));
+                    } else {
                         resources.add(r);
                     }
                 }

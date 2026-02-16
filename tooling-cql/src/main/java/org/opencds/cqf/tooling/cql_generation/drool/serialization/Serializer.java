@@ -1,12 +1,10 @@
 package org.opencds.cqf.tooling.cql_generation.drool.serialization;
 
-import java.io.StringWriter;
-
-import org.hl7.cql_annotations.r1.Annotation;
-
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
+import java.io.StringWriter;
+import org.hl7.cql_annotations.r1.Annotation;
 
 /**
  * Serializes Objects to xml
@@ -18,15 +16,18 @@ public class Serializer {
 
     public Serializer(Class<?> clazz) {
         this.clazz = clazz;
-	}
+    }
 
-	public String convertToXml(Object object, JAXBContext context) throws JAXBException {
+    public String convertToXml(Object object, JAXBContext context) throws JAXBException {
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
         StringWriter writer = new StringWriter();
         marshaller.marshal(object, writer);
-        return writer.getBuffer().toString().replace("<xml version=\"1.0\"", "<xml version=\"1.1\"").replace("\f", "&#xc;");
+        return writer.getBuffer()
+                .toString()
+                .replace("<xml version=\"1.0\"", "<xml version=\"1.1\"")
+                .replace("\f", "&#xc;");
     }
 
     public JAXBContext getJaxbContext() {

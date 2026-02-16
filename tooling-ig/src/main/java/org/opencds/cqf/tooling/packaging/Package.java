@@ -2,18 +2,17 @@ package org.opencds.cqf.tooling.packaging;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
+@SuppressWarnings("checkstyle:AbstractClassName")
 public abstract class Package<T extends IBaseResource> {
 
     private static final Logger logger = LoggerFactory.getLogger(Package.class);
@@ -39,7 +38,7 @@ public abstract class Package<T extends IBaseResource> {
     private T mainArtifact;
     private IBaseResource primaryLibrary;
     private Set<IBaseResource> dependencies;
-    private TestPackage<?,?> testPackage;
+    private TestPackage<?, ?> testPackage;
     private String igRoot;
     private FhirContext fhirContext;
     private boolean includeDependencies;
@@ -49,7 +48,13 @@ public abstract class Package<T extends IBaseResource> {
     private IGenericClient fhirClient;
     private String bundleOutputPath;
 
-    public Package(String igRoot, FhirContext fhirContext, boolean includeDependencies, boolean includeTerminology, boolean includeTests, String fhirServerUrl) {
+    public Package(
+            String igRoot,
+            FhirContext fhirContext,
+            boolean includeDependencies,
+            boolean includeTerminology,
+            boolean includeTests,
+            String fhirServerUrl) {
         this.igRoot = igRoot;
         this.fhirContext = fhirContext;
         this.includeDependencies = includeDependencies;
@@ -63,8 +68,11 @@ public abstract class Package<T extends IBaseResource> {
     }
 
     public abstract T resolveMainArtifact();
+
     public abstract Set<IBaseResource> resolveDependencies(T mainArtifact);
+
     public abstract TestPackage<?, ?> resolveTests(T mainArtifact);
+
     public abstract void output();
 
     public void packageArtifact() {
@@ -76,24 +84,27 @@ public abstract class Package<T extends IBaseResource> {
         output();
     }
 
-    public void resolvePrimaryLibraryDependencies(IBaseResource mainArtifact, FhirContext fhirContext, LinkedHashSet<IBaseResource> dependencies) {
-        var primaryLibrary = ResourceDiscovery.getLibraryUrlMap(fhirContext).get(
-                ResourceUtils.getPrimaryLibraryUrl(mainArtifact, fhirContext));
-        if (getPrimaryLibrary() == null) { // we want to save the primary library for the artifact being bundled not dependency libraries
+    public void resolvePrimaryLibraryDependencies(
+            IBaseResource mainArtifact, FhirContext fhirContext, LinkedHashSet<IBaseResource> dependencies) {
+        var primaryLibrary = ResourceDiscovery.getLibraryUrlMap(fhirContext)
+                .get(ResourceUtils.getPrimaryLibraryUrl(mainArtifact, fhirContext));
+        if (getPrimaryLibrary()
+                == null) { // we want to save the primary library for the artifact being bundled not dependency
+            // libraries
             setPrimaryLibrary(primaryLibrary);
         }
 
         var missingDependencies = new HashSet<String>();
         if (includeDependencies) {
             dependencies.add(primaryLibrary);
-            var dependencyLibraries = ResourceUtils.getDepLibraryResources(
-                    primaryLibrary, fhirContext, true, false, missingDependencies);
+            var dependencyLibraries =
+                    ResourceUtils.getDepLibraryResources(primaryLibrary, fhirContext, true, false, missingDependencies);
             dependencies.addAll(dependencyLibraries.values());
         }
 
         if (includeTerminology) {
-            var dependencyValueSets = ResourceUtils.getDepValueSetResources(
-                    primaryLibrary, fhirContext, true, missingDependencies);
+            var dependencyValueSets =
+                    ResourceUtils.getDepValueSetResources(primaryLibrary, fhirContext, true, missingDependencies);
             dependencies.addAll(dependencyValueSets.values());
         }
 
@@ -124,11 +135,11 @@ public abstract class Package<T extends IBaseResource> {
         this.dependencies = dependencies;
     }
 
-    public TestPackage<?,?> getTestPackage() {
+    public TestPackage<?, ?> getTestPackage() {
         return testPackage;
     }
 
-    public void setTests(TestPackage<?,?> testPackage) {
+    public void setTests(TestPackage<?, ?> testPackage) {
         this.testPackage = testPackage;
     }
 

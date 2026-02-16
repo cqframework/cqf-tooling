@@ -1,11 +1,11 @@
 package org.opencds.cqf.tooling.cql_generation.context;
 
+import com.google.gson.Gson;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -18,12 +18,10 @@ import org.hl7.elm.r1.*;
 import org.opencds.cqf.tooling.cql_generation.IOUtil;
 import org.opencds.cqf.tooling.cql_generation.builder.VmrToModelElmBuilder;
 
-import com.google.gson.Gson;
-
 /**
  * Carries state needed to build Elm Libraries for any given Model.
  * @author  Joshua Reynolds
- * @since   2021-02-24 
+ * @since   2021-02-24
  */
 public class ElmContext {
     public StringBuilder sb = new StringBuilder();
@@ -34,7 +32,7 @@ public class ElmContext {
     public Stack<Expression> expressionStack = new Stack<Expression>();
     public Stack<Pair<String, ExpressionRef>> referenceStack = new Stack<Pair<String, ExpressionRef>>();
     public Stack<String> operatorContext = new Stack<String>();
-    //libraryName , elmLibrary
+    // libraryName , elmLibrary
     public Map<String, Library> libraries = new HashMap<String, Library>();
 
     public ElmContext(VmrToModelElmBuilder modelBuilder) {
@@ -51,13 +49,15 @@ public class ElmContext {
         libraryManager.getLibrarySourceLoader().registerProvider(modelBuilder.getLibrarySourceProvider());
         // this.setTranslatorOptions(CqlTranslatorOptions.defaultOptions());
         try {
-            UcumService ucumService = new UcumEssenceService(
-                    UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
+            UcumService ucumService =
+                    new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
             libraryManager.setUcumService(ucumService);
             this.libraryBuilder = new LibraryBuilder(libraryManager, new IdObjectFactory());
             this.libraryBuilder.setLibraryIdentifier(libraryInfo.getLeft());
-            this.libraryBuilder.getModel(new UsingDef().withUri(modelBuilder.getModelUri())
-                    .withLocalIdentifier(modelBuilder.getModelIdentifier()).withVersion(modelBuilder.getModelVersion()));
+            this.libraryBuilder.getModel(new UsingDef()
+                    .withUri(modelBuilder.getModelUri())
+                    .withLocalIdentifier(modelBuilder.getModelIdentifier())
+                    .withVersion(modelBuilder.getModelVersion()));
             this.libraryBuilder.addContext(libraryInfo.getRight());
             libraryBuilder.addInclude(modelBuilder.getIncludeHelper());
             this.libraryBuilder.beginTranslation();
@@ -84,11 +84,11 @@ public class ElmContext {
         this.currentContext = currentContext;
     }
 
-        //TODO: remove after resolving missing valuesets
-	public void writeValueSets(Set<String> valueSetIds) {
+    // TODO: remove after resolving missing valuesets
+    public void writeValueSets(Set<String> valueSetIds) {
         Gson gson = new Gson();
         String json = gson.toJson(valueSetIds);
         File outputFile = new File("../CQLGenerationDocs/GeneratedDocs/valueset/valuesetids" + ".txt");
         IOUtil.writeToFile(outputFile, json);
-	}
+    }
 }

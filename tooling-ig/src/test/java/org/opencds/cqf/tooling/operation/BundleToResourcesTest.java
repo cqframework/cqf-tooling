@@ -1,11 +1,10 @@
 package org.opencds.cqf.tooling.operation;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class BundleToResourcesTest {
 
@@ -28,7 +27,7 @@ public class BundleToResourcesTest {
         String[] args = new String[4];
         args[0] = "-BundleToResources";
         args[1] = PATH_ARGUMENT + jsonFilePath;
-        args[2] = ENCODING_ARGUMENT+ "json";
+        args[2] = ENCODING_ARGUMENT + "json";
         args[3] = OUTPUT_PATH_ARGUMENT + projectPath + File.separator + relativePath;
         bundleToResources.execute(args);
 
@@ -59,7 +58,10 @@ public class BundleToResourcesTest {
             Assert.assertTrue(found, "Expected file not found: " + expectedFile);
         }
 
-        Assert.assertEquals(actualFiles.length, expectedFiles.size(), "Expected " + expectedFiles.size() + " resources files, but found " + actualFiles.length + ".");
+        Assert.assertEquals(
+                actualFiles.length,
+                expectedFiles.size(),
+                "Expected " + expectedFiles.size() + " resources files, but found " + actualFiles.length + ".");
     }
 
     @Test
@@ -77,7 +79,7 @@ public class BundleToResourcesTest {
 
         // Copy source file content to the temp file
         try (InputStream input = new FileInputStream(sourceFile);
-             OutputStream output = new FileOutputStream(tempFile)) {
+                OutputStream output = new FileOutputStream(tempFile)) {
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = input.read(buffer)) != -1) {
@@ -122,10 +124,12 @@ public class BundleToResourcesTest {
             Assert.assertTrue(found, "Expected file not found: " + expectedFile);
         }
 
-        Assert.assertEquals(actualFiles.length, expectedFiles.size(), "Expected " + expectedFiles.size() + " resource files, but found " + actualFiles.length + ".");
+        Assert.assertEquals(
+                actualFiles.length,
+                expectedFiles.size(),
+                "Expected " + expectedFiles.size() + " resource files, but found " + actualFiles.length + ".");
 
         // Verify the temp file is deleted
         Assert.assertFalse(tempFile.exists(), "Temporary bundle file was not deleted.");
     }
-
 }

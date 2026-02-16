@@ -1,5 +1,10 @@
 package org.opencds.cqf.tooling.operation;
 
+import ca.uhn.fhir.context.FhirContext;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,19 +29,14 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.R4FHIRUtils;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings({"checkstyle:MemberName", "checkstyle:MethodName", "checkstyle:ParameterName"})
 public class PostmanCollectionOperation extends Operation {
-    private final static Logger logger = LoggerFactory.getLogger(PostmanCollectionOperation.class);
-    private static final String POSTMAN_COLLECTION_SCHEMA = "https://schema.getpostman.com/json/collection/v2.1.0/collection.json";
+    private static final Logger logger = LoggerFactory.getLogger(PostmanCollectionOperation.class);
+    private static final String POSTMAN_COLLECTION_SCHEMA =
+            "https://schema.getpostman.com/json/collection/v2.1.0/collection.json";
     private String pathToBundlesDir;
     private FhirContext context;
     String version;
@@ -66,7 +65,8 @@ public class PostmanCollectionOperation extends Operation {
                 case "ptbd":
                     pathToBundlesDir = value;
                     break;
-                case "version": case "v":
+                case "version":
+                case "v":
                     version = value;
                     break;
                 case "protocol":
@@ -103,7 +103,8 @@ public class PostmanCollectionOperation extends Operation {
 
             for (File bundleDir : bundleDirectories) {
 
-                File[] bundleFiles = bundleDir.listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith(".json"));
+                File[] bundleFiles = bundleDir.listFiles(
+                        pathname -> pathname.isFile() && pathname.getName().endsWith(".json"));
                 if (bundleFiles == null) {
                     continue;
                 }
@@ -114,7 +115,6 @@ public class PostmanCollectionOperation extends Operation {
                         populatePostmanCollection(resource, versionItem, fileContent, version);
                     }
                 }
-
             }
             writePostmanCollection(postmanCollection);
         } catch (Exception e) {
@@ -122,11 +122,11 @@ public class PostmanCollectionOperation extends Operation {
         }
     }
 
-    private void validateHostAndPath(){
-        if(StringUtils.isEmpty(urlBase)) {
+    private void validateHostAndPath() {
+        if (StringUtils.isEmpty(urlBase)) {
             urlBase = "{server-base}";
         }
-        if(StringUtils.isEmpty(urlPath)) {
+        if (StringUtils.isEmpty(urlPath)) {
             urlPath = "{path}";
         }
     }
@@ -138,12 +138,11 @@ public class PostmanCollectionOperation extends Operation {
     }
 
     private String createDefaultName() {
-        return String.format("Postman-Collection-%s",
-                new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss").format(new Date()));
+        return String.format("Postman-Collection-%s", new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss").format(new Date()));
     }
 
     private void validateProtocol() {
-        if(StringUtils.isEmpty(protocol)) {
+        if (StringUtils.isEmpty(protocol)) {
             protocol = "http";
         }
     }
@@ -196,7 +195,6 @@ public class PostmanCollectionOperation extends Operation {
                     pathNames.append(token);
                     pathNames.append("/");
                 }
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -214,10 +212,10 @@ public class PostmanCollectionOperation extends Operation {
         return list;
     }
 
-    private String  generateMeasureUrl(String measureId, String patient, String start, String end) {
+    private String generateMeasureUrl(String measureId, String patient, String start, String end) {
         StringBuilder sb = new StringBuilder();
         sb.append(pathNames);
-        if(StringUtils.isNotBlank(measureId)) {
+        if (StringUtils.isNotBlank(measureId)) {
             sb.append("Measure/");
             sb.append(measureId);
             sb.append("/$evaluate-measure?");
@@ -238,7 +236,7 @@ public class PostmanCollectionOperation extends Operation {
         return sb.toString();
     }
 
-    private String  generatePostUrl() {
+    private String generatePostUrl() {
         return pathNames.toString();
     }
 
@@ -311,7 +309,7 @@ public class PostmanCollectionOperation extends Operation {
 
     private BaseItem populateVersionItem(PostmanCollection postmanCollection, String version) {
 
-        if(postmanCollection.getItem() == null) {
+        if (postmanCollection.getItem() == null) {
             postmanCollection.setItem(generateEmptyBaseItemList());
         }
         BaseItem itemBase = new BaseItem();
@@ -326,15 +324,15 @@ public class PostmanCollectionOperation extends Operation {
         return new ArrayList<>();
     }
 
-    private void populatePostmanCollection(IBaseResource resourceBundle, BaseItem versionItem, String content, String version) {
+    private void populatePostmanCollection(
+            IBaseResource resourceBundle, BaseItem versionItem, String content, String version) {
 
-        if(versionItem != null && versionItem.getItem() == null) {
+        if (versionItem != null && versionItem.getItem() == null) {
             versionItem.setItem(generateEmptyBaseItemList());
         }
 
         BaseItem itemSubFolder = new BaseItem();
         versionItem.getItem().add(itemSubFolder);
-
 
         if (version.equals("r4")) {
 
@@ -350,7 +348,8 @@ public class PostmanCollectionOperation extends Operation {
 
                     String measureId = getMeasureId(measureReport);
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    String patient = R4FHIRUtils.parseId(measureReport.getSubject().getReference());
+                    String patient =
+                            R4FHIRUtils.parseId(measureReport.getSubject().getReference());
                     String start = sdf.format(measureReport.getPeriod().getStart());
                     String end = sdf.format(measureReport.getPeriod().getEnd());
                     String measureUrl = generateMeasureUrl(measureId, patient, start, end);
@@ -366,16 +365,18 @@ public class PostmanCollectionOperation extends Operation {
             org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) resourceBundle;
             generateSubfolderItem(itemSubFolder, bundle.getId(), content);
 
-
             for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent component : bundle.getEntry()) {
                 org.hl7.fhir.dstu3.model.Resource resource = component.getResource();
 
                 if (resource.getResourceType().compareTo(org.hl7.fhir.dstu3.model.ResourceType.MeasureReport) == 0) {
-                    org.hl7.fhir.dstu3.model.MeasureReport measureReport = (org.hl7.fhir.dstu3.model.MeasureReport) resource;
+                    org.hl7.fhir.dstu3.model.MeasureReport measureReport =
+                            (org.hl7.fhir.dstu3.model.MeasureReport) resource;
 
-                    String measureId = R4FHIRUtils.parseId(measureReport.getMeasure().getReference());
+                    String measureId =
+                            R4FHIRUtils.parseId(measureReport.getMeasure().getReference());
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    String patient = R4FHIRUtils.parseId(measureReport.getPatient().getReference());
+                    String patient =
+                            R4FHIRUtils.parseId(measureReport.getPatient().getReference());
                     String start = sdf.format(measureReport.getPeriod().getStart());
                     String end = sdf.format(measureReport.getPeriod().getEnd());
                     String measureUrl = generateMeasureUrl(measureId, patient, start, end);
@@ -398,26 +399,39 @@ public class PostmanCollectionOperation extends Operation {
         return id;
     }
 
-    private void populateRequestItems( BaseItem itemSubFolder,String measureId,String requestName, String measureUrl, String patient, String start, String end) {
+    private void populateRequestItems(
+            BaseItem itemSubFolder,
+            String measureId,
+            String requestName,
+            String measureUrl,
+            String patient,
+            String start,
+            String end) {
 
-        List<Map<String,String>> requestMapList;
+        List<Map<String, String>> requestMapList;
 
         requestMapList = new ArrayList<>();
-        addItemToQueryList(requestMapList,"patient", patient);
-        addItemToQueryList(requestMapList,"periodStart", start);
-        addItemToQueryList(requestMapList,"periodEnd",end);
+        addItemToQueryList(requestMapList, "patient", patient);
+        addItemToQueryList(requestMapList, "periodStart", start);
+        addItemToQueryList(requestMapList, "periodEnd", end);
 
-        populateItemWithRequestItem("GET",requestName, "", measureId, measureUrl, itemSubFolder, requestMapList);
-
+        populateItemWithRequestItem("GET", requestName, "", measureId, measureUrl, itemSubFolder, requestMapList);
     }
 
     private void generateSubfolderItem(BaseItem itemSubFolder, String id, String content) {
-        itemSubFolder.setName(id.split("-")[0]);  //EXM104-FHIR4-8.1.000-bundle  -> EXM104
+        itemSubFolder.setName(id.split("-")[0]); // EXM104-FHIR4-8.1.000-bundle  -> EXM104
         itemSubFolder.setItem(generateEmptyBaseItemList());
-        populateItemWithRequestItem("POST","Post Bundle", content, "", generatePostUrl(), itemSubFolder, null);
+        populateItemWithRequestItem("POST", "Post Bundle", content, "", generatePostUrl(), itemSubFolder, null);
     }
 
-    private void populateItemWithRequestItem(String method, String name, String body,  String measureId, String measureUrl, BaseItem itemSubFolder, List<Map<String, String>> requestMapList) {
+    private void populateItemWithRequestItem(
+            String method,
+            String name,
+            String body,
+            String measureId,
+            String measureUrl,
+            BaseItem itemSubFolder,
+            List<Map<String, String>> requestMapList) {
         RequestItem requestItem = new RequestItem();
         if (itemSubFolder.getItem() != null) {
             itemSubFolder.getItem().add(requestItem);
@@ -425,27 +439,40 @@ public class PostmanCollectionOperation extends Operation {
         populateRequestItem(requestItem, name, method, body, measureId, measureUrl, requestMapList);
     }
 
-    private void populateRequestItem(RequestItem requestItem, String name, String method, String body, String measureId, String measureUrl, List<Map<String, String>> requestMapList) {
+    private void populateRequestItem(
+            RequestItem requestItem,
+            String name,
+            String method,
+            String body,
+            String measureId,
+            String measureUrl,
+            List<Map<String, String>> requestMapList) {
 
-        if(StringUtils.isNotBlank(name)) {
+        if (StringUtils.isNotBlank(name)) {
             requestItem.setName(name);
         }
         ProtocolProfileBehavior behavior = new ProtocolProfileBehavior();
         behavior.setDisableBodyPruning(true);
-        if(StringUtils.isEmpty(body) ) {
+        if (StringUtils.isEmpty(body)) {
             requestItem.setProtocolProfileBehavior(behavior);
         }
         RequestInfo requestInfo = new RequestInfo();
         requestItem.setRequest(requestInfo);
 
-        if(StringUtils.isEmpty(body) ) {
+        if (StringUtils.isEmpty(body)) {
             requestItem.setResponse(new ArrayList<>());
         }
 
         populateRequestInfo(requestInfo, method, body, measureId, measureUrl, requestMapList);
     }
 
-    private void populateRequestInfo(RequestInfo requestInfo, String method, String body, String measureId, String measureUrl, List<Map<String, String>> requestMapList) {
+    private void populateRequestInfo(
+            RequestInfo requestInfo,
+            String method,
+            String body,
+            String measureId,
+            String measureUrl,
+            List<Map<String, String>> requestMapList) {
 
         if (StringUtils.isNotBlank(method)) {
             requestInfo.setMethod(method);
@@ -461,8 +488,8 @@ public class PostmanCollectionOperation extends Operation {
         populateRequestUrl(requestUrl, measureUrl, measureId, requestMapList);
     }
 
-
-    private void populateRequestUrl(RequestUrl requestUrl, String measureUrl, String measureId, List<Map<String, String>> requestMapList) {
+    private void populateRequestUrl(
+            RequestUrl requestUrl, String measureUrl, String measureId, List<Map<String, String>> requestMapList) {
         if (StringUtils.isNotBlank(measureUrl)) {
             requestUrl.setRaw(measureUrl);
         }
@@ -478,20 +505,20 @@ public class PostmanCollectionOperation extends Operation {
         requestUrl.setHost(generateUrlHostTokens());
     }
 
-
     private RequestBody populateRequestBody(String body) {
         RequestBody requestBody = new RequestBody();
         requestBody.setMode("raw");
-        if(body != null) {
+        if (body != null) {
             requestBody.setRaw(body);
         }
         return requestBody;
     }
 
     private static List<Map<String, String>> requestHeader;
+
     private static List<Map<String, String>> generateRequestHeaderMap() {
 
-        if(requestHeader == null || requestHeader.isEmpty() ){
+        if (requestHeader == null || requestHeader.isEmpty()) {
             requestHeader = new ArrayList<>();
             Map<String, String> map = new HashMap<>();
             map.put("key", "Content-Type");
@@ -500,7 +527,7 @@ public class PostmanCollectionOperation extends Operation {
             map.put("value", "application/json");
             requestHeader.add(map);
         }
-        return  requestHeader;
+        return requestHeader;
     }
 
     private IBaseResource parseBundle(File resource) {
@@ -510,10 +537,11 @@ public class PostmanCollectionOperation extends Operation {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
+            String message = String.format(
+                    "'%s' will not be included in the bundle because the following error occurred: '%s'",
+                    resource.getName(), e.getMessage());
             logger.error(message, e);
         }
         return theResource;
@@ -524,7 +552,6 @@ public class PostmanCollectionOperation extends Operation {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-
 
         try {
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(postmanCollection);
@@ -539,7 +566,6 @@ public class PostmanCollectionOperation extends Operation {
         }
     }
 
-
     private void addItemToQueryList(List<Map<String, String>> list, String key, String value) {
         Map<String, String> map = new HashMap<>();
         if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
@@ -548,7 +574,6 @@ public class PostmanCollectionOperation extends Operation {
         }
         list.add(map);
     }
-
 
     private static List<Map<String, String>> listHeader;
 
@@ -566,12 +591,11 @@ public class PostmanCollectionOperation extends Operation {
         return listHeader;
     }
 
-
     // try to model postman collection
 
     class PostmanCollection {
         private PostmanCollectionInfo info;
-        private List<BaseItem> item ;
+        private List<BaseItem> item;
 
         public PostmanCollectionInfo getInfo() {
             return info;
@@ -590,9 +614,10 @@ public class PostmanCollectionOperation extends Operation {
         }
     }
 
+    @SuppressWarnings("checkstyle:AbstractClassName")
     class BaseItem {
         private String name;
-        private List<BaseItem> item ;
+        private List<BaseItem> item;
 
         public String getName() {
             return name;
@@ -624,7 +649,6 @@ public class PostmanCollectionOperation extends Operation {
             this._postman_id = _postman_id;
         }
 
-
         public String getName() {
             return name;
         }
@@ -642,7 +666,7 @@ public class PostmanCollectionOperation extends Operation {
         }
     }
 
-    class RequestItem extends BaseItem{
+    class RequestItem extends BaseItem {
         private RequestInfo request;
         private List<?> response;
         private ProtocolProfileBehavior protocolProfileBehavior;
@@ -686,7 +710,7 @@ public class PostmanCollectionOperation extends Operation {
 
     class RequestInfo {
         private String method;
-        private List<Map<String,String>> header;
+        private List<Map<String, String>> header;
         private RequestBody body;
         private RequestUrl url;
 
@@ -749,7 +773,7 @@ public class PostmanCollectionOperation extends Operation {
         private String protocol;
         private List<String> host;
         private List<String> path;
-        private List<Map<String,String>> query;
+        private List<Map<String, String>> query;
 
         public String getRaw() {
             return raw;
@@ -791,6 +815,4 @@ public class PostmanCollectionOperation extends Operation {
             this.query = query;
         }
     }
-
-
 }

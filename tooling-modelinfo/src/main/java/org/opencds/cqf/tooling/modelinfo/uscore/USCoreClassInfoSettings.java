@@ -2,9 +2,7 @@ package org.opencds.cqf.tooling.modelinfo.uscore;
 
 import java.util.HashMap;
 import java.util.HashSet;
-
 import org.opencds.cqf.tooling.modelinfo.ClassInfoSettings;
-
 
 @SuppressWarnings("serial")
 class USCoreClassInfoSettings extends ClassInfoSettings {
@@ -54,8 +52,7 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
                     put("USCore.xhtml", "System.String");
                 }
             };
-        }
-        else {
+        } else {
             this.primitiveTypeMappings = new HashMap<String, String>() {
                 {
                     put("FHIR.base64Binary", "System.String");
@@ -81,7 +78,7 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
                 }
             };
         }
-        
+
         if (this.flatten) {
             this.cqlTypeMappings = new HashMap<String, String>() {
                 {
@@ -135,8 +132,7 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
                     put("USCore.Ratio", "System.Ratio");
                 }
             };
-        }
-        else {
+        } else {
             this.cqlTypeMappings = new HashMap<String, String>() {
                 {
                     put("FHIR.xsd:base64Binary", "System.String");
@@ -191,32 +187,32 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
             };
         }
 
-/*
-        this.typeNameMappings = new HashMap<String, String>() {
-            {
-                put("CarePlanProfile", "CarePlan");
-                put("DiagnosticReportProfileLaboratoryReporting", "DiagnosticReport"); // TODO: Support synonyms?
-                put("DiagnosticReportProfileNoteExchange", "DiagnosticReportNote");
-                put("DocumentReferenceProfile", "DocumentReference");
-                put("EncounterProfile", "Encounter");
-                put("GoalProfile", "Goal");
-                put("ImmunizationProfile", "Immunizataion");
-                put("ImplantableDeviceProfile", "Device"); // TODO: Support synonyms?
-                put("LaboratoryResultObservationProfile", "Observation"); // TODO: Support synonyms?
-                put("MedicationProfile", "Medication");
-                put("MedicationRequestProfile", "MedicationRequest");
-                put("OrganizationProfile", "Organization");
-                put("PatientProfile", "Patient");
-                put("PediatricBMIforAgeObservationProfile", "PediatricBMIforAgeObservation");
-                put("PediatricWeightForHeightObservationProfile", "PediatricWeightForHeightObservation");
-                put("PractitionerProfile", "Practitioner");
-                put("PractitionerRoleProfile", "PractitionerRole");
-                put("ProcedureProfile", "Procedure");
-                put("PulseOximetryProfile", "PulseOximetry");
-                put("SmokingStatusProfile", "SmokingStatus");
-            }
-        };
- */
+        /*
+               this.typeNameMappings = new HashMap<String, String>() {
+                   {
+                       put("CarePlanProfile", "CarePlan");
+                       put("DiagnosticReportProfileLaboratoryReporting", "DiagnosticReport"); // TODO: Support synonyms?
+                       put("DiagnosticReportProfileNoteExchange", "DiagnosticReportNote");
+                       put("DocumentReferenceProfile", "DocumentReference");
+                       put("EncounterProfile", "Encounter");
+                       put("GoalProfile", "Goal");
+                       put("ImmunizationProfile", "Immunizataion");
+                       put("ImplantableDeviceProfile", "Device"); // TODO: Support synonyms?
+                       put("LaboratoryResultObservationProfile", "Observation"); // TODO: Support synonyms?
+                       put("MedicationProfile", "Medication");
+                       put("MedicationRequestProfile", "MedicationRequest");
+                       put("OrganizationProfile", "Organization");
+                       put("PatientProfile", "Patient");
+                       put("PediatricBMIforAgeObservationProfile", "PediatricBMIforAgeObservation");
+                       put("PediatricWeightForHeightObservationProfile", "PediatricWeightForHeightObservation");
+                       put("PractitionerProfile", "Practitioner");
+                       put("PractitionerRoleProfile", "PractitionerRole");
+                       put("ProcedureProfile", "Procedure");
+                       put("PulseOximetryProfile", "PulseOximetry");
+                       put("SmokingStatusProfile", "SmokingStatus");
+                   }
+               };
+        */
 
         this.primaryCodePath = new HashMap<String, String>() {
             {

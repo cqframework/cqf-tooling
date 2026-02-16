@@ -7,19 +7,17 @@ import org.opencds.cqf.tooling.processor.argument.PostBundlesInDirArgumentProces
 
 public class PostBundlesInDirOperation extends Operation {
 
-    public PostBundlesInDirOperation() {    
-    } 
+    public PostBundlesInDirOperation() {}
 
     @Override
     public void execute(String[] args) {
         PostBundlesInDirParameters params = null;
         try {
             params = new PostBundlesInDirArgumentProcessor().parseAndConvert(args);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }
         PostBundlesInDirProcessor.PostBundlesInDir(params);
-    }   
+    }
 }

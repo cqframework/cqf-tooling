@@ -1,10 +1,8 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import org.hl7.fhir.r4.model.*;
-
 import java.util.HashMap;
 import java.util.Map;
-
+import org.hl7.fhir.r4.model.*;
 
 public class SettingsBuilder {
 
@@ -104,7 +102,9 @@ public class SettingsBuilder {
         // modelNamespace
         result.addParameter("modelNamespace", ig.getPackageId());
         // modelUrl
-        result.addParameter("modelUrl", ig.getUrl()); // Need to determine how to extract canonical? Just remove /ImplementationGuide...?
+        result.addParameter(
+                "modelUrl",
+                ig.getUrl()); // Need to determine how to extract canonical? Just remove /ImplementationGuide...?
         // patientClassName
         result.addParameter("patientClassName", "Patient"); // TODO: Define an extension for this?
         // patientBirthDatePropertyName
@@ -124,10 +124,17 @@ public class SettingsBuilder {
 
         // for each dependsOn
         for (var dependsOn : ig.getDependsOn()) {
-            result.addParameter().setName("dependency")
-                    .addPart(new Parameters.ParametersParameterComponent().setName("modelName").setValue(new StringType(dependsOn.getPackageId())))
-                    .addPart(new Parameters.ParametersParameterComponent().setName("modelVersion").setValue(new StringType(dependsOn.getVersion())))
-                    .addPart(new Parameters.ParametersParameterComponent().setName("modelUrl").setValue(new StringType(dependsOn.getUri())));
+            result.addParameter()
+                    .setName("dependency")
+                    .addPart(new Parameters.ParametersParameterComponent()
+                            .setName("modelName")
+                            .setValue(new StringType(dependsOn.getPackageId())))
+                    .addPart(new Parameters.ParametersParameterComponent()
+                            .setName("modelVersion")
+                            .setValue(new StringType(dependsOn.getVersion())))
+                    .addPart(new Parameters.ParametersParameterComponent()
+                            .setName("modelUrl")
+                            .setValue(new StringType(dependsOn.getUri())));
         }
 
         // for each profile
@@ -136,23 +143,36 @@ public class SettingsBuilder {
             // This should be a safe assumption within the context of the ig.definition.resource elements
             // This also assumes the atlas is indexed by id (which assumes a single namespace for ids
             // This should be reasonably safe given current naming conventions (but will break at some point)
-            if (resource.getReference() != null && resource.getReference().getReference() != null && resource.getReference().getReference().contains("StructureDefinition/")) {
+            if (resource.getReference() != null
+                    && resource.getReference().getReference() != null
+                    && resource.getReference().getReference().contains("StructureDefinition/")) {
                 var ids = resource.getReference().getReference().split("/");
                 var id = ids[ids.length - 1];
 
                 var sd = atlas.getStructureDefinitions().get(id);
                 if (sd != null && sd.getKind() == StructureDefinition.StructureDefinitionKind.RESOURCE) {
-                    result.addParameter().setName("profile")
+                    result.addParameter()
+                            .setName("profile")
                             // url
-                            .addPart(new Parameters.ParametersParameterComponent().setName("url").setValue(sd.getUrlElement()))
+                            .addPart(new Parameters.ParametersParameterComponent()
+                                    .setName("url")
+                                    .setValue(sd.getUrlElement()))
                             // isIncluded
-                            .addPart(new Parameters.ParametersParameterComponent().setName("isIncluded").setValue(new BooleanType(true)))
+                            .addPart(new Parameters.ParametersParameterComponent()
+                                    .setName("isIncluded")
+                                    .setValue(new BooleanType(true)))
                             // isRetrievable
-                            .addPart(new Parameters.ParametersParameterComponent().setName("isRetrievable").setValue(new BooleanType(true)))
+                            .addPart(new Parameters.ParametersParameterComponent()
+                                    .setName("isRetrievable")
+                                    .setValue(new BooleanType(true)))
                             // label
-                            .addPart(new Parameters.ParametersParameterComponent().setName("label").setValue(sd.getTitleElement()))
+                            .addPart(new Parameters.ParametersParameterComponent()
+                                    .setName("label")
+                                    .setValue(sd.getTitleElement()))
                             // primaryCodePath
-                            .addPart(new Parameters.ParametersParameterComponent().setName("primaryCodePath").setValue(new StringType(getDefaultPrimaryCodePath(sd.getType()))));
+                            .addPart(new Parameters.ParametersParameterComponent()
+                                    .setName("primaryCodePath")
+                                    .setValue(new StringType(getDefaultPrimaryCodePath(sd.getType()))));
                 }
             }
         }

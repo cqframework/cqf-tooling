@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.modelinfo.fhir;
 
 import java.util.Collection;
 import java.util.Map;
-
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -28,23 +27,27 @@ public class FHIRClassInfoBuilder extends ClassInfoBuilder {
         }
 
         logger.info("Building ComplexTypes");
-        this.buildFor("FHIR", (x -> (x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
-                || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension")))
-                && !x.getUrl().equals("http://hl7.org/fhir/StructureDefinition/elementdefinition-de")));
+        this.buildFor(
+                "FHIR",
+                (x -> (x.getKind() == StructureDefinitionKind.COMPLEXTYPE
+                                && (x.getBaseDefinition() == null
+                                        || !x.getBaseDefinition()
+                                                .equals("http://hl7.org/fhir/StructureDefinition/Extension")))
+                        && !x.getUrl().equals("http://hl7.org/fhir/StructureDefinition/elementdefinition-de")));
 
         logger.info("Building Resources");
-        this.buildFor("FHIR", (x -> x.getKind() == StructureDefinitionKind.RESOURCE
-                && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)));
+        this.buildFor(
+                "FHIR",
+                (x -> x.getKind() == StructureDefinitionKind.RESOURCE
+                        && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)));
     }
 
     @Override
     public void afterBuild() {
-        //Clean up Content Reference Specifiers
+        // Clean up Content Reference Specifiers
         Collection<TypeInfo> typeInfoValues = this.getTypeInfos().values();
-        typeInfoValues.stream().map(x -> (ClassInfo)x).forEach(
-                x -> x.getElement().stream()
-                        .filter(y -> this.hasContentReferenceTypeSpecifier(y))
-                        .forEach(y -> this.fixupContentReferenceSpecifier("FHIR", y))
-        );
+        typeInfoValues.stream().map(x -> (ClassInfo) x).forEach(x -> x.getElement().stream()
+                .filter(y -> this.hasContentReferenceTypeSpecifier(y))
+                .forEach(y -> this.fixupContentReferenceSpecifier("FHIR", y)));
     }
 }

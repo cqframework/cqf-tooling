@@ -5,6 +5,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,7 +15,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -22,9 +23,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 public class DateRollerTest {
 
     private final String testFilePathRoot = "target" + separator + "test-output" + separator + "dateRoller";
@@ -32,7 +30,8 @@ public class DateRollerTest {
     @BeforeMethod
     public void setup() throws Exception {
         ResourceDiscovery.clearDevicePaths();
-        File originalDirectory = new File(Objects.requireNonNull(DateRollerTest.class.getResource("dateRoller")).getPath());
+        File originalDirectory = new File(Objects.requireNonNull(DateRollerTest.class.getResource("dateRoller"))
+                .getPath());
         File testRootDirectory = new File(testFilePathRoot);
         if (testRootDirectory.exists()) {
             FileUtils.cleanDirectory(testRootDirectory);
@@ -74,7 +73,8 @@ public class DateRollerTest {
         }
     }
 
-    //if the original file contains a prefetch/item1 element, the size of this object is compared to the rolled file item1
+    // if the original file contains a prefetch/item1 element, the size of this object is compared to the rolled file
+    // item1
     private void compareItem1Size(String original, String rolled) {
         JsonObject originalJson = JsonParser.parseString(original).getAsJsonObject();
         JsonObject rolledJson = JsonParser.parseString(rolled).getAsJsonObject();
@@ -82,15 +82,27 @@ public class DateRollerTest {
         String prefetch = "prefetch";
         String item1 = "item1";
 
-        Assert.assertEquals(originalJson.entrySet().size(), rolledJson.entrySet().size());
+        Assert.assertEquals(
+                originalJson.entrySet().size(), rolledJson.entrySet().size());
         if (originalJson.has(prefetch) && originalJson.get(prefetch).isJsonObject()) {
-            assertTrue (rolledJson.get(prefetch).isJsonObject());
+            assertTrue(rolledJson.get(prefetch).isJsonObject());
 
             if (originalJson.get(prefetch).getAsJsonObject().get(item1).isJsonObject()) {
-                assertEquals (
-                        originalJson.get(prefetch).getAsJsonObject().get(item1).getAsJsonObject().entrySet().size(),
-                        rolledJson.get(prefetch).getAsJsonObject().get(item1).getAsJsonObject().entrySet().size()
-                );
+                assertEquals(
+                        originalJson
+                                .get(prefetch)
+                                .getAsJsonObject()
+                                .get(item1)
+                                .getAsJsonObject()
+                                .entrySet()
+                                .size(),
+                        rolledJson
+                                .get(prefetch)
+                                .getAsJsonObject()
+                                .get(item1)
+                                .getAsJsonObject()
+                                .entrySet()
+                                .size());
             }
         }
     }
@@ -106,8 +118,7 @@ public class DateRollerTest {
     private String getFileAsString(String filePath) {
         String content = null;
         try {
-            content = Files.lines(Paths.get(filePath))
-                    .collect(Collectors.joining(System.lineSeparator()));
+            content = Files.lines(Paths.get(filePath)).collect(Collectors.joining(System.lineSeparator()));
         } catch (IOException e) {
             e.printStackTrace();
         }

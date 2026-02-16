@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;

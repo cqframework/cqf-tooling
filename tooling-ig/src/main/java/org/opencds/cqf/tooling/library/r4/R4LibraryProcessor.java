@@ -2,6 +2,8 @@ package org.opencds.cqf.tooling.library.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
+import java.io.File;
+import java.util.*;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
@@ -13,9 +15,6 @@ import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
-
-import java.io.File;
-import java.util.*;
 
 public class R4LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
@@ -36,7 +35,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
         If the path is not specified, or is not a known directory, process
         all known library resources
     */
-    protected List<String> refreshLibraries(String libraryPath, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
+    protected List<String> refreshLibraries(
+            String libraryPath, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
         return refreshLibraries(libraryPath, null, encoding, shouldApplySoftwareSystemStamp);
     }
 
@@ -46,7 +46,11 @@ public class R4LibraryProcessor extends LibraryProcessor {
         all known library resources, if no libraryOutputDirectory is specified,
         overwrite all known library resources
     */
-    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
+    protected List<String> refreshLibraries(
+            String libraryPath,
+            String libraryOutputDirectory,
+            Encoding encoding,
+            Boolean shouldApplySoftwareSystemStamp) {
         File file = libraryPath != null ? new File(libraryPath) : null;
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -55,15 +59,13 @@ public class R4LibraryProcessor extends LibraryProcessor {
             for (String path : ResourceDiscovery.getLibraryPaths(this.fhirContext)) {
                 loadLibrary(fileMap, libraries, new File(path));
             }
-        }
-        else if (file.isDirectory()) {
+        } else if (file.isDirectory()) {
             for (File libraryFile : Objects.requireNonNull(file.listFiles())) {
-                if(IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
+                if (IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
                     loadLibrary(fileMap, libraries, libraryFile);
                 }
             }
-        }
-        else {
+        } else {
             loadLibrary(fileMap, libraries, file);
         }
 
@@ -74,8 +76,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
             Library library = (Library) versionConvertor_40_50.convertResource(refreshedLibrary);
             String filePath = null;
             Encoding fileEncoding = null;
-            if (fileMap.containsKey(refreshedLibrary.getId()))
-            {
+            if (fileMap.containsKey(refreshedLibrary.getId())) {
                 filePath = fileMap.get(refreshedLibrary.getId());
                 fileEncoding = IOUtils.getEncoding(filePath);
             } else {
@@ -91,12 +92,12 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 // TODO: This prevents mangled names from being output
                 // It would be nice for the tooling to generate library shells, we have enough information to,
                 // but the tooling gets confused about the ID and the filename and what gets written is garbage
-                //TODO: needs outputPathParameter
+                // TODO: needs outputPathParameter
                 String outputPath = filePath;
                 if (libraryOutputDirectory != null) {
                     File libraryDirectory = new File(libraryOutputDirectory);
                     if (!libraryDirectory.exists()) {
-                        //TODO: add logger and log non existant directory for writing
+                        // TODO: add logger and log non existant directory for writing
                     } else {
                         outputPath = libraryDirectory.getAbsolutePath();
                     }
@@ -117,15 +118,18 @@ public class R4LibraryProcessor extends LibraryProcessor {
         return refreshedLibraryNames;
     }
 
-    private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
+    private void loadLibrary(
+            Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
         try {
             Resource resource = FormatUtilities.loadFile(libraryFile.getAbsolutePath());
             VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) versionConvertor_40_50.convertResource(resource);
+            org.hl7.fhir.r5.model.Library library =
+                    (org.hl7.fhir.r5.model.Library) versionConvertor_40_50.convertResource(resource);
             fileMap.put(library.getId(), libraryFile.getAbsolutePath());
             libraries.add(library);
         } catch (Exception ex) {
-            logMessage(String.format("Error reading library: %s. Error: %s", libraryFile.getAbsolutePath(), ex.getMessage()));
+            logMessage(String.format(
+                    "Error reading library: %s. Error: %s", libraryFile.getAbsolutePath(), ex.getMessage()));
         }
     }
 
@@ -133,8 +137,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
     public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
         if (params.parentContext != null) {
             initialize(params.parentContext);
-        }
-        else {
+        } else {
             initializeFromIni(params.ini);
         }
 
@@ -146,7 +149,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
         R4LibraryProcessor.softwareSystemHelper = new SoftwareSystemHelper(rootDir);
 
         if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
-            return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding, params.shouldApplySoftwareSystemStamp);
+            return refreshLibraries(
+                    libraryPath, params.libraryOutputDirectory, encoding, params.shouldApplySoftwareSystemStamp);
         } else {
             return refreshLibraries(libraryPath, encoding, params.shouldApplySoftwareSystemStamp);
         }

@@ -2,19 +2,20 @@ package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import java.util.UUID;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-
-import java.util.UUID;
 
 public class BundlePublish extends Operation {
     private String pathToBundle; // -pathtobundle (-ptb)
     private String bundleId; // -bundleid (-bid)
     private String version; // -version (-v) Can be stu3, r4, or r5
     private String fhirServer; // -fhirserver (-fs)
-    private String postType; // -posttype (-pt) This can be transaction (default) or "resource" to post the Bundle resource itself
+    private String
+            postType; // -posttype (-pt) This can be transaction (default) or "resource" to post the Bundle resource
+    // itself
     private FhirContext context;
 
     // TODO: Authentication
@@ -40,7 +41,8 @@ public class BundlePublish extends Operation {
                 case "bid":
                     bundleId = value;
                     break;
-                case "version": case "v":
+                case "version":
+                case "v":
                     version = value;
                     break;
                 case "fhirserver":
@@ -51,7 +53,8 @@ public class BundlePublish extends Operation {
                 case "pt":
                     postType = value;
                     break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
 
             if (fhirServer == null) {
@@ -60,8 +63,7 @@ public class BundlePublish extends Operation {
 
             if (version == null) {
                 context = FhirContext.forR4Cached();
-            }
-            else {
+            } else {
                 switch (version.toLowerCase()) {
                     case "stu3":
                         context = FhirContext.forDstu3Cached();

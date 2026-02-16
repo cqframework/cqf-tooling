@@ -12,8 +12,8 @@ public class MeasurePackage {
     private final FhirContext fhirContext;
     private final LibraryPackage libraryPackage;
 
-    public MeasurePackage(Measure r5Measure, IBaseResource measure,
-                                 FhirContext fhirContext, LibraryPackage libraryPackage) {
+    public MeasurePackage(
+            Measure r5Measure, IBaseResource measure, FhirContext fhirContext, LibraryPackage libraryPackage) {
         this.r5Measure = r5Measure;
         this.measure = measure;
         this.fhirContext = fhirContext;

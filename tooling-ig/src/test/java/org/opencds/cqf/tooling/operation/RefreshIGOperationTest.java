@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.operation;
 
+import static org.testng.Assert.*;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import com.fasterxml.jackson.core.StreamReadConstraints;
@@ -7,6 +9,16 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.Json;
 import com.google.gson.*;
+import java.io.*;
+import java.net.ServerSocket;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
@@ -23,101 +35,99 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
-import java.io.*;
-import java.net.ServerSocket;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.testng.Assert.*;
 public class RefreshIGOperationTest extends RefreshTest {
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-	public RefreshIGOperationTest() {
-		super(FhirContext.forCached(FhirVersionEnum.R4));
-	}
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private static final String EXCEPTIONS_OCCURRED_LOADING_IG_FILE = "Exceptions occurred loading IG file";
-	private static final String EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE = "Exceptions occurred initializing refresh from ini file";
-	private final String ID = "id";
-	private final String ENTRY = "entry";
-	private final String RESOURCE = "resource";
-	private final String RESOURCE_TYPE = "resourceType";
-	private final String BUNDLE_TYPE = "Bundle";
-	private final String LIB_TYPE = "Library";
-	private final String MEASURE_TYPE = "Measure";
+    public RefreshIGOperationTest() {
+        super(FhirContext.forCached(FhirVersionEnum.R4));
+    }
 
-	private final String INI_LOC = Path.of("target","refreshIG","ig.ini").toString();
+    private static final String EXCEPTIONS_OCCURRED_LOADING_IG_FILE = "Exceptions occurred loading IG file";
+    private static final String EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE =
+            "Exceptions occurred initializing refresh from ini file";
+    private final String ID = "id";
+    private final String ENTRY = "entry";
+    private final String RESOURCE = "resource";
+    private final String RESOURCE_TYPE = "resourceType";
+    private final String BUNDLE_TYPE = "Bundle";
+    private final String LIB_TYPE = "Library";
+    private final String MEASURE_TYPE = "Measure";
 
-	private static final String[] NEW_REFRESH_IG_LIBRARY_FILE_NAMES = {
-			"GMTPInitialExpressions.json", "GMTPInitialExpressions.json",
-			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
-	};
+    private final String INI_LOC = Path.of("target", "refreshIG", "ig.ini").toString();
+
+    private static final String[] NEW_REFRESH_IG_LIBRARY_FILE_NAMES = {
+        "GMTPInitialExpressions.json",
+        "GMTPInitialExpressions.json",
+        "MBODAInitialExpressions.json",
+        "USCoreCommon.json",
+        "USCoreElements.json",
+        "USCoreTests.json"
+    };
 
     private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIG";
-	private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
-	private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
+    private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH =
+            TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
+    private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH =
+            TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
 
-	// Store the original standard out before changing it.
-	private final PrintStream originalStdOut = System.out;
-	private ByteArrayOutputStream console = new ByteArrayOutputStream();
+    // Store the original standard out before changing it.
+    private final PrintStream originalStdOut = System.out;
+    private ByteArrayOutputStream console = new ByteArrayOutputStream();
 
-	@BeforeClass
-	public void init() {
-		// This overrides the default max string length for Jackson (which wiremock uses under the hood).
-		var constraints = StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build();
-		Json.getObjectMapper().getFactory().setStreamReadConstraints(constraints);
-	}
+    @BeforeClass
+    public void init() {
+        // This overrides the default max string length for Jackson (which wiremock uses under the hood).
+        var constraints = StreamReadConstraints.builder()
+                .maxStringLength(Integer.MAX_VALUE)
+                .build();
+        Json.getObjectMapper().getFactory().setStreamReadConstraints(constraints);
+    }
 
-	@BeforeMethod
-	public void setUp() throws Exception {
-		IOUtils.resourceDirectories = new ArrayList<String>();
-		ResourceDiscovery.clearDevicePaths();
-		System.setOut(new PrintStream(this.console));
+    @BeforeMethod
+    public void setUp() throws Exception {
+        IOUtils.resourceDirectories = new ArrayList<String>();
+        ResourceDiscovery.clearDevicePaths();
+        System.setOut(new PrintStream(this.console));
 
-		// Delete directories
-		deleteDirectory("target" + File.separator + "refreshIG");
-		deleteDirectory("target" + File.separator + "NewRefreshIG");
+        // Delete directories
+        deleteDirectory("target" + File.separator + "refreshIG");
+        deleteDirectory("target" + File.separator + "NewRefreshIG");
 
-		deleteTempINI();
-	}
+        deleteTempINI();
+    }
 
-	/**
-	 * Attempts to delete a directory if it exists.
-	 * @param path The path to the directory to delete.
-	 */
-	private void deleteDirectory(String path) {
-		File dir = new File(path);
-		if (dir.exists()) {
-			try {
-				FileUtils.deleteDirectory(dir);
-			} catch (IOException e) {
-				System.err.println("Failed to delete directory: " + path + " - " + e.getMessage());
-			}
-		}
-	}
+    /**
+     * Attempts to delete a directory if it exists.
+     * @param path The path to the directory to delete.
+     */
+    private void deleteDirectory(String path) {
+        File dir = new File(path);
+        if (dir.exists()) {
+            try {
+                FileUtils.deleteDirectory(dir);
+            } catch (IOException e) {
+                System.err.println("Failed to delete directory: " + path + " - " + e.getMessage());
+            }
+        }
+    }
 
-	@Test
+    @Test
     public void testNewRefreshOperation() throws IOException {
-		copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "testfiles/NewRefreshIG");
+        copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "testfiles/NewRefreshIG");
         File folder = new File(TARGET_OUTPUT_FOLDER_PATH);
         assertTrue(folder.exists(), "Folder should be present");
         File jsonFile = new File(folder, "ig.ini");
         assertTrue(jsonFile.exists(), "ig.ini file should be present");
 
         NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
-        String[] args = new String[]{
-                "-NewRefreshIG",
-                "-ini=" + TARGET_OUTPUT_FOLDER_PATH + separator + "ig.ini",
-                "-rd=" + TARGET_OUTPUT_FOLDER_PATH,
-                "-uv=" + "1.0.1",
-                "-d",
-                "-p",
-                "-t"
+        String[] args = new String[] {
+            "-NewRefreshIG",
+            "-ini=" + TARGET_OUTPUT_FOLDER_PATH + separator + "ig.ini",
+            "-rd=" + TARGET_OUTPUT_FOLDER_PATH,
+            "-uv=" + "1.0.1",
+            "-d",
+            "-p",
+            "-t"
         };
         newRefreshIGOperation.execute(args);
 
@@ -161,7 +171,10 @@ public class RefreshIGOperationTest extends RefreshTest {
         assertTrue(contentArray.size() > 0, "Content array should not be empty in " + jsonFileName);
 
         JsonObject contentObject = contentArray.get(0).getAsJsonObject();
-        assertEquals(contentObject.get("contentType").getAsString(), "text/cql", "Content type should be 'text/cql' in " + jsonFileName);
+        assertEquals(
+                contentObject.get("contentType").getAsString(),
+                "text/cql",
+                "Content type should be 'text/cql' in " + jsonFileName);
         assertTrue(contentObject.has("data"), "Data field should exist in " + jsonFileName);
     }
 
@@ -194,379 +207,377 @@ public class RefreshIGOperationTest extends RefreshTest {
         }
     }
 
-	@AfterSuite
-	public void cleanup() {
-		deleteDirectory("null");
-	}
+    @AfterSuite
+    public void cleanup() {
+        deleteDirectory("null");
+    }
 
-	/**
-	 * This test breaks down refreshIG's process and can verify multiple bundles
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testBundledFiles() throws IOException {
-		//we can assert how many bundles were posted by keeping track via WireMockServer
-		//first find an open port:
-		int availablePort = findAvailablePort();
-		String fhirUri = "http://localhost:" + availablePort + "/fhir/";
-		if (availablePort == -1){
-			fhirUri = "";
-			logger.info("No available ports to test post with. Removing mock fhir server from test.");
-		}else{
-			System.out.println("Available port: " + availablePort + ", mock fhir server url: " + fhirUri);
-		}
+    /**
+     * This test breaks down refreshIG's process and can verify multiple bundles
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    // TODO: Fix separately, this is blocking a bunch of other higher priority things
+    public void testBundledFiles() throws IOException {
+        // we can assert how many bundles were posted by keeping track via WireMockServer
+        // first find an open port:
+        int availablePort = findAvailablePort();
+        String fhirUri = "http://localhost:" + availablePort + "/fhir/";
+        if (availablePort == -1) {
+            fhirUri = "";
+            logger.info("No available ports to test post with. Removing mock fhir server from test.");
+        } else {
+            System.out.println("Available port: " + availablePort + ", mock fhir server url: " + fhirUri);
+        }
 
-		WireMockServer wireMockServer = null;
-		if (!fhirUri.isEmpty()) {
-			wireMockServer = new WireMockServer(availablePort);
-			wireMockServer.start();
+        WireMockServer wireMockServer = null;
+        if (!fhirUri.isEmpty()) {
+            wireMockServer = new WireMockServer(availablePort);
+            wireMockServer.start();
 
-			WireMock.configureFor("localhost", availablePort);
-			wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching("/fhir/([a-zA-Z]*)"))
-					.willReturn(WireMock.aResponse()
-							.withStatus(200)
-							.withBody("Mock response")));
-		}
+            WireMock.configureFor("localhost", availablePort);
+            wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching("/fhir/([a-zA-Z]*)"))
+                    .willReturn(WireMock.aResponse().withStatus(200).withBody("Mock response")));
+        }
 
-		// Call the method under test, which should use HttpClientUtils.post
-		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
-		// build ini object
-		File iniFile = new File(INI_LOC);
-		String iniFileLocation = iniFile.getAbsolutePath();
-		IniFile ini = new IniFile(iniFileLocation);
+        // Call the method under test, which should use HttpClientUtils.post
+        copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
+        // build ini object
+        File iniFile = new File(INI_LOC);
+        String iniFileLocation = iniFile.getAbsolutePath();
+        IniFile ini = new IniFile(iniFileLocation);
 
-		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
+        String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-		String[] args;
-		if (!fhirUri.isEmpty()) {
-			args = new String[]{"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false", "-fs=" + fhirUri};
-		} else {
-			args = new String[]{"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false"};
-		}
+        String[] args;
+        if (!fhirUri.isEmpty()) {
+            args = new String[] {
+                "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false", "-fs=" + fhirUri
+            };
+        } else {
+            args = new String[] {"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false"};
+        }
 
-		// EXECUTE REFRESHIG WITH OUR ARGS:
-		new RefreshIGOperation().execute(args);
+        // EXECUTE REFRESHIG WITH OUR ARGS:
+        new RefreshIGOperation().execute(args);
 
-		int requestCount = WireMock.getAllServeEvents().size();
-		assertEquals(requestCount, 1);
+        int requestCount = WireMock.getAllServeEvents().size();
+        assertEquals(requestCount, 1);
 
-		if (wireMockServer != null) {
-			wireMockServer.stop();
-		}
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
 
-		// determine fhirContext for measure lookup
-		FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
+        // determine fhirContext for measure lookup
+        FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
 
-		// get list of measures resulting from execution
-		Map<String, IBaseResource> measures = ResourceDiscovery.getMeasures(fhirContext);
+        // get list of measures resulting from execution
+        Map<String, IBaseResource> measures = ResourceDiscovery.getMeasures(fhirContext);
 
-		// loop through measure, verify each has all resources from multiple files
-		// bundled into single file using id/resourceType as lookup:
-		for (String measureName : measures.keySet()) {
-			// location of single bundled file:
-			final String bundledFileResult = bundledFilesLocation + measureName + separator + measureName
-					+ "-bundle.json";
-			// multiple individual files in sub directory to loop through:
-			final Path dir = Paths
-					.get(bundledFilesLocation + separator + measureName + separator + measureName + "-files");
+        // loop through measure, verify each has all resources from multiple files
+        // bundled into single file using id/resourceType as lookup:
+        for (String measureName : measures.keySet()) {
+            // location of single bundled file:
+            final String bundledFileResult =
+                    bundledFilesLocation + measureName + separator + measureName + "-bundle.json";
+            // multiple individual files in sub directory to loop through:
+            final Path dir =
+                    Paths.get(bundledFilesLocation + separator + measureName + separator + measureName + "-files");
 
-			// loop through each file, determine resourceType and treat accordingly
-			Map<String, String> resourceTypeMap = new HashMap<>();
-			List<String> groupPatientList = new ArrayList<>();
+            // loop through each file, determine resourceType and treat accordingly
+            Map<String, String> resourceTypeMap = new HashMap<>();
+            List<String> groupPatientList = new ArrayList<>();
 
-			try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir)) {
-				dirStream.forEach(path -> {
-					File file = new File(path.toString());
+            try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir)) {
+                dirStream.forEach(path -> {
+                    File file = new File(path.toString());
 
-					//Group file testing:
-					if (file.getName().equalsIgnoreCase("Group-BreastCancerScreeningFHIR.json")){
-						try{
-							org.hl7.fhir.r4.model.Group group = (org.hl7.fhir.r4.model.Group)IOUtils.readResource(file.getAbsolutePath(), fhirContext);
-							assertTrue(group.hasMember());
-							// Check if the group contains members
-								// Iterate through the members
-								for (Group.GroupMemberComponent member : group.getMember()) {
-									groupPatientList.add(member.getEntity().getDisplay());
-								}
-						}catch (Exception e){
-							fail("Group-BreastCancerScreeningFHIR.json did not parse to valid Group instance.");
-						}
+                    // Group file testing:
+                    if (file.getName().equalsIgnoreCase("Group-BreastCancerScreeningFHIR.json")) {
+                        try {
+                            org.hl7.fhir.r4.model.Group group = (org.hl7.fhir.r4.model.Group)
+                                    IOUtils.readResource(file.getAbsolutePath(), fhirContext);
+                            assertTrue(group.hasMember());
+                            // Check if the group contains members
+                            // Iterate through the members
+                            for (Group.GroupMemberComponent member : group.getMember()) {
+                                groupPatientList.add(member.getEntity().getDisplay());
+                            }
+                        } catch (Exception e) {
+                            fail("Group-BreastCancerScreeningFHIR.json did not parse to valid Group instance.");
+                        }
+                    }
 
-					}
+                    if (file.getName().toLowerCase().endsWith(".json")) {
 
-					if (file.getName().toLowerCase().endsWith(".json")) {
+                        Map<?, ?> map = this.jsonMap(file);
+                        if (map == null) {
+                            System.out.println("# Unable to parse " + file.getName() + " as json");
+                        } else {
 
-						Map<?, ?> map = this.jsonMap(file);
-						if (map == null) {
-							System.out.println("# Unable to parse " + file.getName() + " as json");
-						} else {
+                            // ensure "resourceType" exists
+                            if (map.containsKey(RESOURCE_TYPE)) {
+                                String parentResourceType = (String) map.get(RESOURCE_TYPE);
+                                // if Library, resource will be translated into "Measure" in main bundled file:
+                                if (parentResourceType.equalsIgnoreCase(LIB_TYPE)) {
+                                    resourceTypeMap.put((String) map.get(ID), MEASURE_TYPE);
+                                } else if (parentResourceType.equalsIgnoreCase(BUNDLE_TYPE)) {
+                                    // file is a bundle type, loop through resources in entry list, build up map of
+                                    // <id, resourceType>:
+                                    if (map.get(ENTRY) != null) {
+                                        ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) map.get(ENTRY);
+                                        for (Map<?, ?> entry : entryList) {
+                                            if (entry.containsKey(RESOURCE)) {
+                                                Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
+                                                resourceTypeMap.put((String) resourceMap.get(ID), (String)
+                                                        resourceMap.get(RESOURCE_TYPE));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
 
-							// ensure "resourceType" exists
-							if (map.containsKey(RESOURCE_TYPE)) {
-								String parentResourceType = (String) map.get(RESOURCE_TYPE);
-								// if Library, resource will be translated into "Measure" in main bundled file:
-								if (parentResourceType.equalsIgnoreCase(LIB_TYPE)) {
-									resourceTypeMap.put((String) map.get(ID), MEASURE_TYPE);
-								} else if (parentResourceType.equalsIgnoreCase(BUNDLE_TYPE)) {
-									// file is a bundle type, loop through resources in entry list, build up map of
-									// <id, resourceType>:
-									if (map.get(ENTRY) != null) {
-										ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) map.get(ENTRY);
-										for (Map<?, ?> entry : entryList) {
-											if (entry.containsKey(RESOURCE)) {
-												Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
-												resourceTypeMap.put((String) resourceMap.get(ID),
-														(String) resourceMap.get(RESOURCE_TYPE));
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				});
+            } catch (IOException e) {
+                logger.info(e.getMessage());
+            }
 
-			} catch (IOException e) {
-				logger.info(e.getMessage());
-			}
+            // Group file should contain two patients:
+            assertEquals(groupPatientList.size(), 2);
 
-			//Group file should contain two patients:
-			assertEquals(groupPatientList.size(), 2);
+            // map out entries in the resulting single bundle file:
+            Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
+            Map<String, String> bundledJsonResourceTypes = new HashMap<>();
+            ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
+            for (Map<?, ?> entry : entryList) {
+                Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
+                bundledJsonResourceTypes.put((String) resourceMap.get(ID), (String) resourceMap.get(RESOURCE_TYPE));
+            }
 
-			// map out entries in the resulting single bundle file:
-			Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
-			Map<String, String> bundledJsonResourceTypes = new HashMap<>();
-			ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
-			for (Map<?, ?> entry : entryList) {
-				Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
-				bundledJsonResourceTypes.put((String) resourceMap.get(ID), (String) resourceMap.get(RESOURCE_TYPE));
-			}
+            // compare mappings of <id, resourceType> to ensure all bundled correctly:
+            assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
+        }
 
-			// compare mappings of <id, resourceType> to ensure all bundled correctly:
-			assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
-		}
+        // run cleanup (maven runs all ci tests sequentially and static member variables could retain values from
+        // previous tests)
+        ResourceDiscovery.cleanUp();
+        ResourceUtils.cleanUp();
+    }
 
-		// run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)
-		ResourceDiscovery.cleanUp();
-		ResourceUtils.cleanUp();
-	}
+    private static int findAvailablePort() {
+        for (int port = 8000; port <= 9000; port++) {
+            if (isPortAvailable(port)) {
+                return port;
+            }
+        }
+        return -1;
+    }
 
-	private static int findAvailablePort() {
-		for (int port = 8000; port <= 9000; port++) {
-			if (isPortAvailable(port)) {
-				return port;
-			}
-		}
-		return -1;
-	}
+    private static boolean isPortAvailable(int port) {
+        ServerSocket ss;
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Trying " + serverSocket);
+            ss = serverSocket;
+        } catch (IOException e) {
+            return false;
+        }
+        System.out.println(ss + " is open.");
+        return true;
+    }
 
-	private static boolean isPortAvailable(int port) {
-		ServerSocket ss;
-		try (ServerSocket serverSocket = new ServerSocket(port)) {
-			System.out.println("Trying " + serverSocket);
-			ss = serverSocket;
-		} catch (IOException e) {
-			return false;
-		}
-		System.out.println(ss + " is open.");
-		return true;
-	}
+    // @Test(expectedExceptions = IllegalArgumentException.class)
+    // TODO: Fix separately, this is blocking a bunch of other higher priority things
+    public void testNullArgs() {
+        new RefreshIGOperation().execute(null);
+    }
 
-	//@Test(expectedExceptions = IllegalArgumentException.class)
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testNullArgs() {
-		new RefreshIGOperation().execute(null);
-	}
+    // @Test
+    // TODO: Fix separately, this is blocking a bunch of other higher priority things
+    public void testBlankINILoc() {
+        String args[] = {"-RefreshIG", "-ini=", "-t", "-d", "-p"};
 
-	//@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testBlankINILoc() {
-		String args[] = { "-RefreshIG", "-ini=", "-t", "-d", "-p" };
+        try {
+            new RefreshIGOperation().execute(args);
+        } catch (IllegalArgumentException e) {
+            assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
+            assertTrue(this.console.toString().indexOf("fhir-version was not specified in the ini file.") != -1);
+        }
+    }
 
-		try {
-			new RefreshIGOperation().execute(args);
-		} catch (IllegalArgumentException e) {
-			assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
-			assertTrue(this.console.toString().indexOf("fhir-version was not specified in the ini file.") != -1);
-		}
-	}
+    // @Test
+    // TODO: Fix separately, this is blocking a bunch of other higher priority things
+    public void testInvalidIgVersion() {
+        Map<String, String> igProperties = new HashMap<String, String>();
+        igProperties.put("ig", "nonsense");
+        igProperties.put("template", "nonsense");
+        igProperties.put("usage-stats-opt-out", "nonsense");
+        igProperties.put("fhir-version", "nonsense");
 
+        File iniFile = this.createTempINI(igProperties);
 
-	//@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testInvalidIgVersion() {
-		Map<String, String> igProperties = new HashMap<String, String>();
-		igProperties.put("ig", "nonsense");
-		igProperties.put("template", "nonsense");
-		igProperties.put("usage-stats-opt-out", "nonsense");
-		igProperties.put("fhir-version", "nonsense");
+        String args[] = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p"};
 
-		File iniFile = this.createTempINI(igProperties);
+        if (iniFile != null) {
+            try {
+                new RefreshIGOperation().execute(args);
+            } catch (Exception e) {
+                assertTrue(e.getClass() == IllegalArgumentException.class);
+                assertTrue(
+                        this.console.toString().indexOf(EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE) != -1);
+                assertTrue(this.console.toString().indexOf("Unknown Version 'nonsense'") != -1);
 
-		String args[] = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
+                assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
+            }
+            deleteTempINI();
+        }
+    }
 
-		if (iniFile != null) {
-			try {
-				new RefreshIGOperation().execute(args);
-			} catch (Exception e) {
-				assertTrue(e.getClass() == IllegalArgumentException.class);
-				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE) != -1);
-				assertTrue(this.console.toString().indexOf("Unknown Version 'nonsense'") != -1);
+    // @Test
+    // TODO: Fix separately, this is blocking a bunch of other higher priority things
+    public void testInvalidIgInput() {
+        Map<String, String> igProperties = new HashMap<String, String>();
+        igProperties.put("ig", "nonsense");
+        igProperties.put("template", "nonsense");
+        igProperties.put("usage-stats-opt-out", "nonsense");
+        igProperties.put("fhir-version", "4.0.1");
 
-				assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
-			}
-			deleteTempINI();
-		}
-	}
+        File iniFile = this.createTempINI(igProperties);
 
-	//@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testInvalidIgInput() {
-		Map<String, String> igProperties = new HashMap<String, String>();
-		igProperties.put("ig", "nonsense");
-		igProperties.put("template", "nonsense");
-		igProperties.put("usage-stats-opt-out", "nonsense");
-		igProperties.put("fhir-version", "4.0.1");
+        String args[] = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p"};
 
-		File iniFile = this.createTempINI(igProperties);
+        if (iniFile != null) {
+            try {
+                new RefreshIGOperation().execute(args);
+            } catch (Exception e) {
+                assertTrue(e.getClass() == IllegalArgumentException.class);
+                assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
 
-		String args[] = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
+                assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_LOADING_IG_FILE) != -1);
+                assertTrue(
+                        this.console.toString().indexOf(EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE) != -1);
+            }
+            deleteTempINI();
+        }
+    }
 
-		if (iniFile != null) {
-			try {
-				new RefreshIGOperation().execute(args);
-			} catch (Exception e) {
-				assertTrue(e.getClass() == IllegalArgumentException.class);
-				assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
+    // @Test
+    // TODO: Fix separately, this is blocking a bunch of other higher priority things
+    public void testParamsMissingINI() {
+        Map<String, String> igProperties = new HashMap<String, String>();
+        igProperties.put("ig", "nonsense");
+        igProperties.put("template", "nonsense");
+        igProperties.put("usage-stats-opt-out", "nonsense");
+        igProperties.put("fhir-version", "4.0.1");
 
-				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_LOADING_IG_FILE) != -1);
-				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE) != -1);
-			}
-			deleteTempINI();
-		}
-	}
+        File iniFile = this.createTempINI(igProperties);
 
+        String[] args = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p"};
 
-	//@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testParamsMissingINI() {
-		Map<String, String> igProperties = new HashMap<String, String>();
-		igProperties.put("ig", "nonsense");
-		igProperties.put("template", "nonsense");
-		igProperties.put("usage-stats-opt-out", "nonsense");
-		igProperties.put("fhir-version", "4.0.1");
+        RefreshIGParameters params = null;
+        try {
+            params = new RefreshIGArgumentProcessor().parseAndConvert(args);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
 
-		File iniFile = this.createTempINI(igProperties);
+        // override ini to be null
+        params.ini = null;
 
-		String[] args = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
+        try {
+            new IGProcessor().publishIG(params);
+        } catch (Exception e) {
+            assertEquals(e.getClass(), NullPointerException.class);
+        }
 
-		RefreshIGParameters params = null;
-		try {
-			params = new RefreshIGArgumentProcessor().parseAndConvert(args);
-		}
-		catch (Exception e) {
-			System.err.println(e.getMessage());
-			System.exit(1);
-		}
+        deleteTempINI();
+    }
 
-		//override ini to be null
-		params.ini = null;
+    @AfterMethod
+    public void afterTest() {
+        deleteTempINI();
+        System.setOut(this.originalStdOut);
+        System.out.println(this.console.toString());
+        this.console = new ByteArrayOutputStream();
+    }
 
-		try {
-			new IGProcessor().publishIG(params);
-		} catch (Exception e) {
-			assertEquals(e.getClass(), NullPointerException.class);
-		}
+    private File createTempINI(Map<String, String> properties) {
+        //		should look like:
+        //		[IG]
+        //		ig = input/ecqm-content-r4.xml
+        //		template = cqf.fhir.template
+        //		usage-stats-opt-out = false
+        //		fhir-version=4.0.1
+        try {
+            File iniFile = new File("temp.ini");
+            FileOutputStream fos = new FileOutputStream(iniFile);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            bw.write("[IG]");
+            bw.newLine();
+            for (String key : properties.keySet()) {
+                bw.write(key + " = " + properties.get(key));
+                bw.newLine();
+            }
 
-		deleteTempINI();
-	}
+            bw.close();
+            return iniFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    private boolean deleteTempINI() {
+        try {
+            File iniFile = new File("temp.ini");
+            if (iniFile.exists()) {
+                iniFile.delete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
 
-	@AfterMethod
-	public void afterTest() {
-		deleteTempINI();
-		System.setOut(this.originalStdOut);
-		System.out.println(this.console.toString());
-		this.console = new ByteArrayOutputStream();
-	}
+        return true;
+    }
 
+    private Map<?, ?> jsonMap(File file) {
+        Map<?, ?> map = null;
+        try {
+            Gson gson = new Gson();
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            map = gson.fromJson(reader, Map.class);
+            reader.close();
+        } catch (Exception ex) {
+            // swallow exception if directory doesnt' exist
+            // ex.printStackTrace();
+        }
+        return map;
+    }
 
-	private File createTempINI(Map<String, String> properties) {
-//		should look like:
-//		[IG]
-//		ig = input/ecqm-content-r4.xml
-//		template = cqf.fhir.template
-//		usage-stats-opt-out = false
-//		fhir-version=4.0.1
-		try {
-			File iniFile = new File("temp.ini");
-			FileOutputStream fos = new FileOutputStream(iniFile);
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-			bw.write("[IG]");
-			bw.newLine();
-			for (String key : properties.keySet()) {
-				bw.write(key + " = " + properties.get(key));
-				bw.newLine();
-			}
+    private boolean mapsAreEqual(Map<String, String> map1, Map<String, String> map2) {
+        System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
+                + "(" + map2.size() + ")");
 
-			bw.close();
-			return iniFile;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+        if (map1.size() != map2.size()) {
+            return false;
+        }
+        // TODO: this is flawed... Test has 2 different resources with the same name/id of different types
+        //		boolean comparison = map1.entrySet().stream().allMatch(e -> e.getValue().equals(map2.get(e.getKey())));
+        //		System.out.println("#TEST INFO: MATCH: " + comparison);
+        //		return comparison;
+        return true;
+    }
 
-	private boolean deleteTempINI() {
-		try {
-			File iniFile  = new File("temp.ini");
-			if (iniFile.exists()) {
-				iniFile.delete();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+    private String getFhirVersion(IniFile ini) {
+        String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
+        if (specifiedFhirVersion == null || specifiedFhirVersion.equals("")) {
 
-		return true;
-	}
-
-	private Map<?, ?> jsonMap(File file) {
-		Map<?, ?> map = null;
-		try {
-			Gson gson = new Gson();
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			map = gson.fromJson(reader, Map.class);
-			reader.close();
-		} catch (Exception ex) {
-			// swallow exception if directory doesnt' exist
-			// ex.printStackTrace();
-		}
-		return map;
-	}
-
-	private boolean mapsAreEqual(Map<String, String> map1, Map<String, String> map2) {
-		System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
-				+ "(" + map2.size() + ")");
-
-		if (map1.size() != map2.size()) {
-			return false;
-		}
-		// TODO: this is flawed... Test has 2 different resources with the same name/id of different types
-//		boolean comparison = map1.entrySet().stream().allMatch(e -> e.getValue().equals(map2.get(e.getKey())));
-//		System.out.println("#TEST INFO: MATCH: " + comparison);
-//		return comparison;
-		return true;
-	}
-
-	private String getFhirVersion(IniFile ini) {
-		String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
-		if (specifiedFhirVersion == null || specifiedFhirVersion.equals("")) {
-
-			// TODO: Should point to global constant:
-			specifiedFhirVersion = "4.0.1";
-		}
-		return specifiedFhirVersion;
-	}
+            // TODO: Should point to global constant:
+            specifiedFhirVersion = "4.0.1";
+        }
+        return specifiedFhirVersion;
+    }
 }

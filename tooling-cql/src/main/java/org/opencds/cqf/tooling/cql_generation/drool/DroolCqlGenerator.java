@@ -1,11 +1,11 @@
 package org.opencds.cqf.tooling.cql_generation.drool;
 
+import jakarta.xml.bind.JAXBException;
 import java.io.File;
 import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
-
 import org.cdsframework.dto.ConditionDTO;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -25,8 +25,6 @@ import org.opencds.cqf.tooling.cql_generation.drool.visitor.Visitor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jakarta.xml.bind.JAXBException;
 
 /**
  * Implements the {@link CqlGenerator CqlGenerator} Interface, {@link Deserializer Deserializes} the {@link ConditionDTO ConditionDTO}
@@ -116,11 +114,12 @@ public class DroolCqlGenerator implements CqlGenerator {
                 VersionedIdentifier vi = new VersionedIdentifier();
                 vi.setId(getIdFromSource(cql));
                 vi.setVersion(getVersionFromSource(cql));
-                File outputFile = new File(IOUtils.concatFilePath(outpuDirectory.getAbsolutePath(),
-                        vi.getId() + "-" + vi.getVersion() + ".cql"));
+                File outputFile = new File(IOUtils.concatFilePath(
+                        outpuDirectory.getAbsolutePath(), vi.getId() + "-" + vi.getVersion() + ".cql"));
                 IOUtil.writeToFile(outputFile, cql);
             } else {
-                throw new IllegalArgumentException("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
+                throw new IllegalArgumentException(
+                        "Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
             }
         });
     }
@@ -130,13 +129,15 @@ public class DroolCqlGenerator implements CqlGenerator {
         context.libraries.entrySet().stream().forEach(entry -> {
             logger.info(entry.getKey());
             try {
-                String elm = serializer.convertToXml(modelBuilder.of.createLibrary(entry.getValue()), serializer.getJaxbContext());
+                String elm = serializer.convertToXml(
+                        modelBuilder.of.createLibrary(entry.getValue()), serializer.getJaxbContext());
                 if (outpuDirectory.isDirectory()) {
-                    File outputFile = new File(IOUtils.concatFilePath(outpuDirectory.getAbsolutePath(),
-                            entry.getKey() + ".xml"));
+                    File outputFile =
+                            new File(IOUtils.concatFilePath(outpuDirectory.getAbsolutePath(), entry.getKey() + ".xml"));
                     IOUtil.writeToFile(outputFile, elm);
                 } else {
-                    throw new IllegalArgumentException("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
+                    throw new IllegalArgumentException(
+                            "Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
                 }
             } catch (JAXBException e) {
                 e.printStackTrace();
@@ -155,6 +156,7 @@ public class DroolCqlGenerator implements CqlGenerator {
     private String getNameFromSource(String cql) {
         return cql.replaceFirst("library ", "").split(" version")[0].replaceAll("\"", "");
     }
+
     private String getVersionFromSource(String cql) {
         return cql.split("version")[1].split("'")[1];
     }

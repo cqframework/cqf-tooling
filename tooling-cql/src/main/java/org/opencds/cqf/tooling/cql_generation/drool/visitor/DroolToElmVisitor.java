@@ -3,7 +3,6 @@ package org.opencds.cqf.tooling.cql_generation.drool.visitor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
@@ -38,7 +37,7 @@ import org.slf4j.MarkerFactory;
  * build up the {@link ElmContext ElmContext}. The ganularity of the libraries
  * can be toggled by CONDITION or CONDITIONREL using the {@link CQLTYPES
  * CQLTYPES} enumeration.
- * 
+ *
  * @author Joshua Reynolds
  * @since 2021-02-24
  */
@@ -47,7 +46,8 @@ public class DroolToElmVisitor implements Visitor {
      * Toggle ** of cql output
      */
     public enum CQLTYPES {
-        CONDITION, CONDITIONREL
+        CONDITION,
+        CONDITIONREL
     }
 
     private Enum<CQLTYPES> type = null;
@@ -79,7 +79,6 @@ public class DroolToElmVisitor implements Visitor {
         context = new ElmContext(modelBuilder);
         expressionBodyAdapter = new DroolPredicateToElmExpressionConverter(modelBuilder);
     }
-
 
     @Override
     public void visit(CriteriaPredicatePartConceptDTO predicatePartConcepts) {
@@ -135,12 +134,19 @@ public class DroolToElmVisitor implements Visitor {
     @Override
     public void visit(ConditionCriteriaPredicateDTO predicate) {
         logger.debug("Adapting Condition Criteria Predicate DTO");
-        if (predicate.getPredicatePartDTOs().size() > 0 && !predicate.getPredicateType().equals(CriteriaPredicateType.PredicateGroup)) {
+        if (predicate.getPredicatePartDTOs().size() > 0
+                && !predicate.getPredicateType().equals(CriteriaPredicateType.PredicateGroup)) {
             Expression predicateExpression = expressionBodyAdapter.adapt(predicate, context.libraryBuilder);
             if (predicateExpression == null) {
-                logger.warn(markers.get("Expression"), "Not enough information to generate elm from {}", predicate.getUuid());
+                logger.warn(
+                        markers.get("Expression"),
+                        "Not enough information to generate elm from {}",
+                        predicate.getUuid());
             } else {
-                logger.debug(markers.get("Expression"), "pushing Predicate Expression to expression Stack: {}", predicateExpression);
+                logger.debug(
+                        markers.get("Expression"),
+                        "pushing Predicate Expression to expression Stack: {}",
+                        predicateExpression);
                 context.expressionStack.push(predicateExpression);
             }
         } else {
@@ -149,13 +155,19 @@ public class DroolToElmVisitor implements Visitor {
         logger.debug("clearing Expression Body Adapter state");
         expressionBodyAdapter.clearState();
         logger.debug("Adapting Expression Reference");
-        Pair<String, ExpressionRef> expressionReferenceConjunctionPair = 
-        definitionAdapter.adapt(predicate, context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
+        Pair<String, ExpressionRef> expressionReferenceConjunctionPair = definitionAdapter.adapt(
+                predicate, context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
         if (expressionReferenceConjunctionPair != null) {
-            logger.debug(markers.get("ExpressionDef"), "pushing expression reference to reference stack: {}", expressionReferenceConjunctionPair);
+            logger.debug(
+                    markers.get("ExpressionDef"),
+                    "pushing expression reference to reference stack: {}",
+                    expressionReferenceConjunctionPair);
             context.referenceStack.push(expressionReferenceConjunctionPair);
         } else {
-            logger.warn(markers.get("ExpressionDef"), "Not enough information to generate elm from {}", predicate.getUuid());
+            logger.warn(
+                    markers.get("ExpressionDef"),
+                    "Not enough information to generate elm from {}",
+                    predicate.getUuid());
         }
     }
 
@@ -163,16 +175,25 @@ public class DroolToElmVisitor implements Visitor {
     public void visit(ConditionCriteriaRelDTO conditionCriteriaRel) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITIONREL)) {
             if (context.referenceStack.size() > 0) {
-                Pair<String, ExpressionRef> expressionReferenceConjunctionPair = 
-                    definitionAdapter.conditionCriteriaMetExpression(context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
+                Pair<String, ExpressionRef> expressionReferenceConjunctionPair =
+                        definitionAdapter.conditionCriteriaMetExpression(
+                                context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
                 if (expressionReferenceConjunctionPair != null) {
-                    logger.debug(markers.get("ExpressionDef"), "pushing expression reference to reference stack: {}", expressionReferenceConjunctionPair);
+                    logger.debug(
+                            markers.get("ExpressionDef"),
+                            "pushing expression reference to reference stack: {}",
+                            expressionReferenceConjunctionPair);
                     context.referenceStack.push(expressionReferenceConjunctionPair);
                 } else {
-                    logger.debug("No Criteria Met Expression Reference built for conditionRel {}", conditionCriteriaRel.getUuid());
+                    logger.debug(
+                            "No Criteria Met Expression Reference built for conditionRel {}",
+                            conditionCriteriaRel.getUuid());
                 }
             } else {
-                logger.warn(markers.get("ExpressionDef"), "Not enough information to generate elm from remaining Expression Reference to build CriteriaMetExpression for condition {}", conditionCriteriaRel.getUuid());
+                logger.warn(
+                        markers.get("ExpressionDef"),
+                        "Not enough information to generate elm from remaining Expression Reference to build CriteriaMetExpression for condition {}",
+                        conditionCriteriaRel.getUuid());
             }
             logger.debug(markers.get("Library"), "Building Library {}", context.libraryBuilder.getLibraryIdentifier());
             context.buildLibrary();
@@ -185,7 +206,8 @@ public class DroolToElmVisitor implements Visitor {
     public void peek(ConditionCriteriaRelDTO conditionCriteriaRel) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITIONREL)) {
             logger.debug("Adapting Library Identifier");
-            Pair<VersionedIdentifier, ContextDef> libraryInfo = libraryAdapter.adapt(conditionCriteriaRel, modelBuilder, context.libraries.size() + 1);
+            Pair<VersionedIdentifier, ContextDef> libraryInfo =
+                    libraryAdapter.adapt(conditionCriteriaRel, modelBuilder, context.libraries.size() + 1);
             logger.debug("Initializing new LibraryBuilder");
             context.newLibraryBuilder(libraryInfo);
         } else {
@@ -209,16 +231,23 @@ public class DroolToElmVisitor implements Visitor {
     public void visit(ConditionDTO conditionDTO) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITION)) {
             if (context.referenceStack.size() > 0) {
-                Pair<String, ExpressionRef> expressionReferenceConjunctionPair = 
-                    definitionAdapter.conditionCriteriaMetExpression(context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
+                Pair<String, ExpressionRef> expressionReferenceConjunctionPair =
+                        definitionAdapter.conditionCriteriaMetExpression(
+                                context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
                 if (expressionReferenceConjunctionPair != null) {
-                    logger.debug(markers.get("ExpressionDef"), "pushing expression reference to reference stack: {}", expressionReferenceConjunctionPair);
+                    logger.debug(
+                            markers.get("ExpressionDef"),
+                            "pushing expression reference to reference stack: {}",
+                            expressionReferenceConjunctionPair);
                     context.referenceStack.push(expressionReferenceConjunctionPair);
                 } else {
                     logger.debug("No Criteria Met Expression Reference built for condition {}", conditionDTO.getUuid());
                 }
             } else {
-                logger.warn(markers.get("Library"), "No remaining Expression Reference to build CriteriaMetExpression from condition {}", conditionDTO.getUuid());
+                logger.warn(
+                        markers.get("Library"),
+                        "No remaining Expression Reference to build CriteriaMetExpression from condition {}",
+                        conditionDTO.getUuid());
             }
             logger.debug(markers.get("Library"), "Building Library {}", context.libraryBuilder.getLibraryIdentifier());
             context.buildLibrary();
@@ -231,13 +260,13 @@ public class DroolToElmVisitor implements Visitor {
     public void peek(ConditionDTO conditionDTO) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITION)) {
             logger.debug("Adapting Library Identifier");
-            Pair<VersionedIdentifier, ContextDef> libraryInfo = libraryAdapter.adapt(conditionDTO, modelBuilder, context.libraries.size() + 1);
+            Pair<VersionedIdentifier, ContextDef> libraryInfo =
+                    libraryAdapter.adapt(conditionDTO, modelBuilder, context.libraries.size() + 1);
             logger.debug("Initializing new LibraryBuilder");
             context.newLibraryBuilder(libraryInfo);
         } else {
             logger.debug("CQLType was null or not ConditionRel");
         }
-
     }
 
     @Override

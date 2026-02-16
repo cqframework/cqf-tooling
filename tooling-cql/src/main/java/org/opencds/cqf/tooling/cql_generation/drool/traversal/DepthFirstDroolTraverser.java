@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.cql_generation.drool.traversal;
 
 import java.util.List;
 import java.util.Stack;
-
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
@@ -30,8 +29,10 @@ import org.slf4j.LoggerFactory;
 public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
 
     private static final Logger logger = LoggerFactory.getLogger(DepthFirstDroolTraverser.class);
-    private Stack<CriteriaResourceParamDTO> criteriaResourceParamDTOExtensionStack = new Stack<CriteriaResourceParamDTO>();
+    private Stack<CriteriaResourceParamDTO> criteriaResourceParamDTOExtensionStack =
+            new Stack<CriteriaResourceParamDTO>();
     private Boolean unableToDetermineModeling = false;
+
     public DepthFirstDroolTraverser(Visitor visitor) {
         super(visitor);
     }
@@ -49,16 +50,17 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         if (!conditionCriteriaRels.isEmpty() || conditionCriteriaRels != null) {
 
             conditionCriteriaRels.stream()
-            .filter(rel ->
-            rel.getConditionCriteriaPredicateDTOs().isEmpty()
-             || rel.getName().toLowerCase().contains("not yet implemented"))
-            .forEach(rel -> logger.info("Not Yet Implemented: {}", rel.getUuid()));
+                    .filter(rel -> rel.getConditionCriteriaPredicateDTOs().isEmpty()
+                            || rel.getName().toLowerCase().contains("not yet implemented"))
+                    .forEach(rel -> logger.info("Not Yet Implemented: {}", rel.getUuid()));
 
             conditionCriteriaRels.stream()
-            .filter(rel ->
-            !rel.getConditionCriteriaPredicateDTOs().isEmpty()
-             && !rel.getName().toLowerCase().contains("not yet implemented"))
-            .forEach(rel -> { this.visitor.peek(rel); traverse(rel); });
+                    .filter(rel -> !rel.getConditionCriteriaPredicateDTOs().isEmpty()
+                            && !rel.getName().toLowerCase().contains("not yet implemented"))
+                    .forEach(rel -> {
+                        this.visitor.peek(rel);
+                        traverse(rel);
+                    });
         }
         this.visitor.visit(conditionDTO);
     }
@@ -87,7 +89,8 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                 } else return;
             }
             if (!unableToDetermineModeling) {
-                if (criteriaResourceParamDTOExtensionStack.size() > 0 || !criteriaResourceParamDTOExtensionStack.empty()) {
+                if (criteriaResourceParamDTOExtensionStack.size() > 0
+                        || !criteriaResourceParamDTOExtensionStack.empty()) {
                     traverse(criteriaResourceParamDTOExtensionStack.pop());
                 }
             } else return;
@@ -110,8 +113,8 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                 traverse(predicatePart.getDataInputNodeDTO());
             }
             if (!predicatePart.getPredicatePartConceptDTOs().isEmpty()) {
-                for (ConditionCriteriaPredicatePartConceptDTO predicatePartConcepts : predicatePart
-                        .getPredicatePartConceptDTOs()) {
+                for (ConditionCriteriaPredicatePartConceptDTO predicatePartConcepts :
+                        predicatePart.getPredicatePartConceptDTOs()) {
                     traverse(predicatePartConcepts);
                 }
             }
@@ -121,7 +124,9 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             criteriaResourceParamDTOExtensionStack.push(predicatePart.getCriteriaResourceParamDTO());
         }
         if (unknownOperatorModeling(predicatePart)) {
-            logger.info("Unable to determine operator from {}", predicatePart.getCriteriaResourceDTO().getUuid());
+            logger.info(
+                    "Unable to determine operator from {}",
+                    predicatePart.getCriteriaResourceDTO().getUuid());
             unableToDetermineModeling = true;
             return;
         }
@@ -148,17 +153,18 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         switch (sourcePredicatePartDTO.getPartType()) {
             case DataInput:
                 if (!sourcePredicatePartDTO.getPredicatePartConceptDTOs().isEmpty()) {
-                    for (CriteriaPredicatePartConceptDTO predicatePartConcepts : sourcePredicatePartDTO
-                            .getPredicatePartConceptDTOs()) {
+                    for (CriteriaPredicatePartConceptDTO predicatePartConcepts :
+                            sourcePredicatePartDTO.getPredicatePartConceptDTOs()) {
                         traverse(predicatePartConcepts);
                     }
                 } else if (sourcePredicatePartDTO.getDataInputClassType().equals(DataModelClassType.String)) {
-                    if (sourcePredicatePartDTO.getPartAlias() != null && sourcePredicatePartDTO.getPartAlias().equals("an order and only an order")) {
+                    if (sourcePredicatePartDTO.getPartAlias() != null
+                            && sourcePredicatePartDTO.getPartAlias().equals("an order and only an order")) {
                         logger.info("Unable to determine modeling from {}", sourcePredicatePartDTO.getUuid());
                         unableToDetermineModeling = true;
                     }
                     break;
-                } else if (unknownConceptModeling(sourcePredicatePartDTO)){
+                } else if (unknownConceptModeling(sourcePredicatePartDTO)) {
                     logger.info("Unable to determine modeling from {}", sourcePredicatePartDTO.getUuid());
                     unableToDetermineModeling = true;
                     return;
@@ -175,7 +181,6 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                 break;
             default:
                 break;
-
         }
         this.visitor.visit(sourcePredicatePartDTO);
     }
@@ -209,20 +214,47 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
     }
 
     private boolean unknownConceptModeling(CriteriaPredicatePartDTO sourcePredicatePartDTO) {
-        return sourcePredicatePartDTO.getPredicatePartRelDTOs() != null && !sourcePredicatePartDTO.getPredicatePartRelDTOs().isEmpty()
-                    && sourcePredicatePartDTO.getPredicatePartRelDTOs().size() == 1 && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getOpenCdsConceptDTO() == null
-                    && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsCodeDTO() == null && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getValueSetDTO() == null
-                    && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO() != null
-                    && (sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO().getName().equals("Reportable Condition Lab Test Concepts")
-                    || sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO().getName().equals("Reportable Condition Lab Result Concepts")
-                    || sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO().getName().equals("Reportable Condition Lab Results Interpretation Concepts")
-                    || sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO().getName().equals("Reportable Condition Substance Administration"));
+        return sourcePredicatePartDTO.getPredicatePartRelDTOs() != null
+                && !sourcePredicatePartDTO.getPredicatePartRelDTOs().isEmpty()
+                && sourcePredicatePartDTO.getPredicatePartRelDTOs().size() == 1
+                && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getOpenCdsConceptDTO() == null
+                && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsCodeDTO() == null
+                && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getValueSetDTO() == null
+                && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO() != null
+                && (sourcePredicatePartDTO
+                                .getPredicatePartRelDTOs()
+                                .get(0)
+                                .getCdsListDTO()
+                                .getName()
+                                .equals("Reportable Condition Lab Test Concepts")
+                        || sourcePredicatePartDTO
+                                .getPredicatePartRelDTOs()
+                                .get(0)
+                                .getCdsListDTO()
+                                .getName()
+                                .equals("Reportable Condition Lab Result Concepts")
+                        || sourcePredicatePartDTO
+                                .getPredicatePartRelDTOs()
+                                .get(0)
+                                .getCdsListDTO()
+                                .getName()
+                                .equals("Reportable Condition Lab Results Interpretation Concepts")
+                        || sourcePredicatePartDTO
+                                .getPredicatePartRelDTOs()
+                                .get(0)
+                                .getCdsListDTO()
+                                .getName()
+                                .equals("Reportable Condition Substance Administration"));
     }
 
     private boolean unknownOperatorModeling(ConditionCriteriaPredicatePartDTO predicatePart) {
-        return predicatePart.getCriteriaResourceParamDTO() == null && predicatePart.getCriteriaResourceDTO() != null
-            && ((predicatePart.getCriteriaResourceDTO().getResourceType() != null
-                && !predicatePart.getCriteriaResourceDTO().getResourceType().equals(CriteriaResourceType.Function))
-                || predicatePart.getCriteriaResourceDTO().getResourceType() == null);
+        return predicatePart.getCriteriaResourceParamDTO() == null
+                && predicatePart.getCriteriaResourceDTO() != null
+                && ((predicatePart.getCriteriaResourceDTO().getResourceType() != null
+                                && !predicatePart
+                                        .getCriteriaResourceDTO()
+                                        .getResourceType()
+                                        .equals(CriteriaResourceType.Function))
+                        || predicatePart.getCriteriaResourceDTO().getResourceType() == null);
     }
 }

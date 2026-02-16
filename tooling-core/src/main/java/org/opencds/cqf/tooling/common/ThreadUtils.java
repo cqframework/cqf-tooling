@@ -1,8 +1,5 @@
 package org.opencds.cqf.tooling.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -10,6 +7,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ThreadUtils {
     protected static final Logger logger = LoggerFactory.getLogger(ThreadUtils.class);
@@ -34,7 +33,7 @@ public class ThreadUtils {
 
         List<Callable<Void>> retryTasks = new ArrayList<>();
 
-        //let OS handle threading:
+        // let OS handle threading:
         try {
             List<Future<Void>> futures = new ArrayList<>();
             for (Callable<Void> task : tasks) {
@@ -55,7 +54,7 @@ public class ThreadUtils {
             if (retryTasks.isEmpty()) {
                 runningExecutors.remove(executor);
                 executor.shutdown();
-            }else{
+            } else {
                 executeTasks(retryTasks, executor);
             }
         }
@@ -76,8 +75,8 @@ public class ThreadUtils {
                 es.shutdownNow();
             }
             runningExecutors = new ArrayList<>();
-        }catch (Exception e){
-            //fail silently, shutting down anyways
+        } catch (Exception e) {
+            // fail silently, shutting down anyways
         }
     }
 }

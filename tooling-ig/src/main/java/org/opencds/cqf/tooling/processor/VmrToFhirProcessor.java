@@ -6,6 +6,11 @@ import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.Unmarshaller;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.List;
+import java.util.UUID;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -18,12 +23,6 @@ import org.opencds.vmr.v1_0.schema.EvaluatedPerson;
 import org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements;
 import org.opencds.vmr.v1_0.schema.EvaluatedPerson.Demographics;
 import org.opencds.vmr.v1_0.schema.VMR;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Provides Transformation processing from vMR to Fhir.
@@ -52,9 +51,14 @@ public class VmrToFhirProcessor {
         writeOutput(params.fhirOutputPath, context, patient, resources, bundleBuilder);
     }
 
-    private static void writeOutput(String fhirOutputPath, FhirContext context, Patient patient, List<IAnyResource> resources,
+    private static void writeOutput(
+            String fhirOutputPath,
+            FhirContext context,
+            Patient patient,
+            List<IAnyResource> resources,
             BundleBuilder bundleBuilder) {
-        File outputDirectory = new File(IOUtils.concatFilePath(fhirOutputPath, patient.getIdElement().getIdPart()));
+        File outputDirectory = new File(
+                IOUtils.concatFilePath(fhirOutputPath, patient.getIdElement().getIdPart()));
         if (!outputDirectory.isDirectory()) {
             outputDirectory.mkdirs();
         }
@@ -74,13 +78,14 @@ public class VmrToFhirProcessor {
     @SuppressWarnings("rawtypes")
     private static CDSOutput unmarshallCdsOutput(File file) {
         try {
-            Unmarshaller unmarshaller = JAXBContext.newInstance(CDSOutput.class, VMR.class).createUnmarshaller();
+            Unmarshaller unmarshaller =
+                    JAXBContext.newInstance(CDSOutput.class, VMR.class).createUnmarshaller();
             InputStream inputStream = new FileInputStream(file);
             Object unmarshalledObject = unmarshaller.unmarshal(inputStream);
             if (unmarshalledObject instanceof JAXBElement) {
                 return (CDSOutput) ((JAXBElement) unmarshalledObject).getValue();
             } else {
-                 return (CDSOutput) unmarshalledObject;
+                return (CDSOutput) unmarshalledObject;
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

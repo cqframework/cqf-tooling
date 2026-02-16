@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.operation;
 
 import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.operations.stripcontent.StripContentParams;
 import org.opencds.cqf.tooling.operations.stripcontent.StripContentExecutor;
+import org.opencds.cqf.tooling.operations.stripcontent.StripContentParams;
 
 public class StripGeneratedContentOperation extends Operation {
     @Override
@@ -26,7 +26,8 @@ public class StripGeneratedContentOperation extends Operation {
                 case "ptr":
                     params.inputDirectory(value);
                     break;
-                case "version": case "v":
+                case "version":
+                case "v":
                     params.fhirVersion(value);
                     break;
 
@@ -37,7 +38,7 @@ public class StripGeneratedContentOperation extends Operation {
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
-       
+
         new StripContentExecutor(params).execute();
     }
 }

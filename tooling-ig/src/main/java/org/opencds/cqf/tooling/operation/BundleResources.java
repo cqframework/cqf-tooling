@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.operation;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -7,19 +9,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.processor.BaseProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings({"checkstyle:MethodName", "checkstyle:StaticVariableName", "checkstyle:MemberName"})
 public class BundleResources extends Operation {
-    private final static Logger logger = LoggerFactory.getLogger(BundleResources.class);
+    private static final Logger logger = LoggerFactory.getLogger(BundleResources.class);
     private String encoding; // -encoding (-e)
     private String pathToDirectory; // -pathtodir (-ptd)
     private String version; // -version (-v) Can be dstu2, stu3, or
@@ -55,14 +53,16 @@ public class BundleResources extends Operation {
                 case "ptd":
                     pathToDirectory = value;
                     break;
-                case "version": case "v":
+                case "version":
+                case "v":
                     version = value;
                     break;
                 case "bundleid":
                 case "bid":
                     bundleId = value;
                     break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 
@@ -70,7 +70,8 @@ public class BundleResources extends Operation {
             encoding = "json";
         } else {
             if (!encoding.equalsIgnoreCase("xml") && !encoding.equalsIgnoreCase("json")) {
-                throw new IllegalArgumentException(String.format("Unsupported encoding: %s. Allowed encodings { json, xml }", encoding));
+                throw new IllegalArgumentException(
+                        String.format("Unsupported encoding: %s. Allowed encodings { json, xml }", encoding));
             }
         }
 
@@ -90,8 +91,7 @@ public class BundleResources extends Operation {
 
         if (version == null) {
             context = FhirContext.forDstu3Cached();
-        }
-        else {
+        } else {
             switch (version.toLowerCase()) {
                 case "dstu2":
                     context = FhirContext.forDstu2Cached();
@@ -106,7 +106,7 @@ public class BundleResources extends Operation {
                     throw new IllegalArgumentException("Unknown fhir version: " + version);
             }
         }
-        
+
         getResources(resources);
 
         if (context.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -116,34 +116,25 @@ public class BundleResources extends Operation {
             }
             bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
             for (IBaseResource resource : theResources) {
-                bundle.addEntry(
-                        new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
-                                .setResource((org.hl7.fhir.dstu3.model.Resource) resource)
-                                .setRequest(
-                                        new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
-                                                .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT)
-                                                .setUrl(((org.hl7.fhir.dstu3.model.Resource) resource).getId())
-                                )
-                );
+                bundle.addEntry(new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
+                        .setResource((org.hl7.fhir.dstu3.model.Resource) resource)
+                        .setRequest(new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
+                                .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT)
+                                .setUrl(((org.hl7.fhir.dstu3.model.Resource) resource).getId())));
             }
             output(bundle, context);
-        }
-        else if (context.getVersion().getVersion() == FhirVersionEnum.R4) {
+        } else if (context.getVersion().getVersion() == FhirVersionEnum.R4) {
             org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
             if (bundleId != null && !bundleId.isEmpty()) {
                 bundle.setId(bundleId);
             }
             bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
             for (IBaseResource resource : theResources) {
-                bundle.addEntry(
-                        new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
-                                .setResource((org.hl7.fhir.r4.model.Resource) resource)
-                                .setRequest(
-                                        new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
-                                                .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
-                                                .setUrl(((org.hl7.fhir.r4.model.Resource) resource).getId())
-                                )
-                );
+                bundle.addEntry(new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
+                        .setResource((org.hl7.fhir.r4.model.Resource) resource)
+                        .setRequest(new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
+                                .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
+                                .setUrl(((org.hl7.fhir.r4.model.Resource) resource).getId())));
             }
             output(bundle, context);
         }
@@ -154,7 +145,7 @@ public class BundleResources extends Operation {
     private void getResources(File[] resources) {
         for (File resource : resources) {
 
-            if(resource.isDirectory()) {
+            if (resource.isDirectory()) {
                 getResources(resource.listFiles());
                 continue;
             }
@@ -165,46 +156,52 @@ public class BundleResources extends Operation {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e.getMessage());
-                }
-                catch (Exception e) {
-                    String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
+                } catch (Exception e) {
+                    String message = String.format(
+                            "'%s' will not be included in the bundle because the following error occurred: '%s'",
+                            resource.getName(), e.getMessage());
                     logger.error(message, e);
                     continue;
                 }
-            }
-            else if (resource.getPath().endsWith(".json")) {
+            } else if (resource.getPath().endsWith(".json")) {
                 try {
                     theResource = context.newJsonParser().parseResource(new FileReader(resource));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e.getMessage());
-                }
-                catch (Exception e) {
-                    String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
+                } catch (Exception e) {
+                    String message = String.format(
+                            "'%s' will not be included in the bundle because the following error occurred: '%s'",
+                            resource.getName(), e.getMessage());
                     logger.error(message, e);
                     continue;
                 }
-            }
-            else {
+            } else {
                 continue;
             }
             theResources.add(theResource);
         }
     }
-    
+
     // Output
     public void output(IBaseResource resource, FhirContext context) {
-        String fileNameBase = getOutputPath() + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator));
+        String fileNameBase =
+                getOutputPath() + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator));
         if (bundleId != null && !bundleId.isEmpty()) {
             fileNameBase = IOUtils.concatFilePath(getOutputPath(), bundleId);
         }
 
         try (FileOutputStream writer = new FileOutputStream(fileNameBase + "-bundle." + encoding)) {
             writer.write(
-                encoding.equals("json")
-                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-            );
+                    encoding.equals("json")
+                            ? context.newJsonParser()
+                                    .setPrettyPrint(true)
+                                    .encodeResourceToString(resource)
+                                    .getBytes()
+                            : context.newXmlParser()
+                                    .setPrettyPrint(true)
+                                    .encodeResourceToString(resource)
+                                    .getBytes());
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();

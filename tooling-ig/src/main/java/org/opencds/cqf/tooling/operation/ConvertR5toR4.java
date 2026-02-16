@@ -3,6 +3,11 @@ package org.opencds.cqf.tooling.operation;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
@@ -13,25 +18,16 @@ import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 public class ConvertR5toR4 extends Operation {
 
-    public static final List<BundleTypeEnum> ALLOWED_BUNDLE_TYPES = List.of(
-            BundleTypeEnum.COLLECTION,
-            BundleTypeEnum.TRANSACTION
-    );
+    public static final List<BundleTypeEnum> ALLOWED_BUNDLE_TYPES =
+            List.of(BundleTypeEnum.COLLECTION, BundleTypeEnum.TRANSACTION);
 
     public static Boolean isBundleTypeAllowed(String bundleType) {
         if (bundleType == null) {
             return false;
         }
-        return ALLOWED_BUNDLE_TYPES.stream()
-                .anyMatch(bt -> bt.name().equalsIgnoreCase(bundleType));
+        return ALLOWED_BUNDLE_TYPES.stream().anyMatch(bt -> bt.name().equalsIgnoreCase(bundleType));
     }
 
     public static List<String> allowedBundleTypes() {
@@ -43,13 +39,13 @@ public class ConvertR5toR4 extends Operation {
 
     private static final Logger logger = LoggerFactory.getLogger(ConvertR5toR4.class);
     // COMMAND LINE ARGUMENTS - REQUIRED
-    private String pathToDirectory;                         // -pathtodir (-ptd)
+    private String pathToDirectory; // -pathtodir (-ptd)
 
     // COMMAND LINE ARGUMENTS - OPTIONAL
-    private String encoding = "json";                       // -encoding (-e)
+    private String encoding = "json"; // -encoding (-e)
     private String bundleId = UUID.randomUUID().toString(); // -bundleid (-bid)
-    private String bundleType = "transaction";              // -type (-t)
-    private String outputFileName = null;                   // -outputfilename (-ofn)
+    private String bundleType = "transaction"; // -type (-t)
+    private String outputFileName = null; // -outputfilename (-ofn)
 
     private void extractOptionsFromArgs(String[] args) {
         for (String arg : args) {
@@ -86,7 +82,8 @@ public class ConvertR5toR4 extends Operation {
                 case "ptd":
                     pathToDirectory = value;
                     break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
     }
@@ -97,7 +94,9 @@ public class ConvertR5toR4 extends Operation {
         }
 
         if (!isBundleTypeAllowed(bundleType)) {
-            throw new IllegalArgumentException(String.format("The bundle type [%s] is invalid. Allowed Types: %s", bundleType, String.join(", ",allowedBundleTypes())));
+            throw new IllegalArgumentException(String.format(
+                    "The bundle type [%s] is invalid. Allowed Types: %s",
+                    bundleType, String.join(", ", allowedBundleTypes())));
         }
     }
 
@@ -106,24 +105,28 @@ public class ConvertR5toR4 extends Operation {
             encoding = "json";
         } else {
             if (!encoding.equalsIgnoreCase("xml") && !encoding.equalsIgnoreCase("json")) {
-                throw new IllegalArgumentException(String.format("Unsupported encoding: %s. Allowed encodings { json, xml }", encoding));
+                throw new IllegalArgumentException(
+                        String.format("Unsupported encoding: %s. Allowed encodings { json, xml }", encoding));
             }
         }
     }
 
     private void validatePathToDirectory() {
         if (pathToDirectory == null) {
-            throw new IllegalArgumentException(String.format("The path [%s] to the resource directory is required", pathToDirectory));
+            throw new IllegalArgumentException(
+                    String.format("The path [%s] to the resource directory is required", pathToDirectory));
         }
 
         var resourceDirectory = new File(pathToDirectory);
         if (!resourceDirectory.isDirectory()) {
-            throw new RuntimeException(String.format("The specified path [%s] to resource files is not a directory", pathToDirectory));
+            throw new RuntimeException(
+                    String.format("The specified path [%s] to resource files is not a directory", pathToDirectory));
         }
 
         var resources = resourceDirectory.listFiles();
         if (resources == null || resources.length == 0) {
-            throw new RuntimeException(String.format("The specified path [%s] to resource files is empty", pathToDirectory));
+            throw new RuntimeException(
+                    String.format("The specified path [%s] to resource files is empty", pathToDirectory));
         }
     }
 
@@ -139,14 +142,12 @@ public class ConvertR5toR4 extends Operation {
         var bundleType = BundleUtils.getBundleType(this.bundleType);
         if (bundleType == null) {
             logger.error("Invalid bundle type: {}", this.bundleType);
-        }
-        else {
+        } else {
             var bundle = convertResources(
                     bundleId,
                     bundleType,
                     IOUtils.readResources(
-                            IOUtils.getFilePaths(pathToDirectory, true),
-                            FhirContextCache.getContext("r5")));
+                            IOUtils.getFilePaths(pathToDirectory, true), FhirContextCache.getContext("r5")));
 
             IOUtils.writeResource(
                     bundle,
@@ -158,25 +159,24 @@ public class ConvertR5toR4 extends Operation {
         }
     }
 
-    private IBaseBundle convertResources(String bundleId, BundleTypeEnum type,
-                                         @Nonnull List<IBaseResource> resourcesToConvert) {
-      var convertedResources = new ArrayList<org.hl7.fhir.r4.model.Resource>();
-      for (var resource : resourcesToConvert){
-        if (resource instanceof org.hl7.fhir.r5.model.Resource) {
-            convertedResources.add(ResourceAndTypeConverter.r5ToR4Resource(resource));
+    private IBaseBundle convertResources(
+            String bundleId, BundleTypeEnum type, @Nonnull List<IBaseResource> resourcesToConvert) {
+        var convertedResources = new ArrayList<org.hl7.fhir.r4.model.Resource>();
+        for (var resource : resourcesToConvert) {
+            if (resource instanceof org.hl7.fhir.r5.model.Resource) {
+                convertedResources.add(ResourceAndTypeConverter.r5ToR4Resource(resource));
+            }
         }
-      }
 
-      var context = FhirContextCache.getContext("r4");
-      var builder = new BundleBuilder(context);
-      if (type == BundleTypeEnum.COLLECTION) {
-         convertedResources.forEach(builder::addCollectionEntry);
-      }
-      else {
-         convertedResources.forEach(builder::addTransactionUpdateEntry);
-      }
-      var bundle = builder.getBundle();
-      bundle.setId(bundleId == null ? UUID.randomUUID().toString() : bundleId);
-      return bundle;
+        var context = FhirContextCache.getContext("r4");
+        var builder = new BundleBuilder(context);
+        if (type == BundleTypeEnum.COLLECTION) {
+            convertedResources.forEach(builder::addCollectionEntry);
+        } else {
+            convertedResources.forEach(builder::addTransactionUpdateEntry);
+        }
+        var bundle = builder.getBundle();
+        bundle.setId(bundleId == null ? UUID.randomUUID().toString() : bundleId);
+        return bundle;
     }
 }

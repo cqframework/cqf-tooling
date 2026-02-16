@@ -1,15 +1,6 @@
 package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.common.ThreadUtils;
-import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -21,23 +12,34 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.apache.commons.io.FileUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.common.ThreadUtils;
+import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+@SuppressWarnings({"checkstyle:MemberName", "checkstyle:ParameterName"})
 public class ExtractMatBundleOperation extends Operation {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private static final String ERROR_BUNDLE_OUTPUT_INVALID = "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
+    private static final String ERROR_BUNDLE_OUTPUT_INVALID =
+            "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
     private static final String ERROR_BUNDLE_FILE_IS_REQUIRED = "The path to a bundle file is required";
     private static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
     private static final String ERROR_OP_IS_NOT_A_DIRECTORY = "The path specified with -op is not a directory.";
     private static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
-    private static final String ERROR_BUNDLE_LOCATION_NONEXISTENT = "The path specified for the bundle doesn't exist on your system.";
-    private static final String ERROR_OUTPUT_LOCATION_NONEXISTENT = "The path specified for the output folder doesn't exist on your system.";
+    private static final String ERROR_BUNDLE_LOCATION_NONEXISTENT =
+            "The path specified for the bundle doesn't exist on your system.";
+    private static final String ERROR_OUTPUT_LOCATION_NONEXISTENT =
+            "The path specified for the output folder doesn't exist on your system.";
     private static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
     private static final String VERSION_R4 = "r4";
     private static final String VERSION_STU3 = "stu3";
     private static final String ERROR_NOT_JSON_OR_XML = "The path to a bundle file of type json or xml is required.";
     private static final String ERROR_NOT_VALID = "Unable to translate the file. The resource appears invalid.";
     private static final String ERROR_NOT_VALID_BUNDLE = "Not a recognized transaction Bundle: ";
-
 
     private List<String> processedBundleCollection;
 
@@ -52,19 +54,20 @@ public class ExtractMatBundleOperation extends Operation {
         String version = VERSION_R4;
         String inputLocation = null;
 
-        //loop through args and prepare approach:
+        // loop through args and prepare approach:
         for (int i = 0; i < args.length; i++) {
             if (i == 0 && args[i].equalsIgnoreCase("-ExtractMatBundle")) {
                 continue; //
             } else if (i == 0 && !args[i].equalsIgnoreCase("-ExtractMatBundle")) {
-                throw new IllegalArgumentException("Insufficient argument structure. " +
-                        "Usage Example: mvn exec:java -Dexec.args=\"-ExtractMatBundle " +
-                        File.separator + "Development" + File.separator + "ecqm-content-r4" +
-                        File.separator + "bundles" + File.separator +  "mat" +
-                        File.separator + "EXM124" + File.separator + "EXM124.json -v=r4");
+                throw new IllegalArgumentException("Insufficient argument structure. "
+                        + "Usage Example: mvn exec:java -Dexec.args=\"-ExtractMatBundle "
+                        + File.separator
+                        + "Development" + File.separator + "ecqm-content-r4" + File.separator
+                        + "bundles" + File.separator + "mat" + File.separator
+                        + "EXM124" + File.separator + "EXM124.json -v=r4");
             }
 
-            //position 1 is the location of file or directory. Determine which:
+            // position 1 is the location of file or directory. Determine which:
             if (i == 1) {
                 inputLocation = args[i];
                 inputLocation = inputLocation.replace("%20", " "); // TODO: use URI instead?
@@ -107,9 +110,9 @@ public class ExtractMatBundleOperation extends Operation {
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
-        }//end arg loop
+        } // end arg loop
 
-        //determine location is provided by user, if not, throw argument exception:
+        // determine location is provided by user, if not, throw argument exception:
         if (inputLocation == null) {
             throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
         } else {
@@ -118,7 +121,7 @@ public class ExtractMatBundleOperation extends Operation {
                 throw new IllegalArgumentException(ERROR_BUNDLE_LOCATION_NONEXISTENT);
             }
             if (directoryFlagPresent) {
-                //ensure the input is a directory before trying to return a list of its files:
+                // ensure the input is a directory before trying to return a list of its files:
                 if (!bundleFile.isDirectory()) {
                     throw new IllegalArgumentException(ERROR_DIR_IS_NOT_A_DIRECTORY);
                 }
@@ -129,24 +132,24 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
 
-
-        //if -dir was found, treat inputLocation as directory:
+        // if -dir was found, treat inputLocation as directory:
         if (directoryFlagPresent) {
             File[] filesInDir = new File(inputLocation).listFiles();
             if (filesInDir != null && filesInDir.length > 0) {
-                //use recursive calls to build up task list:
+                // use recursive calls to build up task list:
                 ThreadUtils.executeTasks(processFilesInDir(filesInDir, version, suppressNarrative));
             } else {
                 logger.info(ERROR_DIR_IS_EMPTY);
                 return;
             }
         } else {
-            //single file, allow processSingleFile() to run with currently assigned inputFile:
+            // single file, allow processSingleFile() to run with currently assigned inputFile:
             processSingleFile(new File(inputLocation), version, suppressNarrative);
         }
 
         if (!processedBundleCollection.isEmpty()) {
-            logger.info("Successfully extracted " + processedBundleCollection.size() + " resource(s): \n" + String.join("\n", processedBundleCollection));
+            logger.info("Successfully extracted " + processedBundleCollection.size() + " resource(s): \n"
+                    + String.join("\n", processedBundleCollection));
         } else {
             logger.info("ExtractMatBundleOperation ended with no resources extracted!");
         }
@@ -163,7 +166,7 @@ public class ExtractMatBundleOperation extends Operation {
         List<Callable<Void>> tasks = new ArrayList<>();
         if (filesInDir != null) {
             for (File file : filesInDir) {
-                //process only 1 layer of subdirectories (should they exist)
+                // process only 1 layer of subdirectories (should they exist)
                 if (file.isDirectory()) {
                     tasks.addAll(processFilesInDir(file.listFiles(), version, suppressNarrative));
                 } else {
@@ -201,7 +204,6 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
 
-
         // Read in the Bundle, override encoding
         IBaseResource bundle;
         String encoding;
@@ -228,21 +230,26 @@ public class ExtractMatBundleOperation extends Operation {
             return;
         }
 
-        //sometimes tests leave library or measure files behind, so we want to make sure we only iterate over bundle files:
+        // sometimes tests leave library or measure files behind, so we want to make sure we only iterate over bundle
+        // files:
         if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)) {
             logger.info(ERROR_NOT_VALID_BUNDLE + inputFileLocation);
             return;
         }
 
-        //ensure the xml and json files are transaction Bundle types:
+        // ensure the xml and json files are transaction Bundle types:
         if (bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
-            if (!((org.hl7.fhir.dstu3.model.Bundle) bundle).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION)) {
+            if (!((org.hl7.fhir.dstu3.model.Bundle) bundle)
+                    .getType()
+                    .equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION)) {
                 logger.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
                 return;
             }
 
         } else if (bundle instanceof org.hl7.fhir.r4.model.Bundle) {
-            if (!((org.hl7.fhir.r4.model.Bundle) bundle).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION)) {
+            if (!((org.hl7.fhir.r4.model.Bundle) bundle)
+                    .getType()
+                    .equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION)) {
                 logger.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
                 return;
             }
@@ -251,30 +258,29 @@ public class ExtractMatBundleOperation extends Operation {
             return;
         }
 
-        //call the Bundle utilities to extract the bundle
+        // call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
 
-
-        //ensure output path assigned by user is utilized:
+        // ensure output path assigned by user is utilized:
         if (getOutputPath() != null && !getOutputPath().isEmpty()) {
             outputDir = getOutputPath();
         }
 
-        processedBundleCollection.addAll(BundleUtils.extractResources(bundle, encoding, outputDir, suppressNarrative, version));
+        processedBundleCollection.addAll(
+                BundleUtils.extractResources(bundle, encoding, outputDir, suppressNarrative, version));
 
-        //move and properly rename the files
+        // move and properly rename the files
         moveAndRenameFiles(outputDir, context, version);
 
         logger.info(INFO_EXTRACTION_SUCCESSFUL + ": " + inputFileLocation);
     }
 
-
-    private Path getParentBundleDir(String directory){
+    private Path getParentBundleDir(String directory) {
         Path parent = Paths.get(directory);
         // Traverse to the parent of 'bundles'
-        while (parent != null &&
-                parent.getFileName() != null &&
-                !parent.getFileName().toString().equalsIgnoreCase("bundles")) {
+        while (parent != null
+                && parent.getFileName() != null
+                && !parent.getFileName().toString().equalsIgnoreCase("bundles")) {
             parent = parent.getParent();
         }
 
@@ -317,17 +323,19 @@ public class ExtractMatBundleOperation extends Operation {
             String resourceName;
 
             // https://github.com/cqframework/cqf-tooling/issues/537
-            // if there's no bundle directory (getParentBundleDir returned null) we'll use resourceOutputDir (original outputDir):
+            // if there's no bundle directory (getParentBundleDir returned null) we'll use resourceOutputDir (original
+            // outputDir):
             Path resourceOutputDir = Paths.get(outputDir).toAbsolutePath();
 
-            Path newOutputDirectory = Paths.get(
-                    Objects.requireNonNullElse(getParentBundleDir(outputDir)
-                            , resourceOutputDir)
+            Path newOutputDirectory =
+                    Paths.get(Objects.requireNonNullElse(getParentBundleDir(outputDir), resourceOutputDir)
                             + File.separator + "input");
 
-            Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "library");
+            Path newLibraryDirectory =
+                    Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "library");
             Path newCqlDirectory = Paths.get(newOutputDirectory.toString(), "cql");
-            Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "measure");
+            Path newMeasureDirectory =
+                    Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "measure");
 
             if (version.equals(VERSION_STU3)) {
                 if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
@@ -338,7 +346,8 @@ public class ExtractMatBundleOperation extends Operation {
                     theLibrary.setId(resourceName);
 
                     // Forcing the encoding to JSON here to make everything the same in input directory
-                    ResourceUtils.outputResourceByName(theResource, "json", context, newLibraryDirectory.toString(), resourceName);
+                    ResourceUtils.outputResourceByName(
+                            theResource, "json", context, newLibraryDirectory.toString(), resourceName);
 
                     // Now extract the CQL from the library file
                     String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
@@ -351,7 +360,8 @@ public class ExtractMatBundleOperation extends Operation {
                     theMeasure.setId(resourceName);
 
                     // Forcing the encoding to JSON here to make everything the same in input directory
-                    ResourceUtils.outputResourceByName(theResource, "json", context, newMeasureDirectory.toString(), resourceName);
+                    ResourceUtils.outputResourceByName(
+                            theResource, "json", context, newMeasureDirectory.toString(), resourceName);
                 }
             } else if (version.equals(VERSION_R4)) {
                 if (theResource instanceof org.hl7.fhir.r4.model.Library) {
@@ -362,7 +372,8 @@ public class ExtractMatBundleOperation extends Operation {
                     theLibrary.setId(resourceName);
 
                     // Forcing the encoding to JSON here to make everything the same in input directory
-                    ResourceUtils.outputResourceByName(theResource, "json", context, newLibraryDirectory.toString(), resourceName);
+                    ResourceUtils.outputResourceByName(
+                            theResource, "json", context, newLibraryDirectory.toString(), resourceName);
 
                     // Now extract the CQL from the library file
                     String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
@@ -375,7 +386,8 @@ public class ExtractMatBundleOperation extends Operation {
                     theMeasure.setId(resourceName);
 
                     // Forcing the encoding to JSON here to make everything the same in input directory
-                    ResourceUtils.outputResourceByName(theResource, "json", context, newMeasureDirectory.toString(), resourceName);
+                    ResourceUtils.outputResourceByName(
+                            theResource, "json", context, newMeasureDirectory.toString(), resourceName);
                 }
             }
         }
@@ -438,5 +450,4 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
     }
-
 }

@@ -18,16 +18,19 @@ public class TestCaseContainer {
         this.containedTestCases = containedTestCases;
     }
 
-    public List<TestCaseOld> getContainedTestCases() { return this.containedTestCases; }
+    public List<TestCaseOld> getContainedTestCases() {
+        return this.containedTestCases;
+    }
 
     public TestCaseContainer() {
         this.containedTestCases = new ArrayList<TestCaseOld>();
     }
 
-    public String getContainedTestCase() { return this.containedTestCase; }
+    public String getContainedTestCase() {
+        return this.containedTestCase;
+    }
 
     public void setContainedTestCase(String containedTestCase) {
         this.containedTestCase = containedTestCase;
     }
-
 }

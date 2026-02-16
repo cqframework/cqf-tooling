@@ -4,6 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
@@ -15,12 +19,6 @@ import org.opencds.cqf.tooling.parameter.TestIGParameters;
 import org.opencds.cqf.tooling.utilities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
 
 public class IGTestProcessor extends BaseProcessor {
 
@@ -49,35 +47,65 @@ public class IGTestProcessor extends BaseProcessor {
         }
 
         private String resourceTypeGroup;
-        public String getResourceTypeGroup() { return this.resourceTypeGroup; }
-        public void setResourceTypeGroup(String value) { this.resourceTypeGroup = value; }
+
+        public String getResourceTypeGroup() {
+            return this.resourceTypeGroup;
+        }
+
+        public void setResourceTypeGroup(String value) {
+            this.resourceTypeGroup = value;
+        }
 
         private String testArtifactName;
-        public String getTestArtifactName() { return this.testArtifactName; }
-        public void setTestArtifactName(String value) { this.testArtifactName = value; }
+
+        public String getTestArtifactName() {
+            return this.testArtifactName;
+        }
+
+        public void setTestArtifactName(String value) {
+            this.testArtifactName = value;
+        }
 
         private String testCaseID;
-        public String getTestCaseID() { return this.testCaseID; }
-        public void setTestCaseID(String value) { this.testCaseID = value; }
+
+        public String getTestCaseID() {
+            return this.testCaseID;
+        }
+
+        public void setTestCaseID(String value) {
+            this.testCaseID = value;
+        }
 
         private Boolean testPassed;
-        public Boolean getTestPassed() { return this.testPassed; }
-        public void setTestPassed(Boolean value) { this.testPassed = value; }
+
+        public Boolean getTestPassed() {
+            return this.testPassed;
+        }
+
+        public void setTestPassed(Boolean value) {
+            this.testPassed = value;
+        }
 
         private String message;
-        public String getMessage() { return this.message; }
-        public void setMessage(String value) { this.message = value; }
+
+        public String getMessage() {
+            return this.message;
+        }
+
+        public void setMessage(String value) {
+            this.message = value;
+        }
 
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
 
-            builder.append((testPassed ? "PASSED - " : "FAILED - ") + resourceTypeGroup + " " + testArtifactName + " " + testCaseID +
-                    (!testPassed && message != null && !message.isEmpty() ? " with message: " + message : ""));
+            builder.append((testPassed ? "PASSED - " : "FAILED - ") + resourceTypeGroup + " " + testArtifactName + " "
+                    + testCaseID
+                    + (!testPassed && message != null && !message.isEmpty() ? " with message: " + message : ""));
 
             return builder.toString();
         }
-
     }
 
     private FhirContext fhirContext;
@@ -95,9 +123,8 @@ public class IGTestProcessor extends BaseProcessor {
             }
 
             return result;
-        }
-        catch (Exception ex) {
-            //TODO: Error/Message handling
+        } catch (Exception ex) {
+            // TODO: Error/Message handling
             LogUtils.putException(String.format("Error retrieving metadata from: '%s'.", path), ex);
             return null;
         }
@@ -109,50 +136,62 @@ public class IGTestProcessor extends BaseProcessor {
         try {
             IBaseResource resource = getServerMetadata(testServerUri);
 
-            RuntimeResourceDefinition capabilityStatementDefinition = ResourceUtils.getResourceDefinition(fhirContext, "CapabilityStatement");
-            String compatibilityStatementClassName = capabilityStatementDefinition.getImplementingClass().getName();
+            RuntimeResourceDefinition capabilityStatementDefinition =
+                    ResourceUtils.getResourceDefinition(fhirContext, "CapabilityStatement");
+            String compatibilityStatementClassName =
+                    capabilityStatementDefinition.getImplementingClass().getName();
             if (compatibilityStatementClassName.equals(resource.getClass().getName())) {
 
                 // String softwareName = null;
                 String softwareVersion = null;
 
                 if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-                    org.hl7.fhir.dstu3.model.CapabilityStatement capabilityStatement = (org.hl7.fhir.dstu3.model.CapabilityStatement)resource;
+                    org.hl7.fhir.dstu3.model.CapabilityStatement capabilityStatement =
+                            (org.hl7.fhir.dstu3.model.CapabilityStatement) resource;
 
-                    org.hl7.fhir.dstu3.model.Extension softwareModuleExtension =
-                            capabilityStatement.getSoftware()
-                                    .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
-                                    .stream()
-                                    .filter(extension -> !extension.getExtensionString("name").equals(BaseSoftwareSystemHelper.cqfRulerDeviceName))
-                                    .collect(Collectors.toList())
-                                    .get(0);
+                    org.hl7.fhir.dstu3.model.Extension softwareModuleExtension = capabilityStatement
+                            .getSoftware()
+                            .getExtensionsByUrl(
+                                    "http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
+                            .stream()
+                            .filter(extension -> !extension
+                                    .getExtensionString("name")
+                                    .equals(BaseSoftwareSystemHelper.cqfRulerDeviceName))
+                            .collect(Collectors.toList())
+                            .get(0);
 
                     if (softwareModuleExtension != null) {
-                        softwareVersion = softwareModuleExtension.getExtensionString("version");//.getValue().toString();
+                        softwareVersion =
+                                softwareModuleExtension.getExtensionString("version"); // .getValue().toString();
                     }
                 } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-                    org.hl7.fhir.r4.model.CapabilityStatement capabilityStatement = (org.hl7.fhir.r4.model.CapabilityStatement)resource;
+                    org.hl7.fhir.r4.model.CapabilityStatement capabilityStatement =
+                            (org.hl7.fhir.r4.model.CapabilityStatement) resource;
 
-                    org.hl7.fhir.r4.model.Extension softwareModuleExtension =
-                            capabilityStatement.getSoftware()
-                                    .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
-                                    .stream()
-                                    .filter(extension -> !extension.getExtensionString("name").equals(BaseSoftwareSystemHelper.cqfRulerDeviceName))
-                                    .collect(Collectors.toList())
-                                    .get(0);
+                    org.hl7.fhir.r4.model.Extension softwareModuleExtension = capabilityStatement
+                            .getSoftware()
+                            .getExtensionsByUrl(
+                                    "http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
+                            .stream()
+                            .filter(extension -> !extension
+                                    .getExtensionString("name")
+                                    .equals(BaseSoftwareSystemHelper.cqfRulerDeviceName))
+                            .collect(Collectors.toList())
+                            .get(0);
 
                     if (softwareModuleExtension != null) {
-                        softwareVersion = softwareModuleExtension.getExtensionString("version");//.getValue().toString();
+                        softwareVersion =
+                                softwareModuleExtension.getExtensionString("version"); // .getValue().toString();
                     }
                 }
 
                 if (softwareVersion != null && !softwareVersion.isEmpty()) {
-                    softwareSystem = new SoftwareSystem(BaseSoftwareSystemHelper.cqfRulerDeviceName, softwareVersion, "CQFramework");
+                    softwareSystem = new SoftwareSystem(
+                            BaseSoftwareSystemHelper.cqfRulerDeviceName, softwareVersion, "CQFramework");
                 }
             }
-        }
-        catch (Exception ex) {
-            //TODO: Error/Message handling
+        } catch (Exception ex) {
+            // TODO: Error/Message handling
             LogUtils.putException(String.format("Error retrieving CapabilityStatement from: '%s'.", testServerUri), ex);
             return null;
         }
@@ -166,12 +205,12 @@ public class IGTestProcessor extends BaseProcessor {
 
         if (params.ini != null) {
             initializeFromIni(params.ini);
-        }
-        else {
-            initializeFromIg(params.rootDir, params.igPath, fhirContext.getVersion().toString());
+        } else {
+            initializeFromIg(
+                    params.rootDir, params.igPath, fhirContext.getVersion().toString());
         }
 
-        SoftwareSystem testTargetSoftwareSystem =  getCqfRulerSoftwareSystem(params.fhirServerUri);
+        SoftwareSystem testTargetSoftwareSystem = getCqfRulerSoftwareSystem(params.fhirServerUri);
 
         logger.info("[Running IG Test Cases]");
 
@@ -189,7 +228,9 @@ public class IGTestProcessor extends BaseProcessor {
         List<TestCaseResultSummary> TestResults = new ArrayList<TestCaseResultSummary>();
 
         File[] resourceTypeTestGroups = testCasesDirectory.listFiles(File::isDirectory);
-        //TODO: How can we validate the set of directories here - that they're actually FHIR resources - and message when they're not. Really it doesn't matter, it can be any grouping so long as it has a corresponding path in /bundles.
+        // TODO: How can we validate the set of directories here - that they're actually FHIR resources - and message
+        // when they're not. Really it doesn't matter, it can be any grouping so long as it has a corresponding path in
+        // /bundles.
 
         if (resourceTypeTestGroups != null) {
             for (File group : resourceTypeTestGroups) {
@@ -203,11 +244,15 @@ public class IGTestProcessor extends BaseProcessor {
                         logger.info("Processing test cases for {}: {}", group.getName(), testArtifact.getName());
 
                         // Get content bundle
-                        Map.Entry<String, IBaseResource> testArtifactContentBundleMap = getContentBundleForTestArtifact(group.getName(), testArtifact.getName());
+                        Map.Entry<String, IBaseResource> testArtifactContentBundleMap =
+                                getContentBundleForTestArtifact(group.getName(), testArtifact.getName());
 
                         if ((testArtifactContentBundleMap == null) || testArtifactContentBundleMap.getValue() == null) {
                             logger.info("No content bundle found for {}: {}", group.getName(), testArtifact.getName());
-                            logger.info("Done processing all test cases for {}: {}", group.getName(), testArtifact.getName());
+                            logger.info(
+                                    "Done processing all test cases for {}: {}",
+                                    group.getName(),
+                                    testArtifact.getName());
                             continue;
                         }
 
@@ -217,11 +262,18 @@ public class IGTestProcessor extends BaseProcessor {
 
                         for (Map.Entry<String, IBaseResource> testCaseBundleMapEntry : testCasesBundles) {
                             IBaseResource testCaseBundle = testCaseBundleMapEntry.getValue();
-                            TestCaseResultSummary testCaseResult  = new TestCaseResultSummary(group.getName(), testArtifact.getName(),
+                            TestCaseResultSummary testCaseResult = new TestCaseResultSummary(
+                                    group.getName(),
+                                    testArtifact.getName(),
                                     testCaseBundle.getIdElement().toString());
                             try {
-                                logger.info("Starting processing of test case '{}' for {}: {}", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName());
-                                Parameters testResults = testProcessor.executeTest(testCaseBundle, testArtifactContentBundleMap.getValue(), params.fhirServerUri);
+                                logger.info(
+                                        "Starting processing of test case '{}' for {}: {}",
+                                        testCaseBundle.getIdElement(),
+                                        group.getName(),
+                                        testArtifact.getName());
+                                Parameters testResults = testProcessor.executeTest(
+                                        testCaseBundle, testArtifactContentBundleMap.getValue(), params.fhirServerUri);
 
                                 Boolean testPassed = false;
                                 for (ParametersParameter param : testResults.getParameter()) {
@@ -231,35 +283,56 @@ public class IGTestProcessor extends BaseProcessor {
                                     }
                                 }
                                 testCaseResult.setTestPassed(testPassed);
-                                logger.info("Done processing test case '{}' for {}: {}", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName());
+                                logger.info(
+                                        "Done processing test case '{}' for {}: {}",
+                                        testCaseBundle.getIdElement(),
+                                        group.getName(),
+                                        testArtifact.getName());
                             } catch (Exception ex) {
                                 testCaseResult.setTestPassed(false);
                                 testCaseResult.setMessage(ex.getMessage());
-                                logger.error("Error: Test case '{}' for {}: {} failed with message: {}", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName(), ex.getMessage());
+                                logger.error(
+                                        "Error: Test case '{}' for {}: {} failed with message: {}",
+                                        testCaseBundle.getIdElement(),
+                                        group.getName(),
+                                        testArtifact.getName(),
+                                        ex.getMessage());
                             }
                             TestResults.add(testCaseResult);
                         }
 
-                        logger.info(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
+                        logger.info(String.format(
+                                "  Done processing all test cases for %s: %s",
+                                group.getName(), testArtifact.getName()));
 
-                        //all Test Artifact Tests Passed
+                        // all Test Artifact Tests Passed
                         List<SoftwareSystem> softwareSystems = new ArrayList<SoftwareSystem>() {
                             {
                                 add(testTargetSoftwareSystem);
                             }
                         };
 
-                        if ((fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) || (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4)) {
+                        if ((fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3)
+                                || (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4)) {
                             if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
                                 // Stamp the testContentBundle artifacts
-                                BundleUtils.stampDstu3BundleEntriesWithSoftwareSystems((org.hl7.fhir.dstu3.model.Bundle)testArtifactContentBundleMap.getValue(), softwareSystems, fhirContext, getRootDir());
+                                BundleUtils.stampDstu3BundleEntriesWithSoftwareSystems(
+                                        (org.hl7.fhir.dstu3.model.Bundle) testArtifactContentBundleMap.getValue(),
+                                        softwareSystems,
+                                        fhirContext,
+                                        getRootDir());
                             } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-                                BundleUtils.stampR4BundleEntriesWithSoftwareSystems((org.hl7.fhir.r4.model.Bundle)testArtifactContentBundleMap.getValue(), softwareSystems, fhirContext, getRootDir());
+                                BundleUtils.stampR4BundleEntriesWithSoftwareSystems(
+                                        (org.hl7.fhir.r4.model.Bundle) testArtifactContentBundleMap.getValue(),
+                                        softwareSystems,
+                                        fhirContext,
+                                        getRootDir());
                             }
 
                             String bundleFilePath = testArtifactContentBundleMap.getKey();
                             IBaseResource bundle = testArtifactContentBundleMap.getValue();
-                            IOUtils.writeResource(bundle, bundleFilePath, IOUtils.getEncoding(bundleFilePath), fhirContext);
+                            IOUtils.writeResource(
+                                    bundle, bundleFilePath, IOUtils.getEncoding(bundleFilePath), fhirContext);
                         }
                     }
                 }
@@ -287,13 +360,15 @@ public class IGTestProcessor extends BaseProcessor {
         logger.info("{} tests passed", passedTests.size());
     }
 
-    private Map.Entry<String, IBaseResource> getContentBundleForTestArtifact(String groupName, String testArtifactName) {
+    private Map.Entry<String, IBaseResource> getContentBundleForTestArtifact(
+            String groupName, String testArtifactName) {
         Map.Entry<String, IBaseResource> testArtifactContentBundle = null;
 
         String contentBundlePath = getPathForContentBundleTestArtifact(groupName, testArtifactName);
         File testArtifactContentBundleDirectory = new File(contentBundlePath);
         if (testArtifactContentBundleDirectory != null && testArtifactContentBundleDirectory.exists()) {
-            List<Map.Entry<String, IBaseResource>> testArtifactContentBundles = BundleUtils.getBundlesInDir(contentBundlePath, fhirContext, false);
+            List<Map.Entry<String, IBaseResource>> testArtifactContentBundles =
+                    BundleUtils.getBundlesInDir(contentBundlePath, fhirContext, false);
 
             // NOTE: Making the assumption that there will be a single bundle for the artifact.
             testArtifactContentBundle = testArtifactContentBundles.get(0);
@@ -303,7 +378,9 @@ public class IGTestProcessor extends BaseProcessor {
     }
 
     private String getPathForContentBundleTestArtifact(String groupName, String testArtifactName) {
-        String contentBundlePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(getRootDir(), IGProcessor.BUNDLE_PATH_ELEMENT), groupName), testArtifactName);
+        String contentBundlePath = FilenameUtils.concat(
+                FilenameUtils.concat(FilenameUtils.concat(getRootDir(), IGProcessor.BUNDLE_PATH_ELEMENT), groupName),
+                testArtifactName);
         return contentBundlePath;
     }
 
@@ -311,7 +388,7 @@ public class IGTestProcessor extends BaseProcessor {
         ITestProcessor testProcessor = null;
         String loweredResourceTypeName = resourceTypeName.toLowerCase();
 
-        switch(loweredResourceTypeName) {
+        switch (loweredResourceTypeName) {
             case "measure":
                 testProcessor = new MeasureTestProcessor(fhirContext);
                 break;

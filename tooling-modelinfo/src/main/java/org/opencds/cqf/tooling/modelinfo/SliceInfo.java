@@ -4,7 +4,6 @@ import static org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder.stripPath;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Type;
 
@@ -23,20 +22,24 @@ public class SliceInfo {
     private SliceInfo parentSliceInfo;
 
     private ElementDefinition sliceRoot;
+
     public ElementDefinition getSliceRoot() {
         return this.sliceRoot;
     }
 
     private String sliceName;
+
     public String getSliceName() {
         return this.sliceName;
     }
+
     public void setSliceName(String sliceName) {
         this.sliceName = sliceName;
         this.sliceMap = new ArrayList<String>();
     }
 
     private List<String> sliceMap = new ArrayList<String>();
+
     public String getSliceMap() throws Exception {
         if (hasSliceMap() && !isTypeSlicing()) {
             return "%" + String.format("parent.%s[%s]", stripPath(sliceRoot.getId()), String.join(",", this.sliceMap));
@@ -54,6 +57,7 @@ public class SliceInfo {
     }
 
     private String discriminator;
+
     public String getDiscriminator() {
         if (discriminator == null) {
             discriminator = buildDiscriminator();
@@ -64,7 +68,8 @@ public class SliceInfo {
     private String buildDiscriminator() {
         StringBuilder builder = new StringBuilder();
         if (sliceRoot.getSlicing() != null && sliceRoot.getSlicing().hasDiscriminator()) {
-            for (ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent c : sliceRoot.getSlicing().getDiscriminator()) {
+            for (ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent c :
+                    sliceRoot.getSlicing().getDiscriminator()) {
                 if (builder.length() > 0) {
                     builder.append(',');
                 }
@@ -89,7 +94,8 @@ public class SliceInfo {
 
     private String getValueSlicingPath(String elementName) {
         if (sliceRoot.hasSlicing() && sliceRoot.getSlicing().hasDiscriminator()) {
-            for (ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent c : sliceRoot.getSlicing().getDiscriminator()) {
+            for (ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent c :
+                    sliceRoot.getSlicing().getDiscriminator()) {
                 if (c.getType().equals(ElementDefinition.DiscriminatorType.VALUE)) {
                     if ((sliceRoot.getPath() + "." + c.getPath()).equals(elementName)) {
                         return c.getPath();
@@ -109,7 +115,8 @@ public class SliceInfo {
             }
             Type type = ed.getFixed();
             if (!type.isPrimitive()) {
-                throw new IllegalArgumentException(String.format("Value slicing on type %s is not supported for slicing of %s",
+                throw new IllegalArgumentException(String.format(
+                        "Value slicing on type %s is not supported for slicing of %s",
                         type.fhirType(), this.sliceRoot.getId()));
             }
             sliceMap.add(String.format("%s='%s'", valueSlicingPath, type.primitiveValue()));
@@ -121,4 +128,3 @@ public class SliceInfo {
         }
     }
 }
-
