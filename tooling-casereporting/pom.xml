@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opencds.cqf</groupId>
+        <artifactId>tooling-parent</artifactId>
+        <version>3.11.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>tooling-casereporting</artifactId>
+    <version>3.11.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>CQF Tooling Case Reporting</name>
+    <description>eRSD transformation and TES package generation for electronic case reporting</description>
+    <url>https://github.com/cqframework/cqf-tooling/tree/master/tooling-casereporting</url>
+
+    <dependencies>
+        <!-- Core infrastructure -->
+        <dependency>
+            <groupId>org.opencds.cqf</groupId>
+            <artifactId>tooling-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Terminology (SpreadsheetHelper for TES) -->
+        <dependency>
+            <groupId>org.opencds.cqf</groupId>
+            <artifactId>tooling-terminology</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- HAPI FHIR -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-validation</artifactId>
+        </dependency>
+
+        <!-- Excel spreadsheet processing (TES) -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.7.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

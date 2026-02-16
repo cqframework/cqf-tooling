@@ -32,6 +32,7 @@
         <module>tooling-terminology</module>
         <module>tooling-modelinfo</module>
         <module>tooling-cql</module>
+        <module>tooling-casereporting</module>
         <module>tooling</module>
         <module>tooling-cli</module>
     </modules>

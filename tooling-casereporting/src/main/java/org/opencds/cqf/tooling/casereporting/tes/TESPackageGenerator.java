@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.opencds.cqf.tooling.operations.bundle.BundleToResources.bundleToResources;
+import ca.uhn.fhir.util.BundleUtil;
 
 public class TESPackageGenerator extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(TESPackageGenerator.class);
@@ -773,7 +773,7 @@ public class TESPackageGenerator extends Operation {
 
         List<ValueSet> rsGrouperValueSets = new ArrayList<>();
         if (sourceBundle != null) {
-            List<IBaseResource> rsGrouperResources = bundleToResources(fhirContext, sourceBundle);
+            List<IBaseResource> rsGrouperResources = BundleUtil.toListOfResources(fhirContext, sourceBundle);
 
             for (IBaseResource resource : rsGrouperResources) {
                 if (resource instanceof ValueSet) {
