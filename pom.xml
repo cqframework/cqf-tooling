@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
         <cql.version>3.27.0</cql.version>
         <hapi.version>8.0.0</hapi.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
@@ -28,9 +28,15 @@
     <url>https://github.com/cqframework/cqf-tooling/tree/master</url>
 
     <modules>
+        <module>tooling-core</module>
+        <module>tooling-terminology</module>
+        <module>tooling-modelinfo</module>
+        <module>tooling-cql</module>
+        <module>tooling-casereporting</module>
+        <module>tooling-acceleratorkit</module>
+        <module>tooling-ig</module>
         <module>tooling</module>
         <module>tooling-cli</module>
-        <module>tooling-ui</module>
     </modules>
 
     <licenses>
@@ -231,6 +237,18 @@
                 <version>1.2.18</version>
             </dependency>
 
+            <!-- Pin Apache POI versions to avoid transitive version conflicts -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -268,7 +286,7 @@
                     <?m2e execute onConfiguration,onIncremental?>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.6.0</version>
                     <configuration>
                         <excludeGeneratedSources>true</excludeGeneratedSources>
                         <configLocation>config/checkstyle.xml</configLocation>
@@ -305,6 +323,27 @@
                             </palantirJavaFormat>
                         </java>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-maven-plugin</artifactId>
+                    <version>1.23</version>
+                    <configuration>
+                        <signature>
+                            <groupId>com.toasttab.android</groupId>
+                            <artifactId>gummy-bears-api-34</artifactId>
+                            <version>0.10.0</version>
+                        </signature>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>check-android-34-compliance</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -367,7 +406,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.4.0</version>
                     <configuration>
-                        <source>11</source>
+                        <source>17</source>
                         <excludePackageNames>org.opencds.cqf.tooling.vmr</excludePackageNames>
                         <quiet>true</quiet>
                         <!--TODO: tighten this to make sure comments aren't missing as well-->
@@ -461,11 +500,18 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <!-- TODO: Renable checkstyle -->
-            <!-- <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-            </plugin> -->
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
