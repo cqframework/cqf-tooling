@@ -2,6 +2,8 @@ package org.opencds.cqf.tooling.operation;
 
 import java.io.File;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.spreadsheet.QICoreElementsToSpreadsheet;
 import org.testng.Assert;
 
 public class QICoreElementsToSpreadsheetTest {
@@ -25,7 +27,7 @@ public class QICoreElementsToSpreadsheetTest {
             "-mn=" + modelName,
             "-mv=" + modelVersion
         };
-        Operation qiCoreElementsToSpreadsheet = new QICoreElementsToSpreadsheet();
+        Operation qiCoreElementsToSpreadsheet = new ExecutableOperationAdapter(new QICoreElementsToSpreadsheet());
         qiCoreElementsToSpreadsheet.execute(args);
         File spreadsheet = new File(outputPath + separator + modelName + modelVersion + ".xlsx");
         Assert.assertTrue(spreadsheet.exists());

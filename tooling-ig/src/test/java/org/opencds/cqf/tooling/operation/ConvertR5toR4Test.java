@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import org.hl7.fhir.r4.model.Bundle;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.convert.ConvertR5toR4;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -44,7 +47,7 @@ public class ConvertR5toR4Test {
         args[4] = OUTPUT_FILENAME_ARGUMENT + outputFile;
 
         IOUtils.initializeDirectory(outputPath);
-        var converter = new ConvertR5toR4();
+        Operation converter = new ExecutableOperationAdapter(new ConvertR5toR4());
         try {
             converter.execute(args);
 
@@ -79,7 +82,7 @@ public class ConvertR5toR4Test {
         args[3] = OUTPUT_PATH_ARGUMENT + outputPath;
 
         IOUtils.initializeDirectory(outputPath);
-        var converter = new ConvertR5toR4();
+        Operation converter = new ExecutableOperationAdapter(new ConvertR5toR4());
         try {
             converter.execute(args);
 
@@ -205,7 +208,7 @@ public class ConvertR5toR4Test {
         args[3] = OUTPUT_PATH_ARGUMENT + outputDirectory;
 
         try {
-            var converter = new ConvertR5toR4();
+            Operation converter = new ExecutableOperationAdapter(new ConvertR5toR4());
             converter.execute(args);
         } finally {
             try {
@@ -226,7 +229,7 @@ public class ConvertR5toR4Test {
         args[1] = PATH_TO_DIRECTORY_ARGUMENT + invalidDirectory;
         args[2] = ENCODING_ARGUMENT + "json";
 
-        var converter = new ConvertR5toR4();
+        Operation converter = new ExecutableOperationAdapter(new ConvertR5toR4());
         converter.execute(args);
     }
 }

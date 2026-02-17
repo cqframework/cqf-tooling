@@ -1,77 +1,214 @@
 package org.opencds.cqf.tooling.operations.ig;
 
-import org.opencds.cqf.tooling.operations.ExecutableOperation;
-import org.opencds.cqf.tooling.operations.Operation;
-import org.opencds.cqf.tooling.operations.OperationParam;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.BundleBuilder;
+import java.util.List;
+import org.apache.commons.io.FilenameUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
+import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
+import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Operation(name = "RefreshIG")
-public class RefreshIG implements ExecutableOperation {
-
-    @OperationParam(
-            alias = {"ip", "igp", "pathtoig"},
-            setter = "setPathToImplementationGuide",
-            required = true,
-            description = "Path to the root directory of the Implementation Guide (required).")
-    private String pathToImplementationGuide;
-
-    @OperationParam(
-            alias = {"elm", "pwelm", "packagewithelm"},
-            setter = "setIncludeElm",
-            defaultValue = "false",
-            description = "Determines whether ELM will be produced or packaged (omitted by default).")
-    private Boolean includeElm;
-
-    @OperationParam(
-            alias = {"d", "id", "pd", "packagedependencies"},
-            setter = "setIncludeDependencies",
-            defaultValue = "false",
-            description = "Determines whether libraries other than the primary will be packaged (omitted by default).")
-    private Boolean includeDependencies;
-
-    @OperationParam(
-            alias = {"t", "it", "pt", "packageterminology"},
-            setter = "setIncludeTerminology",
-            defaultValue = "false",
-            description = "Determines whether terminology will be packaged (omitted by default).")
-    private Boolean includeTerminology;
-
-    @OperationParam(
-            alias = {"p", "ipat", "pp", "packagepatients"},
-            setter = "setIncludePatients",
-            defaultValue = "false",
-            description = "Determines whether patient scenario information will be packaged (omitted by default).")
-    private Boolean includePatients;
-
-    @OperationParam(
-            alias = {"e", "encoding"},
-            setter = "setEncoding",
-            defaultValue = "json",
-            description =
-                    "The file format to be used for representing the resulting FHIR Library { json, xml } (default json)")
-    private String encoding;
-
-    @OperationParam(
-            alias = {"v", "version"},
-            setter = "setVersion",
-            defaultValue = "r4",
-            description = "FHIR version { stu3, r4, r5 } (default r4)")
-    private String version;
-
-    @OperationParam(
-            alias = {"op", "outputpath"},
-            setter = "setOutputPath",
-            description =
-                    "The directory path to which the generated FHIR resources should be written (default is to replace existing resources within the IG)")
-    private String outputPath;
+public class RefreshIG extends Operation {
+    private static final Logger logger = LoggerFactory.getLogger(RefreshIG.class);
+    private RefreshIGParameters params;
 
     @Override
-    public void execute() {
-        // refresh libraries
-        // package (Bundle or list of resources)
-        // refresh measures
-        // package (Bundle or list of resources)
-        // refresh plandefinitions
-        // package (Bundle or list of resources) - also includes
-        // publish
+    public void execute(String[] args) {
+        try {
+            this.params = new RefreshIGArgumentProcessor().parseAndConvert(args);
+            IGInfo info = new IGInfo(null, params);
+            CqlRefresh cqlRefresh = new CqlRefresh(info);
+            cqlRefresh.refreshCql(info, params);
+            LibraryRefresh libraryRefresh = new LibraryRefresh(info);
+            publishLibraries(info, libraryRefresh.refresh(this.params));
+            PlanDefinitionRefresh planDefinitionRefresh = new PlanDefinitionRefresh(
+                    info, libraryRefresh.getCqlProcessor(), libraryRefresh.getLibraryPackages());
+            publishPlanDefinitions(info, planDefinitionRefresh.refresh());
+            if (!planDefinitionRefresh.getPlanDefinitionPackages().isEmpty()) {
+                publishPlanDefinitionBundles(planDefinitionRefresh);
+            }
+            MeasureRefresh measureRefresh =
+                    new MeasureRefresh(info, libraryRefresh.getCqlProcessor(), libraryRefresh.getLibraryPackages());
+            publishMeasures(info, measureRefresh.refresh());
+            if (!measureRefresh.getMeasurePackages().isEmpty()) {
+                publishMeasureBundles(measureRefresh);
+            }
+            // TODO: bundle IG/testcases
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    private void publishPlanDefinitionBundles(PlanDefinitionRefresh planDefinitionRefresh) {
+        String pathToBundles = FilenameUtils.concat(params.rootDir, "bundles");
+        String pathToPlanDefinitionBundles = FilenameUtils.concat(pathToBundles, "plandefinition");
+        try {
+            IOUtils.ensurePath(pathToBundles);
+            IOUtils.ensurePath(pathToPlanDefinitionBundles);
+            planDefinitionRefresh.getPlanDefinitionPackages().forEach(pkg -> {
+                String id = pkg.getPlanDefinition().getIdElement().getIdPart();
+                String pathToPackage = FilenameUtils.concat(pathToPlanDefinitionBundles, id);
+                IOUtils.writeResource(
+                        pkg.bundleResources(),
+                        pathToPackage,
+                        IOUtils.Encoding.JSON,
+                        pkg.getFhirContext(),
+                        params.versioned,
+                        id + "-bundle");
+                String pathToFiles = FilenameUtils.concat(pathToPackage, "files");
+                IOUtils.writeResource(
+                        pkg.getPlanDefinition(), pathToFiles, IOUtils.Encoding.JSON, pkg.getFhirContext());
+                id = pkg.getLibraryPackage().getLibrary().getIdElement().getIdPart();
+                IOUtils.writeResource(
+                        pkg.getLibraryPackage().getLibrary(), pathToFiles, IOUtils.Encoding.JSON, pkg.getFhirContext());
+                BundleBuilder builder = new BundleBuilder(pkg.getFhirContext());
+                pkg.getLibraryPackage().getDependsOnLibraries().forEach(builder::addTransactionUpdateEntry);
+                IOUtils.writeResource(
+                        builder.getBundle(),
+                        pathToFiles,
+                        IOUtils.Encoding.JSON,
+                        pkg.getFhirContext(),
+                        params.versioned,
+                        "library-deps-" + id + "-bundle");
+                builder = new BundleBuilder(pkg.getFhirContext());
+                pkg.getLibraryPackage().getDependsOnValueSets().forEach(builder::addTransactionUpdateEntry);
+                pkg.getLibraryPackage().getDependsOnCodeSystems().forEach(builder::addTransactionUpdateEntry);
+                IOUtils.writeResource(
+                        builder.getBundle(),
+                        pathToFiles,
+                        IOUtils.Encoding.JSON,
+                        pkg.getFhirContext(),
+                        params.versioned,
+                        "terminology-" + id + "-bundle");
+                // TODO: output CQL and ELM - also maybe XML files?
+            });
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+        }
+    }
+
+    private void publishMeasureBundles(MeasureRefresh measureRefresh) {
+        String pathToBundles = FilenameUtils.concat(params.rootDir, "bundles");
+        String pathToMeasureBundles = FilenameUtils.concat(pathToBundles, "measure");
+        try {
+            IOUtils.ensurePath(pathToBundles);
+            IOUtils.ensurePath(pathToMeasureBundles);
+            measureRefresh.getMeasurePackages().forEach(pkg -> {
+                String id = pkg.getMeasure().getIdElement().getIdPart();
+                String pathToPackage = FilenameUtils.concat(pathToMeasureBundles, id);
+                IOUtils.writeResource(
+                        pkg.bundleResources(),
+                        pathToPackage,
+                        IOUtils.Encoding.JSON,
+                        pkg.getFhirContext(),
+                        params.versioned,
+                        id + "-bundle");
+                String pathToFiles = FilenameUtils.concat(pathToPackage, "files");
+                IOUtils.writeResource(pkg.getMeasure(), pathToFiles, IOUtils.Encoding.JSON, pkg.getFhirContext());
+                id = pkg.getLibraryPackage().getLibrary().getIdElement().getIdPart();
+                IOUtils.writeResource(
+                        pkg.getLibraryPackage().getLibrary(), pathToFiles, IOUtils.Encoding.JSON, pkg.getFhirContext());
+                BundleBuilder builder = new BundleBuilder(pkg.getFhirContext());
+                pkg.getLibraryPackage().getDependsOnLibraries().forEach(builder::addTransactionUpdateEntry);
+                IOUtils.writeResource(
+                        builder.getBundle(),
+                        pathToFiles,
+                        IOUtils.Encoding.JSON,
+                        pkg.getFhirContext(),
+                        params.versioned,
+                        "library-deps-" + id + "-bundle");
+                builder = new BundleBuilder(pkg.getFhirContext());
+                pkg.getLibraryPackage().getDependsOnValueSets().forEach(builder::addTransactionUpdateEntry);
+                pkg.getLibraryPackage().getDependsOnCodeSystems().forEach(builder::addTransactionUpdateEntry);
+                IOUtils.writeResource(
+                        builder.getBundle(),
+                        pathToFiles,
+                        IOUtils.Encoding.JSON,
+                        pkg.getFhirContext(),
+                        params.versioned,
+                        "terminology-" + id + "-bundle");
+                // TODO: output CQL and ELM - also maybe XML files?
+            });
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+        }
+    }
+
+    private void publishLibraries(IGInfo igInfo, List<IBaseResource> libraries) {
+        String outputPath = this.params.libraryOutputPath != null && !this.params.libraryOutputPath.isEmpty()
+                ? this.params.libraryOutputPath
+                : igInfo.getLibraryResourcePath();
+        for (var library : libraries) {
+            applySoftwareSystemStamp(igInfo.getFhirContext(), library);
+            IOUtils.writeResource(
+                    library,
+                    outputPath,
+                    this.params.outputEncoding,
+                    igInfo.getFhirContext(),
+                    this.params.versioned,
+                    true);
+        }
+    }
+
+    private void publishPlanDefinitions(IGInfo igInfo, List<IBaseResource> planDefinitions) {
+        // TODO: enable user to set output path
+        String outputPath = igInfo.getPlanDefinitionResourcePath();
+        for (var planDefinition : planDefinitions) {
+            applySoftwareSystemStamp(igInfo.getFhirContext(), planDefinition);
+            IOUtils.writeResource(
+                    planDefinition,
+                    outputPath,
+                    this.params.outputEncoding,
+                    igInfo.getFhirContext(),
+                    this.params.versioned,
+                    true);
+        }
+    }
+
+    private void publishMeasures(IGInfo igInfo, List<IBaseResource> measures) {
+        String outputPath = this.params.measureOutputPath != null && !this.params.measureOutputPath.isEmpty()
+                ? this.params.measureOutputPath
+                : igInfo.getMeasureResourcePath();
+        for (var measure : measures) {
+            applySoftwareSystemStamp(igInfo.getFhirContext(), measure);
+            IOUtils.writeResource(
+                    measure,
+                    outputPath,
+                    this.params.outputEncoding,
+                    igInfo.getFhirContext(),
+                    this.params.versioned,
+                    true);
+        }
+    }
+
+    private SoftwareSystemHelper r4CqfmSoftwareSystemHelper;
+    private org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper dstu3SoftwareSystemHelper;
+
+    private void applySoftwareSystemStamp(FhirContext fhirContext, IBaseResource resource) {
+        if (Boolean.TRUE.equals(this.params.shouldApplySoftwareSystemStamp)) {
+            if (resource instanceof org.hl7.fhir.r4.model.DomainResource) {
+                if (r4CqfmSoftwareSystemHelper == null) {
+                    r4CqfmSoftwareSystemHelper = new SoftwareSystemHelper();
+                }
+                r4CqfmSoftwareSystemHelper.ensureCQFToolingExtensionAndDevice(
+                        (org.hl7.fhir.r4.model.DomainResource) resource, fhirContext);
+            } else if (resource instanceof org.hl7.fhir.dstu3.model.DomainResource) {
+                if (dstu3SoftwareSystemHelper == null) {
+                    dstu3SoftwareSystemHelper = new org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper();
+                }
+                dstu3SoftwareSystemHelper.ensureCQFToolingExtensionAndDevice(
+                        (org.hl7.fhir.dstu3.model.DomainResource) resource, fhirContext);
+            } else {
+                logger.warn(
+                        "CqfmSoftwareSystemHelper not supported for version {}",
+                        fhirContext.getVersion().getVersion().getFhirVersionString());
+            }
+        }
     }
 }

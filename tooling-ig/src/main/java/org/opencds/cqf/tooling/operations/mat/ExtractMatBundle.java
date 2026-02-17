@@ -30,7 +30,7 @@ public class ExtractMatBundle implements ExecutableOperation {
 
     @OperationParam(
             alias = {"ptb", "pathtobundle"},
-            setter = "pathToBundle",
+            setter = "setPathToBundle",
             required = true,
             description = "Path to the exported MAT FHIR Bundle resource (required)")
     private String pathToBundle;
@@ -123,7 +123,7 @@ public class ExtractMatBundle implements ExecutableOperation {
                 extractMeasure(resource, terser);
             } else {
                 IOUtils.writeResource(
-                        resource, resourcesPath.toString(), IOUtils.Encoding.valueOf(encoding), fhirContext);
+                        resource, resourcesPath.toString(), IOUtils.Encoding.parse(encoding), fhirContext);
             }
         }
     }
@@ -134,7 +134,7 @@ public class ExtractMatBundle implements ExecutableOperation {
             name = library.getIdElement().getIdPart();
         }
         IOUtils.writeResource(
-                library, libraryOutputPath.toString(), IOUtils.Encoding.valueOf(encoding), fhirContext, false, name);
+                library, libraryOutputPath.toString(), IOUtils.Encoding.parse(encoding), fhirContext, false, name);
         String cql = extractCql(library, terser);
         if (cql != null) {
             String cqlPath = Paths.get(cqlOutputPath.toString(), name) + ".cql";
@@ -164,7 +164,7 @@ public class ExtractMatBundle implements ExecutableOperation {
             name = measure.getIdElement().getIdPart();
         }
         IOUtils.writeResource(
-                measure, measureOutputPath.toString(), IOUtils.Encoding.valueOf(encoding), fhirContext, false, name);
+                measure, measureOutputPath.toString(), IOUtils.Encoding.parse(encoding), fhirContext, false, name);
     }
 
     private Path newOutputPath;

@@ -7,7 +7,10 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.io.File;
 import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
+import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.RefreshTest;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.library.LibraryRefresh;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.testng.annotations.BeforeMethod;
@@ -47,7 +50,7 @@ public class RefreshLibraryOperationIT extends RefreshTest {
             "-fv=4.0.1"
         };
 
-        RefreshLibraryOperation refreshLibraryOperation = new RefreshLibraryOperation();
+        Operation refreshLibraryOperation = new ExecutableOperationAdapter(new LibraryRefresh());
         refreshLibraryOperation.execute(args);
 
         validateSoftwareSystemExtension(targetDirectory + libraryPath);
@@ -78,7 +81,7 @@ public class RefreshLibraryOperationIT extends RefreshTest {
             "-fv=4.0.1"
         };
 
-        RefreshLibraryOperation refreshLibraryOperation = new RefreshLibraryOperation();
+        Operation refreshLibraryOperation = new ExecutableOperationAdapter(new LibraryRefresh());
         refreshLibraryOperation.execute(args);
 
         assertTrue(targetDirectory.listFiles().length > 0);

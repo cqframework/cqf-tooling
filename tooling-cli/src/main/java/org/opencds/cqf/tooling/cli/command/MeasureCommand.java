@@ -3,7 +3,7 @@ package org.opencds.cqf.tooling.cli.command;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
 import org.opencds.cqf.tooling.measure.stu3.RefreshStu3MeasureOperation;
-import org.opencds.cqf.tooling.operation.ExecuteMeasureTestOperation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
@@ -62,7 +62,7 @@ public class MeasureCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new ExecuteMeasureTestOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.measure.ExecuteMeasureTest());
         }
     }
 }

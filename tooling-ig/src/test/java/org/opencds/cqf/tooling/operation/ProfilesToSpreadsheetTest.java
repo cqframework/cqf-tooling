@@ -4,6 +4,8 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Objects;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.spreadsheet.ProfilesToSpreadsheet;
 import org.testng.Assert;
 
 public class ProfilesToSpreadsheetTest {
@@ -30,7 +32,7 @@ public class ProfilesToSpreadsheetTest {
             "-mn=" + modelName,
             "-mv=" + modelVersion
         };
-        Operation profilesToSpreadsheet = new ProfilesToSpreadsheet();
+        Operation profilesToSpreadsheet = new ExecutableOperationAdapter(new ProfilesToSpreadsheet());
         profilesToSpreadsheet.execute(args);
         File spreadsheet = new File(outputPath + separator + modelName + modelVersion + ".xlsx");
         Assert.assertTrue(spreadsheet.exists());

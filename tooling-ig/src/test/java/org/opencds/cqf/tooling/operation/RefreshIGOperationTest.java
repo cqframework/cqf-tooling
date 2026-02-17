@@ -24,7 +24,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
-import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.ig.RefreshIG;
+import org.opencds.cqf.tooling.operations.ig.RefreshIGLegacy;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
@@ -119,7 +121,7 @@ public class RefreshIGOperationTest extends RefreshTest {
         File jsonFile = new File(folder, "ig.ini");
         assertTrue(jsonFile.exists(), "ig.ini file should be present");
 
-        NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
+        RefreshIG newRefreshIGOperation = new RefreshIG();
         String[] args = new String[] {
             "-NewRefreshIG",
             "-ini=" + TARGET_OUTPUT_FOLDER_PATH + separator + "ig.ini",
@@ -252,14 +254,23 @@ public class RefreshIGOperationTest extends RefreshTest {
         String[] args;
         if (!fhirUri.isEmpty()) {
             args = new String[] {
-                "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false", "-fs=" + fhirUri
+                "-RefreshIG",
+                "-ini=" + INI_LOC,
+                "-t=true",
+                "-d=true",
+                "-p=true",
+                "-e=json",
+                "-ts=false",
+                "-fs=" + fhirUri
             };
         } else {
-            args = new String[] {"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false"};
+            args = new String[] {
+                "-RefreshIG", "-ini=" + INI_LOC, "-t=true", "-d=true", "-p=true", "-e=json", "-ts=false"
+            };
         }
 
         // EXECUTE REFRESHIG WITH OUR ARGS:
-        new RefreshIGOperation().execute(args);
+        new ExecutableOperationAdapter(new RefreshIGLegacy()).execute(args);
 
         int requestCount = WireMock.getAllServeEvents().size();
         assertEquals(requestCount, 1);
@@ -390,16 +401,16 @@ public class RefreshIGOperationTest extends RefreshTest {
     // @Test(expectedExceptions = IllegalArgumentException.class)
     // TODO: Fix separately, this is blocking a bunch of other higher priority things
     public void testNullArgs() {
-        new RefreshIGOperation().execute(null);
+        new ExecutableOperationAdapter(new RefreshIGLegacy()).execute(null);
     }
 
     // @Test
     // TODO: Fix separately, this is blocking a bunch of other higher priority things
     public void testBlankINILoc() {
-        String args[] = {"-RefreshIG", "-ini=", "-t", "-d", "-p"};
+        String args[] = {"-RefreshIG", "-ini=", "-t=true", "-d=true", "-p=true"};
 
         try {
-            new RefreshIGOperation().execute(args);
+            new ExecutableOperationAdapter(new RefreshIGLegacy()).execute(args);
         } catch (IllegalArgumentException e) {
             assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
             assertTrue(this.console.toString().indexOf("fhir-version was not specified in the ini file.") != -1);
@@ -417,11 +428,11 @@ public class RefreshIGOperationTest extends RefreshTest {
 
         File iniFile = this.createTempINI(igProperties);
 
-        String args[] = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p"};
+        String args[] = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t=true", "-d=true", "-p=true"};
 
         if (iniFile != null) {
             try {
-                new RefreshIGOperation().execute(args);
+                new ExecutableOperationAdapter(new RefreshIGLegacy()).execute(args);
             } catch (Exception e) {
                 assertTrue(e.getClass() == IllegalArgumentException.class);
                 assertTrue(
@@ -445,11 +456,11 @@ public class RefreshIGOperationTest extends RefreshTest {
 
         File iniFile = this.createTempINI(igProperties);
 
-        String args[] = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p"};
+        String args[] = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t=true", "-d=true", "-p=true"};
 
         if (iniFile != null) {
             try {
-                new RefreshIGOperation().execute(args);
+                new ExecutableOperationAdapter(new RefreshIGLegacy()).execute(args);
             } catch (Exception e) {
                 assertTrue(e.getClass() == IllegalArgumentException.class);
                 assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
@@ -473,7 +484,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
         File iniFile = this.createTempINI(igProperties);
 
-        String[] args = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p"};
+        String[] args = {"-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t=true", "-d=true", "-p=true"};
 
         RefreshIGParameters params = null;
         try {

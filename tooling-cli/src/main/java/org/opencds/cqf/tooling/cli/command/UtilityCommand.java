@@ -3,11 +3,7 @@ package org.opencds.cqf.tooling.cli.command;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
 import org.opencds.cqf.tooling.modelinfo.StructureDefinitionToModelInfo;
-import org.opencds.cqf.tooling.operation.ExtractMatBundleOperation;
-import org.opencds.cqf.tooling.operation.PostmanCollectionOperation;
-import org.opencds.cqf.tooling.operation.ProfilesToSpreadsheet;
-import org.opencds.cqf.tooling.operation.QICoreElementsToSpreadsheet;
-import org.opencds.cqf.tooling.operation.StripGeneratedContentOperation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
@@ -57,7 +53,7 @@ public class UtilityCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new ExtractMatBundleOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.mat.ExtractMatBundle());
         }
     }
 
@@ -83,7 +79,8 @@ public class UtilityCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new StripGeneratedContentOperation();
+            return new ExecutableOperationAdapter(
+                    new org.opencds.cqf.tooling.operations.stripcontent.StripGeneratedContent());
         }
     }
 
@@ -96,7 +93,7 @@ public class UtilityCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new PostmanCollectionOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.postman.PostmanCollection());
         }
     }
 
@@ -109,7 +106,8 @@ public class UtilityCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new ProfilesToSpreadsheet();
+            return new ExecutableOperationAdapter(
+                    new org.opencds.cqf.tooling.operations.spreadsheet.ProfilesToSpreadsheet());
         }
     }
 
@@ -122,7 +120,8 @@ public class UtilityCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new QICoreElementsToSpreadsheet();
+            return new ExecutableOperationAdapter(
+                    new org.opencds.cqf.tooling.operations.spreadsheet.QICoreElementsToSpreadsheet());
         }
     }
 }

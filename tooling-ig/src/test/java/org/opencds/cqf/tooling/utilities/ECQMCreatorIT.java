@@ -28,7 +28,8 @@ import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
-import org.opencds.cqf.tooling.operation.ExtractMatBundleOperation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.mat.ExtractMatBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -71,7 +72,7 @@ public class ECQMCreatorIT {
         Boolean outputMeasure2File = true;
         String outputDirectory = "src/test/resources/org/opencds/cqf/tooling/utilities/ecqm-content-r4-2021/output/";
 
-        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        org.opencds.cqf.tooling.Operation o = new ExecutableOperationAdapter(new ExtractMatBundle());
         o.execute(new String[] {
             "-ExtractMATBundle",
             this.getClass()

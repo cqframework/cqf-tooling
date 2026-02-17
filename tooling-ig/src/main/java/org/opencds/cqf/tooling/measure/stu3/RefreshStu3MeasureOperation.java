@@ -12,10 +12,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper;
-import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
+import org.opencds.cqf.tooling.operations.ig.RefreshGeneratedContent;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperation {
+public class RefreshStu3MeasureOperation extends RefreshGeneratedContent {
 
     private JsonParser jsonParser;
     private XmlParser xmlParser;

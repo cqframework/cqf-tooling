@@ -2,6 +2,8 @@ package org.opencds.cqf.tooling.operation;
 
 import java.net.URISyntaxException;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.postman.PostmanCollection;
 import org.testng.annotations.Test;
 
 public class PostmanCollectionOperationTest {
@@ -30,7 +32,7 @@ public class PostmanCollectionOperationTest {
             "-protocol=" + protocol,
             "-name=" + name
         };
-        Operation postmanCollectionOperation = new PostmanCollectionOperation();
+        Operation postmanCollectionOperation = new ExecutableOperationAdapter(new PostmanCollection());
         postmanCollectionOperation.execute(args);
     }
 }

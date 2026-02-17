@@ -12,6 +12,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.stripcontent.StripGeneratedContent;
 import org.testng.annotations.Test;
 
 public class StripGeneratedContentOperationTest {
@@ -36,7 +38,7 @@ public class StripGeneratedContentOperationTest {
         assertEquals(libraryBeforeStrip.getRelatedArtifact().size(), 46);
 
         String[] args = {"-" + operation, "-ptr=" + inputFilePath, "-op=" + outputPath, "-v=" + version};
-        Operation stripGeneratedContentOperation = new StripGeneratedContentOperation();
+        Operation stripGeneratedContentOperation = new ExecutableOperationAdapter(new StripGeneratedContent());
         stripGeneratedContentOperation.execute(args);
 
         File jsonFile =
@@ -66,7 +68,7 @@ public class StripGeneratedContentOperationTest {
         String[] args = {
             "-" + operation, "-ptr=" + inputFilePath, "-op=" + outputPath, "-cql=" + outputPath + File.separator + "cql"
         };
-        Operation stripGeneratedContentOperation = new StripGeneratedContentOperation();
+        Operation stripGeneratedContentOperation = new ExecutableOperationAdapter(new StripGeneratedContent());
         stripGeneratedContentOperation.execute(args);
 
         File jsonFile =

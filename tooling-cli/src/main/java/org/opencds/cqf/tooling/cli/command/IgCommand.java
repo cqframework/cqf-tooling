@@ -1,11 +1,8 @@
 package org.opencds.cqf.tooling.cli.command;
 
 import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.operation.IgBundler;
-import org.opencds.cqf.tooling.operation.RefreshIGOperation;
-import org.opencds.cqf.tooling.operation.ScaffoldOperation;
-import org.opencds.cqf.tooling.operation.TestIGOperation;
-import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.ig.RefreshIG;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
@@ -40,7 +37,7 @@ public class IgCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new NewRefreshIGOperation();
+            return new RefreshIG();
         }
     }
 
@@ -53,7 +50,7 @@ public class IgCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new RefreshIGOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.ig.RefreshIGLegacy());
         }
     }
 
@@ -66,7 +63,7 @@ public class IgCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new ScaffoldOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.ig.Scaffold());
         }
     }
 
@@ -79,7 +76,7 @@ public class IgCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new TestIGOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.ig.TestIG());
         }
     }
 
@@ -92,7 +89,7 @@ public class IgCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new IgBundler();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.ig.BundleIG());
         }
     }
 }

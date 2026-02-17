@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling.cli.command;
 
 import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.operation.ConvertR5toR4;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
 import org.opencds.cqf.tooling.qdm.QdmToQiCore;
 import org.opencds.cqf.tooling.quick.QuickPageGenerator;
 import picocli.CommandLine.Command;
@@ -36,7 +36,7 @@ public class ConvertCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new ConvertR5toR4();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.convert.ConvertR5toR4());
         }
     }
 

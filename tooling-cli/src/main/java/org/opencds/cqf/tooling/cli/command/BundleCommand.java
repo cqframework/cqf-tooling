@@ -1,11 +1,7 @@
 package org.opencds.cqf.tooling.cli.command;
 
 import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.operation.BundlePublish;
-import org.opencds.cqf.tooling.operation.BundleResources;
-import org.opencds.cqf.tooling.operation.BundleToResources;
-import org.opencds.cqf.tooling.operation.BundleToTransactionOperation;
-import org.opencds.cqf.tooling.operation.PostBundlesInDirOperation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
@@ -40,7 +36,7 @@ public class BundleCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new BundleResources();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.bundle.BundleResources());
         }
     }
 
@@ -53,7 +49,7 @@ public class BundleCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new BundleToResources();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.bundle.BundleToResources());
         }
     }
 
@@ -66,7 +62,7 @@ public class BundleCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new BundleToTransactionOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.bundle.BundleTransaction());
         }
     }
 
@@ -79,7 +75,7 @@ public class BundleCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new PostBundlesInDirOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.bundle.PostBundles());
         }
     }
 
@@ -92,7 +88,7 @@ public class BundleCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new BundlePublish();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.bundle.BundlePublish());
         }
     }
 }

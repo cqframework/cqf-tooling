@@ -8,10 +8,10 @@ import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.r4.model.Measure;
-import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
+import org.opencds.cqf.tooling.operations.ig.RefreshGeneratedContent;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation {
+public class RefreshR4MeasureOperation extends RefreshGeneratedContent {
 
     public RefreshR4MeasureOperation() {
         super(
