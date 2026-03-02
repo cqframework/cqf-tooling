@@ -223,6 +223,8 @@ class OperationFactory {
                 return new StripGeneratedContentOperation();
             case "SpreadsheetValidateVSandCS":
                 return new SpreadsheetValidateVSandCS();
+            case "ConvertR5toR4":
+                return new ConvertR5toR4();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
