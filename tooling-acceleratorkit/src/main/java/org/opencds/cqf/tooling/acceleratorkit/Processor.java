@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
+import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
+
 import ca.uhn.fhir.context.FhirContext;
 import jakarta.annotation.Nonnull;
 import java.io.FileOutputStream;
@@ -442,18 +444,6 @@ public class Processor extends Operation {
                     applyDataElementToElementDefinition(
                             profileElementExtension.getElement(), profile, extensionElement);
                 }
-            }
-        }
-    }
-
-    private void ensurePath(String path) {
-        // Creating a File object
-        java.io.File scopeDir = new java.io.File(path);
-        // Creating the directory
-        if (!scopeDir.exists()) {
-            if (!scopeDir.mkdirs()) {
-                // TODO: change this to an IOException
-                throw new IllegalArgumentException("Could not create directory: " + path);
             }
         }
     }
@@ -1464,7 +1454,7 @@ public class Processor extends Operation {
                 type = Questionnaire.QuestionnaireItemType.QUANTITY;
                 break;
             default:
-                logger.info(String.format("Questionnaire Item Type not mapped: %s.", typeString));
+                logger.info("Questionnaire Item Type not mapped: {}.", typeString);
         }
 
         return type;
@@ -1483,8 +1473,8 @@ public class Processor extends Operation {
         if (questionnaireItemType != null) {
             questionnaireItem.setType(questionnaireItemType);
         } else {
-            logger.info(String.format(
-                    "Unable to determine questionnaire item type for item '%s'.", dataElement.getDataElementLabel()));
+            logger.info(
+                    "Unable to determine questionnaire item type for item '{}'.", dataElement.getDataElementLabel());
         }
 
         questionnaire.getItem().add(questionnaireItem);
@@ -1709,7 +1699,6 @@ public class Processor extends Operation {
             // return null;
             // }
         } catch (Exception e) {
-            e.printStackTrace();
             throw new NoSuchElementException(
                     "Unable to determine FHIR Type for: " + elementPath.getResourceTypeAndPath());
         }
@@ -2390,7 +2379,7 @@ public class Processor extends Operation {
             ensureChoicesDataElement(element, sd);
 
         } catch (Exception e) {
-            logger.error(String.format("Error ensuring element for '%s'. Error: %s ", element.getLabel(), e));
+            logger.error("Error ensuring element for '{}'. Error: ", element.getLabel(), e);
         }
     }
 
@@ -3084,7 +3073,7 @@ public class Processor extends Operation {
                                     .getBytes());
             writer.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+
             throw new IllegalArgumentException(
                     "Error writing resource: " + resource.getIdElement().getIdPart());
         }
@@ -3506,7 +3495,7 @@ public class Processor extends Operation {
             writer.write(sb.toString().getBytes());
             writer.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+
             throw new IllegalArgumentException("Error writing concepts library source");
         }
     }
@@ -4136,7 +4125,7 @@ public class Processor extends Operation {
             writer.write(sb.toString().getBytes());
             writer.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+
             throw new IllegalArgumentException("Error writing concepts library source");
         }
 
@@ -4145,7 +4134,7 @@ public class Processor extends Operation {
             writer.write(activityIndex.toString().getBytes());
             writer.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+
             throw new IllegalArgumentException("Error writing profile activity index");
         }
     }

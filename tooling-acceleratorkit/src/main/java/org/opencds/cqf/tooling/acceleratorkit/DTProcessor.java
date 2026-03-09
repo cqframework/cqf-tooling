@@ -56,15 +56,14 @@ public class DTProcessor extends Operation {
     private String canonicalBase = null;
 
     private String newLine = System.lineSeparator();
-    private Map<String, PlanDefinition> planDefinitions = new LinkedHashMap<String, PlanDefinition>();
-    // private Map<String, List<PlanDefinition>> planDefinitionsByActivity = new LinkedHashMap<String,
-    // List<PlanDefinition>>();
-    private Map<String, Library> libraries = new LinkedHashMap<String, Library>();
-    private Map<String, StringBuilder> libraryCQL = new LinkedHashMap<String, StringBuilder>();
+    private Map<String, PlanDefinition> planDefinitions = new LinkedHashMap<>();
+    // private Map<String, List<PlanDefinition>> planDefinitionsByActivity = new LinkedHashMap<>();
+    private Map<String, Library> libraries = new LinkedHashMap<>();
+    private Map<String, StringBuilder> libraryCQL = new LinkedHashMap<>();
 
     private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
-    private Map<String, Coding> activityMap = new LinkedHashMap<String, Coding>();
-    private Map<String, Integer> expressionNameCounterMap = new HashMap<String, Integer>();
+    private Map<String, Coding> activityMap = new LinkedHashMap<>();
+    private Map<String, Integer> expressionNameCounterMap = new HashMap<>();
 
     @Override
     public void execute(String[] args) {
@@ -120,7 +119,7 @@ public class DTProcessor extends Operation {
         ensurePath(outputPath);
 
         // process workbook
-        if (decisionTablePages != null) {
+        if (decisionTablePages != null && !decisionTablePages.isEmpty()) {
             for (String page : decisionTablePages.split(",")) {
                 processDecisionTablePage(workbook, page);
             }
@@ -131,7 +130,7 @@ public class DTProcessor extends Operation {
             while (sheets.hasNext()) {
                 Sheet sheet = sheets.next();
                 if (sheet.getSheetName() != null && sheet.getSheetName().startsWith(decisionTablePagePrefix)) {
-                    processDecisionTableSheet(workbook, sheet);
+                    processDecisionTableSheet(sheet);
                 }
             }
         }
@@ -145,14 +144,14 @@ public class DTProcessor extends Operation {
     private void processDecisionTablePage(Workbook workbook, String page) {
         Sheet sheet = workbook.getSheet(page);
         if (sheet == null) {
-            logger.info(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
+            logger.warn("Sheet {} not found in the Workbook, so no processing was done.", page);
         } else {
-            logger.info(String.format("Processing Sheet %s.", page));
-            processDecisionTableSheet(workbook, sheet);
+            logger.info("Processing Sheet {}.", page);
+            processDecisionTableSheet(sheet);
         }
     }
 
-    private void processDecisionTableSheet(Workbook workbook, Sheet sheet) {
+    private void processDecisionTableSheet(Sheet sheet) {
         /*
         Decision table general format:
         Header rows:
@@ -173,7 +172,7 @@ public class DTProcessor extends Operation {
                 Cell cell = cells.next();
                 String cellValue = cell.getStringCellValue().toLowerCase();
                 if (cellValue.startsWith("decision")) {
-                    PlanDefinition planDefinition = processDecisionTable(workbook, it, cells);
+                    PlanDefinition planDefinition = processDecisionTable(it, cells);
                     if (planDefinition != null) {
                         planDefinitions.put(planDefinition.getId(), planDefinition);
                         generateLibrary(planDefinition);
@@ -197,10 +196,6 @@ public class DTProcessor extends Operation {
         String activityCode = activityId.substring(0, i);
         String activityDisplay = activityId.substring(i + 1);
 
-        if (activityCode.isEmpty() || activityDisplay.isEmpty()) {
-            return null;
-        }
-
         Coding activity = activityMap.get(activityCode);
 
         if (activity == null) {
@@ -214,7 +209,7 @@ public class DTProcessor extends Operation {
         return activity;
     }
 
-    private PlanDefinition processDecisionTable(Workbook workbook, Iterator<Row> it, Iterator<Cell> cells) {
+    private PlanDefinition processDecisionTable(Iterator<Row> it, Iterator<Cell> cells) {
         PlanDefinition planDefinition = new PlanDefinition();
 
         if (!cells.hasNext()) {
@@ -494,14 +489,13 @@ public class DTProcessor extends Operation {
 
             action.setId(Integer.toString(actionId));
 
-            List<String> conditionValues = new ArrayList<String>();
+            List<String> conditionValues = new ArrayList<>();
             for (int inputIndex = inputColumnIndex; inputIndex < outputColumnIndex; inputIndex++) {
                 cell = row.getCell(inputIndex);
                 if (cell != null) {
                     String inputCondition = cell.getStringCellValue();
                     if (inputCondition != null
                             && !inputCondition.isEmpty()
-                            && !inputCondition.equals("")
                             && !inputCondition.toLowerCase().startsWith("decision")) {
                         conditionValues.add(inputCondition);
                     }
@@ -535,12 +529,12 @@ public class DTProcessor extends Operation {
                     .setDescription(applicabilityCondition.toString()));
             action.getCondition().add(condition);
 
-            List<String> actionValues = new ArrayList<String>();
+            List<String> actionValues = new ArrayList<>();
             for (int actionIndex = actionColumnIndex; actionIndex < annotationColumnIndex; actionIndex++) {
                 cell = row.getCell(actionIndex);
                 if (cell != null) {
                     String actionValue = cell.getStringCellValue();
-                    if (actionValue != null && !actionValue.isEmpty() && !actionValue.equals("")) {
+                    if (actionValue != null && !actionValue.isEmpty()) {
                         actionValues.add(actionValue.replace(System.getProperty("line.separator"), ""));
                     }
                 }
@@ -565,7 +559,7 @@ public class DTProcessor extends Operation {
                 cell = row.getCell(annotationColumnIndex);
                 if (cell != null) {
                     String annotationValue = cell.getStringCellValue();
-                    if (annotationValue != null && !annotationValue.isEmpty() && !annotationValue.equals("")) {
+                    if (annotationValue != null && !annotationValue.isEmpty()) {
                         currentAnnotationValue = annotationValue;
                     }
                 }
@@ -690,7 +684,7 @@ public class DTProcessor extends Operation {
                     writer.write(entry.getValue().toString().getBytes());
                     writer.flush();
                 } catch (IOException e) {
-                    e.printStackTrace();
+
                     throw new IllegalArgumentException("Error writing CQL: " + entry.getKey());
                 }
             }
@@ -728,7 +722,6 @@ public class DTProcessor extends Operation {
                                     .getBytes());
             writer.flush();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException(
                     "Error writing resource: " + resource.getIdElement().getIdPart());
         }
@@ -762,7 +755,6 @@ public class DTProcessor extends Operation {
             writer.write(buildPlanDefinitionIndex().getBytes());
             writer.flush();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Error writing plandefinition index");
         }
     }

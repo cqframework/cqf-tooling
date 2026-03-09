@@ -7,7 +7,8 @@ content from spreadsheet-based authoring formats into FHIR resources.
 
 This operation processes a WHO SMART Guidelines Accelerator Kit spreadsheet and generates the corresponding
 FHIR resources including PlanDefinitions, ActivityDefinitions, Questionnaires, StructureDefinitions, and
-associated CQL libraries.
+associated CQL libraries. The spreadsheet may contain a CONFIG sheet to register additional scopes, code systems,
+and profile mappings.
 
 ### Arguments:
 - -pathtospreadsheet | -pts (required) - Path to the Accelerator Kit spreadsheet
