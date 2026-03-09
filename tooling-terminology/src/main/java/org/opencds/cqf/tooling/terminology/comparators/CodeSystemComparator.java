@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.compatators;
+package org.opencds.cqf.tooling.terminology.comparators;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
