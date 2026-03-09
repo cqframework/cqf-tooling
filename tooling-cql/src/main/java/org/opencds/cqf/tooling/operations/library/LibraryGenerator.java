@@ -5,7 +5,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TerserUtil;
 import java.io.File;
 import java.io.IOException;
-import org.apache.commons.codec.binary.Base64;
+import java.util.Base64;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
@@ -160,19 +160,19 @@ public class LibraryGenerator implements ExecutableOperation {
         // content
         IBase cqlAttachment = TerserUtil.newElement(fhirContext, "Attachment");
         terser.setElement(cqlAttachment, "contentType", "text/cql");
-        terser.setElement(cqlAttachment, "data", Base64.encodeBase64String(cql.getBytes()));
+        terser.setElement(cqlAttachment, "data", Base64.getEncoder().encodeToString(cql.getBytes()));
         IBase elmXmlAttachment = TerserUtil.newElement(fhirContext, "Attachment");
         terser.setElement(elmXmlAttachment, "contentType", "application/elm+xml");
         terser.setElement(
                 elmXmlAttachment,
                 "data",
-                Base64.encodeBase64String(cqlTranslator.toXml().getBytes()));
+                Base64.getEncoder().encodeToString(cqlTranslator.toXml().getBytes()));
         IBase elmJsonAttachment = TerserUtil.newElement(fhirContext, "Attachment");
         terser.setElement(elmJsonAttachment, "contentType", "application/elm+json");
         terser.setElement(
                 elmJsonAttachment,
                 "data",
-                Base64.encodeBase64String(cqlTranslator.toJson().getBytes()));
+                Base64.getEncoder().encodeToString(cqlTranslator.toJson().getBytes()));
         TerserUtil.setField(fhirContext, "content", library, cqlAttachment, elmXmlAttachment, elmJsonAttachment);
 
         return library;
