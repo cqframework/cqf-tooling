@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.cli.command;
 
 import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
 import org.opencds.cqf.tooling.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
 import picocli.CommandLine.Command;
@@ -40,7 +39,7 @@ public class UtilityCommand implements Runnable {
 
         @Override
         protected Operation createOperation() {
-            return new DataDateRollerOperation();
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.dateroller.RollTestDates());
         }
     }
 

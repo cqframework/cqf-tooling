@@ -16,7 +16,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
+import org.opencds.cqf.tooling.operations.dateroller.RollTestDates;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceDiscovery;
 import org.testng.Assert;
@@ -43,33 +45,29 @@ public class DateRollerTest {
 
     @Test
     public void testRollDirectory() {
-        // this is expecting just files in this directory, although the DateRoller can handle nested directories
-        try {
-            File file = new File(testFilePathRoot);
-            if (file.isDirectory()) {
-                for (File nextFile : file.listFiles()) {
-                    String filePath = nextFile.getAbsolutePath();
-                    testRollSingleFile(filePath);
+        File dir = new File(testFilePathRoot);
+        // Capture original file contents for comparison
+        java.util.Map<String, String> originalContents = new java.util.HashMap<>();
+        if (dir.isDirectory()) {
+            for (File nextFile : dir.listFiles()) {
+                originalContents.put(nextFile.getAbsolutePath(), IOUtils.getFileContent(nextFile));
+            }
+        }
+
+        // Roll all dates using the new operation on the directory
+        String[] args = {"-RollTestsDataDates", "-ptreq=" + testFilePathRoot, "-v=r4"};
+        Operation op = new ExecutableOperationAdapter(new RollTestDates());
+        op.execute(args);
+
+        // Verify each file was updated
+        if (dir.isDirectory()) {
+            for (File nextFile : dir.listFiles()) {
+                String fileToCheck = IOUtils.getFileContent(nextFile);
+                if (null != fileToCheck) {
+                    checkFileResults(fileToCheck);
+                    compareItem1Size(originalContents.get(nextFile.getAbsolutePath()), fileToCheck);
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void testRollSingleFile(String filePath) {
-        try {
-            String[] args = {"-RollTestsDataDates", "-v=r4", "-ip=" + filePath};
-            String fileContentOriginal = IOUtils.getFileContent(new File(filePath));
-            new DataDateRollerOperation().execute(args);
-            File fileRolled = new File(filePath);
-            String fileToCheck = IOUtils.getFileContent(fileRolled);
-            if (null != fileToCheck) {
-                checkFileResults(fileToCheck);
-                compareItem1Size(fileContentOriginal, fileToCheck);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 

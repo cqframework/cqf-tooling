@@ -2,13 +2,10 @@ package org.opencds.cqf.tooling.operations.dateroller;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.TerserUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -173,26 +170,34 @@ public class RollTestDates implements ExecutableOperation {
             JsonObject prefetchResources = request.getAsJsonObject("prefetch");
             JsonObject updatedPrefetch = new JsonObject();
             for (Map.Entry<String, JsonElement> prefetchElement : prefetchResources.entrySet()) {
-                if (prefetchElement.getValue().isJsonNull()) {
+                if (prefetchElement.getValue().isJsonNull()
+                        || !prefetchElement.getValue().isJsonObject()) {
                     updatedPrefetch.add(prefetchElement.getKey(), prefetchElement.getValue());
                     continue;
                 }
+                JsonObject prefetchObj = prefetchElement.getValue().getAsJsonObject();
+                // Handle batch-response format: {response: {...}, resource: {...}}
+                boolean isBatchResponse = prefetchObj.has("resource") && prefetchObj.has("response");
+                JsonObject resourceJson = isBatchResponse
+                        ? prefetchObj.getAsJsonObject("resource")
+                        : prefetchObj;
                 IBaseResource resource = fhirContext
                         .newJsonParser()
-                        .parseResource(prefetchElement.getValue().toString());
+                        .parseResource(resourceJson.toString());
                 if (resource instanceof IBaseBundle) {
-                    updatedPrefetch.add(
-                            prefetchElement.getKey(),
-                            gson.fromJson(
-                                    fhirContext.newJsonParser().encodeResourceToString(updateBundleDates((IBaseBundle)
-                                            resource)),
-                                    JsonObject.class));
+                    resource = updateBundleDates((IBaseBundle) resource);
                 } else {
                     getAllDateElements(fhirContext, resource, getDateClasses(fhirContext));
-                    updatedPrefetch.add(
-                            prefetchElement.getKey(),
-                            gson.fromJson(
-                                    fhirContext.newJsonParser().encodeResourceToString(resource), JsonObject.class));
+                }
+                JsonObject updatedResourceJson = gson.fromJson(
+                        fhirContext.newJsonParser().encodeResourceToString(resource), JsonObject.class);
+                if (isBatchResponse) {
+                    JsonObject wrapper = new JsonObject();
+                    wrapper.add("response", prefetchObj.getAsJsonObject("response"));
+                    wrapper.add("resource", updatedResourceJson);
+                    updatedPrefetch.add(prefetchElement.getKey(), wrapper);
+                } else {
+                    updatedPrefetch.add(prefetchElement.getKey(), updatedResourceJson);
                 }
             }
             request.add("prefetch", updatedPrefetch);
@@ -204,6 +209,7 @@ public class RollTestDates implements ExecutableOperation {
             FhirContext fhirContext, IBaseResource resource, List<Class<? extends IBase>> classes) {
         FhirTerser terser = new FhirTerser(fhirContext);
         if (ExtensionUtil.hasExtension(resource, DATEROLLER_EXT_URL) && doUpdate(resource)) {
+            int daysToAdd = getDaysBetweenDates(getLastUpdatedDate(resource), LocalDate.now());
             terser.visit(resource, (theResource, theElement, thePathToElement, theChildDefinition, theDefinition) -> {
                 // TODO - handle timing elements
                 if (theElement.fhirType().equalsIgnoreCase("timing")) {
@@ -211,23 +217,10 @@ public class RollTestDates implements ExecutableOperation {
                 }
                 for (Class<? extends IBase> clazz : classes) {
                     if (clazz.isAssignableFrom(theElement.getClass())) {
-                        // skip extensions and children of composite Date elements (Period)
-                        if (thePathToElement.contains("extension")
-                                || (theChildDefinition instanceof RuntimeChildPrimitiveDatatypeDefinition
-                                        && ((RuntimeChildPrimitiveDatatypeDefinition) theChildDefinition)
-                                                .getField()
-                                                .getDeclaringClass()
-                                                .getSimpleName()
-                                                .equalsIgnoreCase("period"))) {
+                        // skip extensions
+                        if (thePathToElement.contains("extension")) {
                             continue;
                         }
-                        // Resolve choice type path names by type
-                        if (theChildDefinition instanceof RuntimeChildChoiceDefinition) {
-                            String s = theChildDefinition.getChildNameByDatatype(clazz);
-                            thePathToElement.remove(thePathToElement.size() - 1);
-                            thePathToElement.add(s);
-                        }
-                        int daysToAdd = getDaysBetweenDates(getLastUpdatedDate(resource), LocalDate.now());
                         if (theElement instanceof org.hl7.fhir.dstu3.model.BaseDateTimeType) {
                             TimeZone timeZone = ((org.hl7.fhir.dstu3.model.BaseDateTimeType) theElement).getTimeZone();
                             ((org.hl7.fhir.dstu3.model.BaseDateTimeType) theElement)
@@ -249,59 +242,14 @@ public class RollTestDates implements ExecutableOperation {
                                             ((org.hl7.fhir.r5.model.BaseDateTimeType) theElement).getValue(),
                                             daysToAdd))
                                     .setTimeZone(timeZone);
-                        } else if (theElement instanceof org.hl7.fhir.dstu3.model.Period) {
-                            org.hl7.fhir.dstu3.model.BaseDateTimeType start = terser.getSingleValueOrNull(
-                                    theElement, "start", org.hl7.fhir.dstu3.model.BaseDateTimeType.class);
-                            org.hl7.fhir.dstu3.model.BaseDateTimeType end = terser.getSingleValueOrNull(
-                                    theElement, "end", org.hl7.fhir.dstu3.model.BaseDateTimeType.class);
-                            ((org.hl7.fhir.dstu3.model.Period) theElement)
-                                    .setEnd(end.setValue(DateUtils.addDays(end.getValue(), daysToAdd))
-                                            .setTimeZone(end.getTimeZone())
-                                            .getValue());
-                            ((org.hl7.fhir.dstu3.model.Period) theElement)
-                                    .setStart(start.setValue(DateUtils.addDays(start.getValue(), daysToAdd))
-                                            .setTimeZone(start.getTimeZone())
-                                            .getValue());
-                        } else if (theElement instanceof org.hl7.fhir.r4.model.Period) {
-                            org.hl7.fhir.r4.model.BaseDateTimeType start = terser.getSingleValueOrNull(
-                                    theElement, "start", org.hl7.fhir.r4.model.BaseDateTimeType.class);
-                            org.hl7.fhir.r4.model.BaseDateTimeType end = terser.getSingleValueOrNull(
-                                    theElement, "end", org.hl7.fhir.r4.model.BaseDateTimeType.class);
-                            ((org.hl7.fhir.r4.model.Period) theElement)
-                                    .setEnd(end.setValue(DateUtils.addDays(end.getValue(), daysToAdd))
-                                            .setTimeZone(end.getTimeZone())
-                                            .getValue());
-                            ((org.hl7.fhir.r4.model.Period) theElement)
-                                    .setStart(start.setValue(DateUtils.addDays(start.getValue(), daysToAdd))
-                                            .setTimeZone(start.getTimeZone())
-                                            .getValue());
-                        } else if (theElement instanceof org.hl7.fhir.r5.model.Period) {
-                            org.hl7.fhir.r5.model.BaseDateTimeType start = terser.getSingleValueOrNull(
-                                    theElement, "start", org.hl7.fhir.r5.model.BaseDateTimeType.class);
-                            org.hl7.fhir.r5.model.BaseDateTimeType end = terser.getSingleValueOrNull(
-                                    theElement, "end", org.hl7.fhir.r5.model.BaseDateTimeType.class);
-                            ((org.hl7.fhir.r5.model.Period) theElement)
-                                    .setEnd(end.setValue(DateUtils.addDays(end.getValue(), daysToAdd))
-                                            .setTimeZone(end.getTimeZone())
-                                            .getValue());
-                            ((org.hl7.fhir.r5.model.Period) theElement)
-                                    .setStart(start.setValue(DateUtils.addDays(start.getValue(), daysToAdd))
-                                            .setTimeZone(start.getTimeZone())
-                                            .getValue());
                         } else {
-                            throw new IllegalArgumentException(
-                                    "Expected type: date | datetime | timing | instant | period, found: "
-                                            + theElement.fhirType());
+                            continue;
                         }
-                        TerserUtil.setFieldByFhirPath(
-                                terser,
-                                resolveFhirPath(theResource.fhirType(), thePathToElement),
-                                resource,
-                                theElement);
-                        updateDateRollerExtension(fhirContext, resource);
+                        break;
                     }
                 }
             });
+            updateDateRollerExtension(fhirContext, resource);
             return true;
         }
         return false;
@@ -395,38 +343,27 @@ public class RollTestDates implements ExecutableOperation {
                     org.hl7.fhir.dstu3.model.DateTimeType.class,
                     org.hl7.fhir.dstu3.model.DateType.class,
                     org.hl7.fhir.dstu3.model.InstantType.class,
-                    org.hl7.fhir.dstu3.model.Timing.class,
-                    org.hl7.fhir.dstu3.model.Period.class);
+                    org.hl7.fhir.dstu3.model.Timing.class);
         } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
             Collections.addAll(
                     classes,
                     org.hl7.fhir.r4.model.DateTimeType.class,
                     org.hl7.fhir.r4.model.DateType.class,
                     org.hl7.fhir.r4.model.InstantType.class,
-                    org.hl7.fhir.r4.model.Timing.class,
-                    org.hl7.fhir.r4.model.Period.class);
+                    org.hl7.fhir.r4.model.Timing.class);
         } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
             Collections.addAll(
                     classes,
                     org.hl7.fhir.r5.model.DateTimeType.class,
                     org.hl7.fhir.r5.model.DateType.class,
                     org.hl7.fhir.r5.model.InstantType.class,
-                    org.hl7.fhir.r5.model.Timing.class,
-                    org.hl7.fhir.r5.model.Period.class);
+                    org.hl7.fhir.r5.model.Timing.class);
         } else {
             throw new UnsupportedOperationException("FHIR version "
                     + fhirContext.getVersion().getVersion().getFhirVersionString()
                     + " is not supported for this operation.");
         }
         return classes;
-    }
-
-    private String resolveFhirPath(String resourceType, List<String> paths) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(resourceType).append(".");
-        paths.forEach(path -> builder.append(path).append("."));
-        builder.deleteCharAt(builder.length() - 1);
-        return builder.toString();
     }
 
     public String getPathToResources() {
