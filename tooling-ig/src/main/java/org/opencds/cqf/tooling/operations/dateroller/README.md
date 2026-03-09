@@ -1,30 +1,30 @@
-# RollTestDataDates
+# RollTestDates Operation
 
-This operation takes a file or a directory and updates the date elements in FHIR resources and CDS Hooks requests. 
+This operation takes a file or a directory and updates the date elements in FHIR resources and CDS Hooks requests.
 It then overwrites the original files with the updated ones.
 
-If a resource in a xml or json file has the following extension
+If a resource in an xml or json file has the following extension
 
-    http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller 
+    http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller
 
-and if the current date is greater than the valueDuration set in that extension (i.e. 30 days) that resource will have 
-its date, period, dateTimeType, etc. fields changed according to the relation of the date in that field to the 
-dateLastUpdated value in the extension. This also applies to cds hook request test data. If the extension is not 
-present, that resource is skipped. If the current date is not more than the duration from the lastUpdated date, that 
+and if the current date is greater than the valueDuration set in that extension (i.e. 30 days) that resource will have
+its date, period, dateTimeType, etc. fields changed according to the relation of the date in that field to the
+dateLastUpdated value in the extension. This also applies to CDS Hooks request test data. If the extension is not
+present, that resource is skipped. If the current date is not more than the duration from the lastUpdated date, that
 resource is skipped.
 
 It may be done based on a file name or a directory.
-An example command line would be:
 
-    JAVA -jar tooling-cli-2.1.0-SNAPSHOT.jar -RollTestsDataDates -v=r4 -ip="$USER_HOME$/sandbox/rollDate/files/"
+### Example:
+
+    java -jar tooling-cli-3.0.0-SNAPSHOT.jar -RollTestsDataDates -v=r4 -ptres="$USER_HOME$/sandbox/rollDate/files/"
 
 OR
 
-    JAVA -jar tooling-cli-2.1.0-SNAPSHOT.jar -RollTestsDataDates -v=r4 -ip="$USER_HOME$/sandbox/rollDate/files/bundle-example-rec-02-true-make-recommendations.json"
+    java -jar tooling-cli-3.0.0-SNAPSHOT.jar -RollTestsDataDates -v=r4 -ptreq="$USER_HOME$/sandbox/rollDate/requests/"
 
+### Sample extension:
 
-Sample extension:
-    
     "extension": [
         {
             "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller",
@@ -47,9 +47,9 @@ Sample extension:
     ],
 
 ### Arguments:
-- -pathtoresources (required if -ptreq not present) | -ptres - Path to the directory containing the resource files to 
+- -pathtoresources | -ptres (required if -ptreq not present) - Path to the directory containing the resource files to
 be updated
-- -pathtorequests (required if -ptres not present) | -ptreq - Path to the directory containing the CDS Hooks request 
+- -pathtorequests | -ptreq (required if -ptres not present) - Path to the directory containing the CDS Hooks request
 files to be updated
 - -version | -v (optional) - FHIR version { stu3, r4, r5 }
     - Default version: r4
