@@ -38,6 +38,7 @@ public class MeasureRefreshProcessor {
         clearRelatedArtifacts(measureToUse);
 
     	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, compiledLibrary, options);
+        removeModelInfoDependencies(moduleDefinitionLibrary);
         measureToUse.setDate(new Date());
         // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
         setMeta(measureToUse, moduleDefinitionLibrary);
@@ -49,6 +50,24 @@ public class MeasureRefreshProcessor {
         }
 
         return measureToUse;
+    }
+
+    private void removeModelInfoDependencies(Library moduleDefinitionLibrary) {
+        // NOTE: see similar logic in CqlProcessor.translateFile
+        if (moduleDefinitionLibrary.hasRelatedArtifact()) {
+            for (int i = moduleDefinitionLibrary.getRelatedArtifact().size() - 1; i >= 0; i--) {
+                RelatedArtifact relatedArtifact = moduleDefinitionLibrary.getRelatedArtifact().get(i);
+                if (relatedArtifact != null && relatedArtifact.hasResource() && (
+                    relatedArtifact.getResource().startsWith("http://hl7.org/fhir/Library/QICore-ModelInfo")
+                            || relatedArtifact.getResource().startsWith("http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo")
+                            || relatedArtifact.getResource().startsWith("http://hl7.org/fhir/Library/USCore-ModelInfo")
+                )) {
+                    // Do not report dependencies on model info loaded from the translator, or
+                    // from CQF Common (because these should be loaded from Using CQL now)
+                    moduleDefinitionLibrary.getRelatedArtifact().remove(i);
+                }
+            }
+        }
     }
 
     private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary compiledLibrary, CqlCompilerOptions options){

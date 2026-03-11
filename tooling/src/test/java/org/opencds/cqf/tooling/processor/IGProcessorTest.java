@@ -61,6 +61,7 @@ public class IGProcessorTest extends RefreshTest {
 	private final String BUNDLE_TYPE = "Bundle";
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
+	private final String GROUP_TYPE = "Group";
 
 	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
 
@@ -136,10 +137,11 @@ public class IGProcessorTest extends RefreshTest {
 							// ensure "resourceType" exists
 							if (map.containsKey(RESOURCE_TYPE)) {
 								String parentResourceType = (String) map.get(RESOURCE_TYPE);
-								// if Library, resource will produce a "Measure" in main bundled file:
+								// if Library, resource will produce a "Measure" and a "Group" in main bundled file:
 								if (parentResourceType.equalsIgnoreCase(LIB_TYPE)) {
 									resourceTypeMap.put(MEASURE_TYPE + "_" + map.get(ID), MEASURE_TYPE);
 									resourceTypeMap.put(LIB_TYPE + "_" + map.get(ID), LIB_TYPE);
+									resourceTypeMap.put(GROUP_TYPE + "_" + map.get(ID), GROUP_TYPE);
 								} else if (parentResourceType.equalsIgnoreCase(BUNDLE_TYPE)) {
 									// file is a bundle type, loop through resources in entry list, build up map of
 									// <id, resourceType>:

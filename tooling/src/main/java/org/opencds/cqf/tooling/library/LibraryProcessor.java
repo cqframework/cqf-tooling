@@ -236,6 +236,9 @@ public class LibraryProcessor extends BaseProcessor {
             var translatorOptions = getCqlProcessor().getCqlTranslatorOptions();
             var formats = translatorOptions.getFormats();
             CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
+            if (this.parentContext != null && this.parentContext.getCanonicalBase() != null) {
+                attachment.setUrl(this.parentContext.getCanonicalBase() + "/" + fileName);
+            }
             if (info != null) {
                 if (info.getElm() != null && emptyIfNull(formats).contains(Format.XML)) {
                     sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
@@ -379,9 +382,7 @@ public class LibraryProcessor extends BaseProcessor {
                 Attachment att = new Attachment();
                 att.setContentType("text/cql");
                 att.setData(TextFile.fileToBytes(f));
-                if (this.parentContext != null && this.parentContext.getCanonicalBase() != null) {
-                    att.setUrl(this.parentContext.getCanonicalBase() + "/Library-" + f.getName());
-                }
+                att.setUrl(f.getAbsolutePath());
                 return att;
             }
         }

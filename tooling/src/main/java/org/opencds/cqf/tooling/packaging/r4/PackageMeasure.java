@@ -116,7 +116,9 @@ public class PackageMeasure extends Package<Measure> {
                 measureId + "-files");
         IOUtils.initializeDirectory(measureFilesOutputPath);
         IOUtils.writeResource(mainArtifact, measureFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext());
-        IOUtils.writeResource(getPrimaryLibrary(), measureFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext());
+        if (getPrimaryLibrary() != null) {
+            IOUtils.writeResource(getPrimaryLibrary(), measureFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext());
+        }
 
         // TODO: Is this correct? Do we just exclude the dependencies from the bundle?
         if (isIncludeDependencies()) {
@@ -134,16 +136,14 @@ public class PackageMeasure extends Package<Measure> {
                     measureFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext(), valueSetDependencyBundleId);
         }
 
-        var cqlFileOutputPath = IOUtils.concatFilePath(measureFilesOutputPath,
-                ((Library) getPrimaryLibrary()).getIdPart() + ".cql");
-        IOUtils.writeCqlToFile(ResourceUtils.getCqlFromR4Library((Library) getPrimaryLibrary()), cqlFileOutputPath);
+        if (getPrimaryLibrary() != null) {
+            var cqlFileOutputPath = IOUtils.concatFilePath(measureFilesOutputPath,
+                    ((Library) getPrimaryLibrary()).getIdPart() + ".cql");
+            IOUtils.writeCqlToFile(ResourceUtils.getCqlFromR4Library((Library) getPrimaryLibrary()), cqlFileOutputPath);
+        }
 
         if (isIncludeTests() && testPackage != null) {
             logger.info("Packaging {} Tests...", testPackage.getTests().size());
-            if (testPackage.getGroup() != null) {
-                IOUtils.writeResource(testPackage.getGroup(), measureFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext(),
-                        true, "Group-" + testPackage.getGroup().getIdElement().getIdPart());
-            }
             testPackage.getTests().forEach(
                     test -> {
                         dependencies.addAll(BundleUtils.getR4ResourcesFromBundle((Bundle) test));
@@ -151,6 +151,11 @@ public class PackageMeasure extends Package<Measure> {
                                 getFhirContext(), test.getIdElement().getIdPart());
                     }
             );
+            if (testPackage.getGroup() != null) {
+                dependencies.add(testPackage.getGroup());
+                IOUtils.writeResource(testPackage.getGroup(), measureFilesOutputPath, IOUtils.Encoding.JSON, getFhirContext(),
+                        true, "Group-" + testPackage.getGroup().getIdElement().getIdPart());
+            }
         }
 
         dependencies.add(mainArtifact);
