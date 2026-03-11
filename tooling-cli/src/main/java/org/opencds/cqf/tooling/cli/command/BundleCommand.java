@@ -14,6 +14,7 @@ import picocli.CommandLine.Spec;
             BundleCommand.Resources.class,
             BundleCommand.ToResources.class,
             BundleCommand.ToTransaction.class,
+            BundleCommand.Transaction.class,
             BundleCommand.Post.class,
             BundleCommand.Publish.class,
         })
@@ -58,6 +59,19 @@ public class BundleCommand implements Runnable {
         @Override
         protected String getOperationName() {
             return "MakeTransaction";
+        }
+
+        @Override
+        protected Operation createOperation() {
+            return new ExecutableOperationAdapter(new org.opencds.cqf.tooling.operations.bundle.BundleToTransaction());
+        }
+    }
+
+    @Command(name = "transaction", description = "Execute Bundles as transactions on a FHIR server")
+    static class Transaction extends OperationCommand {
+        @Override
+        protected String getOperationName() {
+            return "BundleTransaction";
         }
 
         @Override
