@@ -14,10 +14,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
-import org.opencds.cqf.tooling.casereporting.ersdutils.eRSDGrouperComposeFixer;
 import org.opencds.cqf.tooling.casereporting.tes.TESPackageGenerator;
-import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
-import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
 import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
 import org.opencds.cqf.tooling.exception.OperationNotFound;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
@@ -214,8 +211,6 @@ class OperationFactory {
                 return new ErsdTransformer();
             case "CaseReportingTESGeneratePackage":
                 return new TESPackageGenerator();
-            case "eRSDFixGrouperCompose":
-                return new eRSDGrouperComposeFixer();
             case "RollTestsDataDates":
                 return new DataDateRollerOperation();
             case "ProfilesToSpreadsheet":
