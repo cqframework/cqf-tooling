@@ -113,22 +113,6 @@ public class BundleToTransactionOperation extends Operation {
             }
         }
         else if (context.getVersion().getVersion() == FhirVersionEnum.R4) {
-//            for (IBaseResource resource : theResources) {
-//                if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
-//                    org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle)resource;
-//                    for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-//                        if (entry.getResource() != null) {
-//                            entry.setRequest(
-//                                new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
-//                                    .setUrl(entry.getResource().getId())
-//                                    .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
-//                            );
-//                        }
-//                    }
-//                    bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-//                    output(bundle, context);
-//                }
-//            }
             for (IBaseResource resource : theResources) {
                 if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
                     org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle)resource;
@@ -157,7 +141,6 @@ public class BundleToTransactionOperation extends Operation {
 
                             entry.setRequest(
                                     new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
-//                                    .setUrl(entry.getResource().getId())
                                             .setUrl(entry.getResource().getResourceType() + "/" + entry.getResource().getIdPart())
                                             .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
                             );
