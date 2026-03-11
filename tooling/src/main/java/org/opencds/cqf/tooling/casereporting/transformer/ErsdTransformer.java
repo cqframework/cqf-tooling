@@ -27,6 +27,8 @@ public class ErsdTransformer extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ErsdTransformer.class);
     private static final String PUBLISHER = "Association of Public Health Laboratories (APHL)";
     private static final String RCTCLIBRARYURL = "http://ersd.aimsplatform.org/fhir/Library/rctc";
+    private static final String USPHUSAGECONTEXTTYPESYSTEMURL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
+    private static final String USPHUSAGECONTEXTSYSTEMURL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
     private static final String SPECIFICATIONLIBRARYURL =
             "http://ersd.aimsplatform.org/fhir/Library/ersd-specification";
     private static final String SPECIFICATIONLIBRARYNAME = "ERSDSpecification";
@@ -288,16 +290,16 @@ public class ErsdTransformer extends Operation {
                 "A Library that is the package manifest for the Electronic Reporting and Surveillance Distribution (eRSD) 3rd Edition. It defines the components and dependencies that make up an eRSD specification version including reporting parameters, a Reportable Trigger Codes (RCTC) Library of the trigger code value sets, and the trigger code value sets themselves.");
 
         UsageContext reportingUsageContext = new UsageContext(
-                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "reporting", null),
                 new CodeableConcept(
-                        new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null)));
+                        new Coding(USPHUSAGECONTEXTSYSTEMURL, "triggering", null)));
         specificationLibrary.addUseContext(reportingUsageContext);
 
         UsageContext specificationTypeUsageContext = new UsageContext(
                 new Coding(
-                        "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "specification-type", null),
+                        USPHUSAGECONTEXTTYPESYSTEMURL, "specification-type", null),
                 new CodeableConcept(
-                        new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "program", null)));
+                        new Coding(USPHUSAGECONTEXTSYSTEMURL, "program", null)));
         specificationLibrary.addUseContext(specificationTypeUsageContext);
 
         return specificationLibrary;
@@ -310,7 +312,7 @@ public class ErsdTransformer extends Operation {
         var priorityUsageContext = new UsageContext();
 
         var typeCoding = new Coding();
-        typeCoding.setSystem("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type");
+        typeCoding.setSystem(USPHUSAGECONTEXTTYPESYSTEMURL);
         typeCoding.setCode("priority");
 
         priorityUsageContext.setCode(typeCoding);
@@ -318,7 +320,7 @@ public class ErsdTransformer extends Operation {
         var valueConcept = new CodeableConcept();
         valueConcept
                 .addCoding()
-                .setSystem("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context")
+                .setSystem(USPHUSAGECONTEXTSYSTEMURL)
                 .setCode("routine");
 
         priorityUsageContext.setValue(valueConcept);
@@ -476,16 +478,16 @@ public class ErsdTransformer extends Operation {
         res.setTitle("Reportable Condition Trigger Codes");
 
         UsageContext reportingUsageContext = new UsageContext(
-                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "reporting", null),
                 new CodeableConcept(
-                        new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null)));
+                        new Coding(USPHUSAGECONTEXTSYSTEMURL, "triggering", null)));
         res.addUseContext(reportingUsageContext);
 
         UsageContext specificationTypeUsageContext = new UsageContext(
                 new Coding(
-                        "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "specification-type", null),
+                        USPHUSAGECONTEXTTYPESYSTEMURL, "specification-type", null),
                 new CodeableConcept(new Coding(
-                        "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "value-set-library", null)));
+                        USPHUSAGECONTEXTSYSTEMURL, "value-set-library", null)));
         res.addUseContext(specificationTypeUsageContext);
 
         return null;
@@ -564,9 +566,9 @@ public class ErsdTransformer extends Operation {
         if (!hasPriority) {
 
             UsageContext priorityContext = new UsageContext(
-                    new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "priority", null),
+                    new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "priority", null),
                     new CodeableConcept(
-                            new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "routine", null)));
+                            new Coding(USPHUSAGECONTEXTSYSTEMURL, "routine", null)));
 
             Extension ext = new Extension();
             ext.setUrl(crmiIntendedusageContextExtensionUrl);
@@ -578,9 +580,9 @@ public class ErsdTransformer extends Operation {
         // Ensure reporting exists
         if (!hasReporting) {
             UsageContext reportingContext = new UsageContext(
-                    new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                    new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "reporting", null),
                     new CodeableConcept(new Coding(
-                            "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null)));
+                            USPHUSAGECONTEXTSYSTEMURL, "triggering", null)));
 
             Extension ext = new Extension();
             ext.setUrl(crmiIntendedusageContextExtensionUrl);
