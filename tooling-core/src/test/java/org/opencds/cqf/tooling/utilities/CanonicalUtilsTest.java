@@ -49,6 +49,11 @@ public class CanonicalUtilsTest {
     }
 
     @Test
+    public void getUrl_urnUuidWithVersion_stripsVersion() {
+        assertEquals(CanonicalUtils.getUrl("urn:uuid:12345|1.0"), "urn:uuid:12345");
+    }
+
+    @Test
     public void getUrl_urnOid_returnsWhole() {
         assertEquals(CanonicalUtils.getUrl("urn:oid:1.2.3"), "urn:oid:1.2.3");
     }
@@ -84,6 +89,29 @@ public class CanonicalUtilsTest {
     @Test
     public void getResourceType_measureCanonical_returnsMeasure() {
         assertEquals(CanonicalUtils.getResourceType("http://example.com/fhir/Measure/my-measure|2.0"), "Measure");
+    }
+
+    @Test
+    public void getResourceType_duplicatePathSegment_returnsCorrectType() {
+        // Regression: String.replace() used to replace ALL occurrences of the tail
+        assertEquals(CanonicalUtils.getResourceType("http://example.com/foo/foo"), "foo",
+                "Should return 'foo' not 'example.com' when path segment is repeated");
+    }
+
+    @Test
+    public void getResourceType_idMatchesEarlierSegment_handledCorrectly() {
+        // The ID "fhir" also appears in the base URL
+        assertEquals(CanonicalUtils.getResourceType("http://example.com/fhir/Library/fhir"), "Library");
+    }
+
+    @Test
+    public void getResourceType_singleSlash_returnsBase() {
+        assertEquals(CanonicalUtils.getResourceType("Library/my-lib"), "Library");
+    }
+
+    @Test
+    public void getResourceType_withVersionAndFragment_returnsResourceType() {
+        assertEquals(CanonicalUtils.getResourceType(FULL_CANONICAL_WITH_FRAGMENT), "Library");
     }
 
     @Test
@@ -161,6 +189,11 @@ public class CanonicalUtilsTest {
     }
 
     @Test
+    public void getVersion_semanticVersion_parsedFully() {
+        assertEquals(CanonicalUtils.getVersion("http://example.com/Library/lib|2.1.0-beta"), "2.1.0-beta");
+    }
+
+    @Test
     public void getVersion_canonicalType_works() {
         assertEquals(CanonicalUtils.getVersion(new CanonicalType(FULL_CANONICAL)), "1.0.0");
     }
@@ -226,6 +259,20 @@ public class CanonicalUtilsTest {
         assertEquals(parts.version(), "1.0.0");
     }
 
+    @Test
+    public void getParts_versionWithoutFragment_fragmentNull() {
+        CanonicalUtils.CanonicalParts parts = CanonicalUtils.getParts(FULL_CANONICAL);
+        assertEquals(parts.version(), "1.0.0");
+        assertNull(parts.fragment());
+    }
+
+    @Test
+    public void getParts_fragmentWithoutVersion_versionNull() {
+        CanonicalUtils.CanonicalParts parts = CanonicalUtils.getParts(FRAGMENT_ONLY);
+        assertNull(parts.version());
+        assertEquals(parts.fragment(), "cql");
+    }
+
     // ---- getHead ----
 
     @Test
@@ -249,6 +296,11 @@ public class CanonicalUtilsTest {
                 CanonicalUtils.getHead("http://example.com/fhir/Library/lib-id"), "http://example.com/fhir/Library");
     }
 
+    @Test
+    public void getHead_trailingSlash_stripsTrailingSlash() {
+        assertEquals(CanonicalUtils.getHead("http://example.com/fhir/"), "http://example.com/fhir");
+    }
+
     // ---- getTail ----
 
     @Test
@@ -264,6 +316,16 @@ public class CanonicalUtilsTest {
     @Test
     public void getTail_fullUrl_returnsLastSegment() {
         assertEquals(CanonicalUtils.getTail("http://example.com/fhir/Library/lib-id"), "lib-id");
+    }
+
+    @Test
+    public void getTail_trailingSlash_returnsEmpty() {
+        assertEquals(CanonicalUtils.getTail("http://example.com/fhir/"), "");
+    }
+
+    @Test
+    public void getTail_slashAtStart_returnsEmpty() {
+        assertEquals(CanonicalUtils.getTail("/"), "");
     }
 
     // ---- getId (legacy) ----
@@ -286,6 +348,28 @@ public class CanonicalUtilsTest {
     @Test
     public void getId_withVersion_stripsVersion() {
         assertEquals(CanonicalUtils.getId(FULL_CANONICAL), "my-lib");
+    }
+
+    @Test
+    public void getId_withFragment_stripsFragment() {
+        // Regression: getId used to only strip | but not #
+        assertEquals(CanonicalUtils.getId("http://example.com/Library/my-lib#cql"), "my-lib",
+                "getId should strip fragment, not return 'my-lib#cql'");
+    }
+
+    @Test
+    public void getId_withVersionAndFragment_stripsBoth() {
+        assertEquals(CanonicalUtils.getId(FULL_CANONICAL_WITH_FRAGMENT), "my-lib");
+    }
+
+    @Test
+    public void getId_bareIdWithVersion_stripsVersion() {
+        assertEquals(CanonicalUtils.getId("my-lib|1.0"), "my-lib");
+    }
+
+    @Test
+    public void getId_bareIdWithFragment_stripsFragment() {
+        assertEquals(CanonicalUtils.getId("my-lib#cql"), "my-lib");
     }
 
     @Test
@@ -345,6 +429,12 @@ public class CanonicalUtilsTest {
         CanonicalUtils.toVersionedIdentifier("http://example.com/fhir/Measure/my-measure");
     }
 
+    @Test(expectedExceptions = InvalidCanonical.class)
+    public void toVersionedIdentifier_minimalLibraryUrl_throwsWithoutBase() {
+        // "Library/my-lib" has no base URL, so getTail(getHead()) can't find "Library"
+        CanonicalUtils.toVersionedIdentifier("Library/my-lib|1.0");
+    }
+
     // ---- toVersionedIdentifierAnyResource ----
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -367,5 +457,21 @@ public class CanonicalUtilsTest {
         assertEquals(vi.getId(), "my-lib");
         assertNull(vi.getVersion());
         assertNull(vi.getSystem());
+    }
+
+    @Test
+    public void toVersionedIdentifierAnyResource_withFragment_idExcludesFragment() {
+        VersionedIdentifier vi =
+                CanonicalUtils.toVersionedIdentifierAnyResource("http://example.com/fhir/Library/my-lib#cql");
+        assertEquals(vi.getId(), "my-lib",
+                "Fragment should not be included in the ID");
+    }
+
+    @Test
+    public void toVersionedIdentifierAnyResource_trailingPipe_versionIsNull() {
+        VersionedIdentifier vi =
+                CanonicalUtils.toVersionedIdentifierAnyResource("http://example.com/fhir/Library/my-lib|");
+        assertEquals(vi.getId(), "my-lib");
+        assertNull(vi.getVersion(), "Empty version string should be normalized to null");
     }
 }

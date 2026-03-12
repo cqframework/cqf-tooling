@@ -17,7 +17,7 @@ public class OperationUtils {
     public static Class<?> getParamType(ExecutableOperation operation, String methodName) {
         for (Method m : operation.getClass().getDeclaredMethods()) {
             if (m.getName().equals(methodName)) {
-                if (m.getParameterCount() > 1) {
+                if (m.getParameterCount() != 1) {
                     continue;
                 }
                 return m.getParameterTypes()[0];

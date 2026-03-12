@@ -134,7 +134,7 @@ public class ExecutableOperationAdapterTest {
 
         adapter.execute(new String[] {"-ip=/input"});
 
-        assertEquals(op.getEncoding(), "json"); // default
+        assertEquals(op.getEncoding(), "json", "Default value should be applied");
     }
 
     // Required parameter validation
@@ -156,8 +156,8 @@ public class ExecutableOperationAdapterTest {
 
         adapter.execute(new String[] {"-ip=/input"});
 
-        assertNull(op.getCount());
-        assertNull(op.getVerbose());
+        assertNull(op.getCount(), "Unset optional Integer should remain null");
+        assertNull(op.getVerbose(), "Unset optional Boolean should remain null");
     }
 
     // Double-dash arguments
@@ -208,8 +208,8 @@ public class ExecutableOperationAdapterTest {
 
         adapter.execute(new String[] {"-h"});
 
-        assertNull(op.getInputPath());
-        assertTrue(!op.isExecuted());
+        assertNull(op.getInputPath(), "Params should not be bound when help is requested");
+        assertTrue(!op.isExecuted(), "Delegate should not execute when help is requested");
     }
 
     @Test
@@ -220,6 +220,16 @@ public class ExecutableOperationAdapterTest {
         adapter.execute(new String[] {"-?"});
 
         assertTrue(!op.isExecuted());
+    }
+
+    @Test
+    public void execute_helpArgAmongOtherArgs_doesNotExecute() {
+        TestOperation op = new TestOperation();
+        ExecutableOperationAdapter adapter = new ExecutableOperationAdapter(op);
+
+        adapter.execute(new String[] {"-ip=/input", "-help"});
+
+        assertTrue(!op.isExecuted(), "Help flag should short-circuit even with other args present");
     }
 
     // No-param operation
@@ -245,5 +255,40 @@ public class ExecutableOperationAdapterTest {
 
         assertEquals(op.getInputPath(), "/input");
         assertTrue(op.isExecuted());
+    }
+
+    // Value with equals sign in it
+
+    @Test
+    public void execute_valueContainingEquals_preservedFully() {
+        TestOperation op = new TestOperation();
+        ExecutableOperationAdapter adapter = new ExecutableOperationAdapter(op);
+
+        adapter.execute(new String[] {"-ip=/path/with=equals"});
+
+        assertEquals(op.getInputPath(), "/path/with=equals",
+                "Value containing '=' should be preserved fully");
+    }
+
+    // Value with spaces
+
+    @Test
+    public void execute_valueWithSpaces_preservedFully() {
+        TestOperation op = new TestOperation();
+        ExecutableOperationAdapter adapter = new ExecutableOperationAdapter(op);
+
+        adapter.execute(new String[] {"-ip=/path/with spaces/in it"});
+
+        assertEquals(op.getInputPath(), "/path/with spaces/in it");
+    }
+
+    // Empty args array
+
+    @Test
+    public void execute_emptyArgs_requiredParamThrows() {
+        TestOperation op = new TestOperation();
+        ExecutableOperationAdapter adapter = new ExecutableOperationAdapter(op);
+
+        assertThrows(InvalidOperationArgs.class, () -> adapter.execute(new String[] {}));
     }
 }

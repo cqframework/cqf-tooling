@@ -51,7 +51,8 @@ public class CanonicalUtils {
         if (!canonical.contains("/")) {
             return null;
         }
-        String withoutTail = canonical.replace(canonical.substring(canonical.lastIndexOf("/")), "");
+        int lastSlash = canonical.lastIndexOf("/");
+        String withoutTail = canonical.substring(0, lastSlash);
         return withoutTail.contains("/") ? withoutTail.substring(withoutTail.lastIndexOf("/") + 1) : withoutTail;
     }
 
@@ -192,7 +193,7 @@ public class CanonicalUtils {
     public static String getId(String url) {
         Objects.requireNonNull(url);
         String temp = url.contains("/") ? url.substring(url.lastIndexOf("/") + 1) : url;
-        return temp.split("\\|")[0];
+        return temp.split("[|#]")[0];
     }
 
     public static <T extends IPrimitiveType<String>> String getId(T canonicalType) {
@@ -264,14 +265,14 @@ public class CanonicalUtils {
         int lastIndexOfBar = canonical.lastIndexOf("|");
         int lastIndexOfHash = canonical.lastIndexOf("#");
 
-        int lastIndex = canonical.length();
-        int mul = lastIndexOfBar * lastIndexOfHash;
-        if (mul > 1) {
-            lastIndex = Math.min(lastIndexOfBar, lastIndexOfHash);
-        } else if (mul < 0) {
-            lastIndex = Math.max(lastIndexOfBar, lastIndexOfHash);
+        if (lastIndexOfBar >= 0 && lastIndexOfHash >= 0) {
+            return Math.min(lastIndexOfBar, lastIndexOfHash);
+        } else if (lastIndexOfBar >= 0) {
+            return lastIndexOfBar;
+        } else if (lastIndexOfHash >= 0) {
+            return lastIndexOfHash;
         }
-        return lastIndex;
+        return canonical.length();
     }
 
     private static void requireValue(IPrimitiveType<String> canonicalType, String operation) {
