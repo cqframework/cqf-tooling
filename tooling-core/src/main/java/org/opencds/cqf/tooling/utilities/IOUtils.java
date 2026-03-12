@@ -74,7 +74,7 @@ public class IOUtils {
         IParser parser = getParser(encoding, fhirContext);
         return parser.setPrettyPrint(prettyPrintOutput)
                 .encodeResourceToString(resource)
-                .getBytes();
+                .getBytes(StandardCharsets.UTF_8);
     }
 
     public static String getFileContent(File file) {
@@ -246,7 +246,7 @@ public class IOUtils {
 
         if (outputPath == null || outputPath.isEmpty()) {
             LogUtils.putException(
-                    "IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+                    "IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: outputPath missing!"));
             return;
         }
 
@@ -317,12 +317,12 @@ public class IOUtils {
             IParser parser = getParser(encoding, fhirContext);
             File file = new File(path);
 
-            if (file.exists() && file.isDirectory()) {
-                throw new IllegalArgumentException(String.format("Cannot read a resource from a directory: %s", path));
+            if (Boolean.TRUE.equals(safeRead) && (!file.exists() || file.isDirectory())) {
+                return null;
             }
 
-            if (Boolean.TRUE.equals(safeRead) && !file.exists()) {
-                return null;
+            if (file.isDirectory()) {
+                throw new IllegalArgumentException(String.format("Cannot read a resource from a directory: %s", path));
             }
             try (FileReader reader = new FileReader(file)) {
                 resource = parser.parseResource(reader);
@@ -393,7 +393,7 @@ public class IOUtils {
         var fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[] {"xml", "json"}, recursive);
         while (fileIterator.hasNext()) {
             var resource = readResource(fileIterator.next().getAbsolutePath(), fhirContext, true);
-            if (resource != null && resource.getClass().isAssignableFrom(clazz)) {
+            if (resource != null && clazz.isAssignableFrom(resource.getClass())) {
                 resources.add(resource);
             }
         }
