@@ -27,11 +27,22 @@ public class ErsdTransformer extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ErsdTransformer.class);
     private static final String PUBLISHER = "Association of Public Health Laboratories (APHL)";
     private static final String RCTCLIBRARYURL = "http://ersd.aimsplatform.org/fhir/Library/rctc";
+    private static final String USPHUSAGECONTEXTTYPESYSTEMURL =
+            "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
+    private static final String USPHUSAGECONTEXTSYSTEMURL =
+            "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
     private static final String SPECIFICATIONLIBRARYURL =
-            "http://ersd.aimsplatform.org/fhir/Library/ERSDSpecificationLibrary";
+            "http://ersd.aimsplatform.org/fhir/Library/ersd-specification";
+    private static final String SPECIFICATIONLIBRARYNAME = "ERSDSpecification";
+    private static final String SPECIFICATIONLIBRARYTITLE = "eRSD Specification";
+
     private FhirContext ctx;
     private FhirValidator validator;
     private IValidatorModule module = new UsPublicHealthValidatorModule();
+    private final String artifactIsOwnedExtensionUrl =
+            "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
+    private final String crmiManifestLibraryProfileUrl =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-manifestlibrary";
     private final String usPhPlanDefinitionProfileUrl =
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-plandefinition";
     private final String usPhSpecificationLibraryProfileUrl =
@@ -40,12 +51,17 @@ public class ErsdTransformer extends Operation {
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl =
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
-    private final String valueSetStewardExtensionUrl = "http://hl7.org/fhir/StructureDefinition/valueset-steward";
+    private final String valueSetStewardExtensionUrl =
+            "http://hl7.org/fhir/StructureDefinition/valueset-steward";
     private final String artifactReleaseLabelExtensionUrl =
             "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
     private final String eCR1eRSDValueSetLibraryProfileUrl =
             "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-valueset-library";
-    private final String eCR1eRSDValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-valueset";
+    private final String eCR1eRSDValueSetProfileUrl =
+            "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-valueset";
+    private final String crmiIntendedusageContextExtensionUrl =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
+
     private PlanDefinition v2PlanDefinition;
     private String version;
     private Period effectivePeriod;
@@ -55,8 +71,6 @@ public class ErsdTransformer extends Operation {
     public ErsdTransformer() {
         ctx = FhirContext.forR4();
         validator = ctx.newValidator();
-        // validator.setValidateAgainstStandardSchema(true);
-        // validator.setValidateAgainstStandardSchematron(true);
         validator.registerValidatorModule(module);
     }
 
@@ -160,6 +174,7 @@ public class ErsdTransformer extends Operation {
 
         Library specificationLibrary = createSpecificationLibrary();
         resolveRelatedArtifacts(sourceBundle, specificationLibrary);
+        addComponentReferences(specificationLibrary);
         Bundle specificationBundle = resolveSpecificationBundle(sourceBundle, specificationLibrary);
 
         if (params.outputFileEncodings == null) {
@@ -225,23 +240,6 @@ public class ErsdTransformer extends Operation {
             return null;
         }
 
-        //        // The structure of the eRSD bundle is a bundle with a single entry - the bundle that contains the
-        // artifacts.
-        //        // We need to ensure that the bundle is structured as expected and then extract that inner bundle to
-        // work with.
-        //        // Rather than requiring the user to trim off that outer bundle as a manual step, we'll just do that
-        // here.
-        //        Bundle sourceArtifactBundle;
-        //        if (sourceBundle.getEntry().size() == 1
-        //                && sourceBundle.getEntry().get(0).hasResource()
-        //                && sourceBundle.getEntry().get(0).getResource().fhirType().equals("Bundle")
-        //            ) {
-        //            sourceArtifactBundle = (Bundle)sourceBundle.getEntry().get(0).getResource();
-        //        } else {
-        //            throw new IllegalArgumentException("The bundle provided is not structured as expected. Expectation
-        // is a Bundle with a single entry - another bundle that contains the artifacts.");
-        //        }
-
         Library rctc = (Library) sourceBundle.getEntry().stream()
                 .filter(x -> x.hasResource()
                         && x.getResource().fhirType().equals("Library")
@@ -269,8 +267,9 @@ public class ErsdTransformer extends Operation {
 
     private Library createSpecificationLibrary() {
         Library specificationLibrary = new Library();
-        specificationLibrary.setId(new IdType("Library", "ersd-specification-library"));
+        specificationLibrary.setId(new IdType("Library", "ersd-specification"));
         specificationLibrary.getMeta().addProfile(usPhSpecificationLibraryProfileUrl);
+        specificationLibrary.getMeta().addProfile(crmiManifestLibraryProfileUrl);
 
         Extension releaseLabelExtension = new Extension();
         releaseLabelExtension.setUrl(artifactReleaseLabelExtensionUrl);
@@ -282,8 +281,8 @@ public class ErsdTransformer extends Operation {
         }
         specificationLibrary.setUrl(SPECIFICATIONLIBRARYURL);
         specificationLibrary.setVersion(this.version);
-        specificationLibrary.setName("ERSDSpecificationLibrary");
-        specificationLibrary.setTitle("eRSD Specification Library");
+        specificationLibrary.setName(SPECIFICATIONLIBRARYNAME);
+        specificationLibrary.setTitle(SPECIFICATIONLIBRARYTITLE);
         specificationLibrary.setStatus(PublicationStatus.ACTIVE);
         specificationLibrary.setExperimental(false);
         specificationLibrary.setType(new CodeableConcept(
@@ -294,19 +293,105 @@ public class ErsdTransformer extends Operation {
                 "A Library that is the package manifest for the Electronic Reporting and Surveillance Distribution (eRSD) 3rd Edition. It defines the components and dependencies that make up an eRSD specification version including reporting parameters, a Reportable Trigger Codes (RCTC) Library of the trigger code value sets, and the trigger code value sets themselves.");
 
         UsageContext reportingUsageContext = new UsageContext(
-                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "reporting", null),
                 new CodeableConcept(
-                        new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null)));
+                        new Coding(USPHUSAGECONTEXTSYSTEMURL, "triggering", null)));
         specificationLibrary.addUseContext(reportingUsageContext);
 
         UsageContext specificationTypeUsageContext = new UsageContext(
-                new Coding(
-                        "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "specification-type", null),
+                new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "specification-type", null),
                 new CodeableConcept(
-                        new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "program", null)));
+                        new Coding(USPHUSAGECONTEXTSYSTEMURL, "program", null)));
         specificationLibrary.addUseContext(specificationTypeUsageContext);
 
         return specificationLibrary;
+    }
+
+    private void addComponentReferences(Library specificationLibrary) {
+        var componentRelatedArtifacts = new ArrayList<RelatedArtifact>();
+        var artifactIsOwnedExtension = new Extension(artifactIsOwnedExtensionUrl, new BooleanType(true));
+
+        var priorityUsageContext = new UsageContext();
+
+        var typeCoding = new Coding();
+        typeCoding.setSystem(USPHUSAGECONTEXTTYPESYSTEMURL);
+        typeCoding.setCode("priority");
+
+        priorityUsageContext.setCode(typeCoding);
+
+        var valueConcept = new CodeableConcept();
+        valueConcept
+                .addCoding()
+                .setSystem(USPHUSAGECONTEXTSYSTEMURL)
+                .setCode("routine");
+
+        priorityUsageContext.setValue(valueConcept);
+
+        var priorityUsageContextExtension = new Extension();
+        priorityUsageContextExtension.setUrl(crmiIntendedusageContextExtensionUrl);
+        priorityUsageContextExtension.setValue(priorityUsageContext);
+
+        var dxtcRelatedArtifact = new RelatedArtifact();
+        dxtcRelatedArtifact.addExtension(priorityUsageContextExtension);
+        dxtcRelatedArtifact.addExtension(artifactIsOwnedExtension);
+        dxtcRelatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        dxtcRelatedArtifact.setDisplay(
+                String.format("ValueSet Diagnosis_Problem Triggers for Public Health Reporting, %s", this.version));
+        dxtcRelatedArtifact.setResource(
+                String.format("http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|%s", this.version));
+        componentRelatedArtifacts.add(dxtcRelatedArtifact);
+
+        var lotcRelatedArtifact = new RelatedArtifact();
+        lotcRelatedArtifact.addExtension(priorityUsageContextExtension);
+        lotcRelatedArtifact.addExtension(artifactIsOwnedExtension);
+        lotcRelatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        lotcRelatedArtifact.setDisplay(
+                String.format("ValueSet Lab Order Test Triggers for Public Health Reporting, %s", this.version));
+        lotcRelatedArtifact.setResource(
+                String.format("http://ersd.aimsplatform.org/fhir/ValueSet/lotc|%s", this.version));
+        componentRelatedArtifacts.add(lotcRelatedArtifact);
+
+        var lrtcRelatedArtifact = new RelatedArtifact();
+        lrtcRelatedArtifact.addExtension(priorityUsageContextExtension);
+        lrtcRelatedArtifact.addExtension(artifactIsOwnedExtension);
+        lrtcRelatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        lrtcRelatedArtifact.setDisplay(
+                String.format("ValueSet Lab Obs Test Triggers for Public Health Reporting, %s", this.version));
+        lrtcRelatedArtifact.setResource(
+                String.format("http://ersd.aimsplatform.org/fhir/ValueSet/lrtc|%s", this.version));
+        componentRelatedArtifacts.add(lrtcRelatedArtifact);
+
+        var mrtcRelatedArtifact = new RelatedArtifact();
+        mrtcRelatedArtifact.addExtension(priorityUsageContextExtension);
+        mrtcRelatedArtifact.addExtension(artifactIsOwnedExtension);
+        mrtcRelatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        mrtcRelatedArtifact.setDisplay(
+                String.format("ValueSet Medications Triggers for Public Health Reporting, %s", this.version));
+        mrtcRelatedArtifact.setResource(
+                String.format("http://ersd.aimsplatform.org/fhir/ValueSet/mrtc|%s", this.version));
+        componentRelatedArtifacts.add(mrtcRelatedArtifact);
+
+        var ostcRelatedArtifact = new RelatedArtifact();
+        ostcRelatedArtifact.addExtension(priorityUsageContextExtension);
+        ostcRelatedArtifact.addExtension(artifactIsOwnedExtension);
+        ostcRelatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        ostcRelatedArtifact.setDisplay(String.format(
+                "ValueSet Organism_Substance Release Triggers for Public Health Reporting, %s", this.version));
+        ostcRelatedArtifact.setResource(
+                String.format("http://ersd.aimsplatform.org/fhir/ValueSet/ostc|%s", this.version));
+        componentRelatedArtifacts.add(ostcRelatedArtifact);
+
+        var sdtcRelatedArtifact = new RelatedArtifact();
+        sdtcRelatedArtifact.addExtension(priorityUsageContextExtension);
+        sdtcRelatedArtifact.addExtension(artifactIsOwnedExtension);
+        sdtcRelatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        sdtcRelatedArtifact.setDisplay(
+                String.format("ValueSet Suspected_Disorder Triggers for Public Health Reporting, %s", this.version));
+        sdtcRelatedArtifact.setResource(
+                String.format("http://ersd.aimsplatform.org/fhir/ValueSet/sdtc|%s", this.version));
+        componentRelatedArtifacts.add(sdtcRelatedArtifact);
+
+        specificationLibrary.getRelatedArtifact().addAll(componentRelatedArtifacts);
     }
 
     private void resolveRelatedArtifacts(Bundle bundle, Library specificationLibrary) {
@@ -337,22 +422,16 @@ public class ErsdTransformer extends Operation {
             return result.toOperationOutcome();
         }
 
-        RelatedArtifact relatedArtifact = new RelatedArtifact();
-        relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
-        relatedArtifact.setResource(res.getUrlElement().asStringValue());
-        specificationLibrary.addRelatedArtifact(relatedArtifact);
-        // res.setType(new CodeableConcept(new
-        // Coding("http://terminology.hl7.org/CodeSystem/plan-definition-type",
-        // "workflow-definition", "Workflow Definition")));
-        // res.getAction().forEach(action -> {
-        // action.getTrigger().forEach(trigger -> {
-        // trigger.setType(TriggerType.NAMEDEVENT);
-        // });
-        // });
-        // res.setVersion(this.version);
-        // res.setPublisher(PUBLISHER);
-        // res.setExperimental(false);
-        // res.setDescription("Example Description");
+        var artifactIsOwnedExtension = new Extension(artifactIsOwnedExtensionUrl, new BooleanType(true));
+        var planDefinitionRelatedArtifact = new RelatedArtifact();
+        planDefinitionRelatedArtifact.addExtension(artifactIsOwnedExtension);
+        planDefinitionRelatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        planDefinitionRelatedArtifact.setDisplay(
+                String.format("PlanDefinition US eCR Specification, %s", this.version));
+        planDefinitionRelatedArtifact.setResource(
+                String.format("%s|%s", res.getUrlElement().getValueAsString(), this.version));
+        specificationLibrary.addRelatedArtifact(planDefinitionRelatedArtifact);
+
         return null;
     }
 
@@ -386,35 +465,30 @@ public class ErsdTransformer extends Operation {
         if (!isValid) {
             return result.toOperationOutcome();
         }
-        // bundle.getEntry().stream()
-        // .filter(x -> (x.hasResource() &&
-        // x.getResource().fhirType().equals("ValueSet")))
-        // .map(x -> (ValueSet) x.getResource())
-        // .forEach(vs -> {
-        // RelatedArtifact relatedArtifact = new RelatedArtifact();
-        // relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
-        // relatedArtifact.setResource(vs.getUrlElement().asStringValue());
-        // res.addRelatedArtifact(relatedArtifact);
-        // });
-        RelatedArtifact relatedArtifact = new RelatedArtifact();
-        relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
-        relatedArtifact.setResource(res.getUrlElement().asStringValue());
-        specificationLibrary.addRelatedArtifact(relatedArtifact);
+
+        var artifactIsOwnedExtension = new Extension(artifactIsOwnedExtensionUrl, new BooleanType(true));
+        var rctcLibraryRelatedArtifact = new RelatedArtifact();
+        rctcLibraryRelatedArtifact.addExtension(artifactIsOwnedExtension);
+        rctcLibraryRelatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        rctcLibraryRelatedArtifact.setDisplay(
+                String.format("Library Reportable Condition Trigger Codes, %s", this.version));
+        rctcLibraryRelatedArtifact.setResource(
+                String.format("%s|%s", res.getUrlElement().asStringValue(), this.version));
+        specificationLibrary.addRelatedArtifact(rctcLibraryRelatedArtifact);
         res.setPublisher(PUBLISHER);
         res.setExperimental(false);
         res.setTitle("Reportable Condition Trigger Codes");
 
         UsageContext reportingUsageContext = new UsageContext(
-                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "reporting", null),
                 new CodeableConcept(
-                        new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null)));
+                        new Coding(USPHUSAGECONTEXTSYSTEMURL, "triggering", null)));
         res.addUseContext(reportingUsageContext);
 
         UsageContext specificationTypeUsageContext = new UsageContext(
-                new Coding(
-                        "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "specification-type", null),
+                new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "specification-type", null),
                 new CodeableConcept(new Coding(
-                        "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "value-set-library", null)));
+                        USPHUSAGECONTEXTSYSTEMURL, "value-set-library", null)));
         res.addUseContext(specificationTypeUsageContext);
 
         return null;
@@ -424,9 +498,11 @@ public class ErsdTransformer extends Operation {
         if (!resolveProfile(res, usPhTriggeringValueSetProfileUrl)) {
             res.getMeta().addProfile(usPhTriggeringValueSetProfileUrl);
         }
+
         if (resolveProfile(res, eCR1eRSDValueSetProfileUrl)) {
             res.getMeta().getProfile().removeIf(p -> p.getValue().equals(eCR1eRSDValueSetProfileUrl));
         }
+
         ValidationResult result = validator.validateWithResult(res);
         boolean isValid = true;
         for (SingleValidationMessage message : result.getMessages()) {
@@ -434,77 +510,100 @@ public class ErsdTransformer extends Operation {
                 isValid = false;
             }
         }
+
         if (!isValid) {
             return result.toOperationOutcome();
         }
-        res.addUseContext(new UsageContext(
-                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
-                new CodeableConcept(
-                        new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null))));
 
-        // Update Grouping ValueSet references (in useContexts) to PlanDefinition
-        List<UsageContext> useContexts = res.getUseContext();
-        res.getUseContext()
-                .removeIf(uc -> uc.hasValueReference()
-                        && uc.getValueReference().hasReference()
-                        && uc.getValueReference().getReference().contains("skeleton"));
+        String canonical = res.getUrl();
 
-        boolean hasPriorityUseContext = false;
+        // Ensure relatedArtifact exists in the manifest library
+        RelatedArtifact relatedArtifact = specificationLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON
+                        && ra.hasResource()
+                        && ra.getResource().equals(canonical))
+                .findFirst()
+                .orElse(null);
+
+        if (relatedArtifact == null) {
+            relatedArtifact = new RelatedArtifact();
+            relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+            relatedArtifact.setResource(canonical);
+            specificationLibrary.addRelatedArtifact(relatedArtifact);
+        }
+
+        // Collect existing useContexts
+        List<UsageContext> useContexts = new ArrayList<>(res.getUseContext());
+
+        boolean hasPriority = false;
+        boolean hasReporting = false;
+
         for (UsageContext uc : useContexts) {
-            hasPriorityUseContext = uc.getCode().getCode().equalsIgnoreCase("priority");
-            if (hasPriorityUseContext) {
-                break;
+            // Exclude skeleton program usageContext entirely
+            if (uc.hasCode()
+                    && "program".equalsIgnoreCase(uc.getCode().getCode())
+                    && uc.hasValueReference()
+                    && uc.getValueReference().hasReference()
+                    && uc.getValueReference().getReference().contains("plandefinition-ersd-skeleton")) {
+                continue;
             }
+
+            if ("priority".equalsIgnoreCase(uc.getCode().getCode())) {
+                hasPriority = true;
+            }
+
+            if ("reporting".equalsIgnoreCase(uc.getCode().getCode())) {
+                hasReporting = true;
+            }
+
+            Extension ext = new Extension();
+            ext.setUrl(crmiIntendedusageContextExtensionUrl);
+            ext.setValue(uc);
+
+            relatedArtifact.addExtension(ext);
         }
 
-        if (!hasPriorityUseContext) {
-            res.addUseContext(new UsageContext(
-                    new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "priority", null),
+        // Ensure priority exists
+        if (!hasPriority) {
+            UsageContext priorityContext = new UsageContext(
+                    new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "priority", null),
                     new CodeableConcept(
-                            new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "routine", null))));
+                            new Coding(USPHUSAGECONTEXTSYSTEMURL, "routine", null)));
+
+            Extension ext = new Extension();
+            ext.setUrl(crmiIntendedusageContextExtensionUrl);
+            ext.setValue(priorityContext);
+
+            relatedArtifact.addExtension(ext);
         }
+
+        // Ensure reporting exists
+        if (!hasReporting) {
+            UsageContext reportingContext = new UsageContext(
+                    new Coding(USPHUSAGECONTEXTTYPESYSTEMURL, "reporting", null),
+                    new CodeableConcept(new Coding(
+                            USPHUSAGECONTEXTSYSTEMURL, "triggering", null)));
+
+            Extension ext = new Extension();
+            ext.setUrl(crmiIntendedusageContextExtensionUrl);
+            ext.setValue(reportingContext);
+
+            relatedArtifact.addExtension(ext);
+        }
+
+        // Remove all useContexts from the ValueSet
+        res.getUseContext().clear();
 
         Extension stewardExtension = res.getExtensionByUrl(valueSetStewardExtensionUrl);
         if (stewardExtension != null && stewardExtension.hasValue()) {
             String stewardName = ((ContactDetail) stewardExtension.getValue()).getName();
-            if (stewardName != null && !stewardName.isEmpty() && !stewardName.isBlank()) {
+            if (stewardName != null && !stewardName.isBlank()) {
                 res.setPublisher(stewardName);
             }
         }
 
-        // Groupers need to have an include per ValueSet in the compose rather than all in one Include together.
-        List<String> grouperUrls = new ArrayList<>();
-        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/dxtc");
-        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/ostc");
-        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/lotc");
-        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/lrtc");
-        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/mrtc");
-        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/sdtc");
-        String url = res.getUrl();
-        if (grouperUrls.contains(url)) {
-            res.setVersion(this.version);
-            res.setPublisher(PUBLISHER);
-
-            ValueSet.ValueSetComposeComponent compose = res.getCompose();
-            List<ValueSet.ConceptSetComponent> includes = compose.getInclude();
-            if (includes.size() > 1) {
-                throw new RuntimeException(String.format(
-                        "Expected the %s grouping ValueSet to have a single include in its compose.", url));
-            }
-
-            ValueSet.ConceptSetComponent include = includes.get(0);
-
-            List<CanonicalType> referencedValueSets = include.getValueSet();
-            for (CanonicalType referencedValueSet : referencedValueSets) {
-                ArrayList<CanonicalType> newInclude = new ArrayList<>();
-                newInclude.add(referencedValueSet);
-                compose.addInclude(new ValueSet.ConceptSetComponent().setValueSet(newInclude));
-            }
-
-            compose.getInclude().remove(include);
-        }
-
         res.setExperimental(false);
+
         return null;
     }
 
@@ -518,7 +617,6 @@ public class ErsdTransformer extends Operation {
         for (BundleEntryComponent entry : bundle.getEntry()) {
             if (entry.getResource() instanceof ValueSet) {
                 ValueSet v = (ValueSet) entry.getResource();
-                // v.setCompose(new ValueSetComposeComponent());
                 v.setText(new Narrative());
                 v.getExpansion().getContains().forEach(x -> x.setDisplay(""));
             }

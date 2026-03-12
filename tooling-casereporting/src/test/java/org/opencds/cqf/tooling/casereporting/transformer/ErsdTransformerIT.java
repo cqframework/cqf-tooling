@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.casereporting.transformer;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
@@ -9,11 +8,7 @@ import ca.uhn.fhir.parser.XmlParser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashSet;
-import java.util.List;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.UsageContext;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.parameter.TransformErsdParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
@@ -188,6 +183,7 @@ public class ErsdTransformerIT {
         Bundle outputBundle = transformBundle(params, outputBundleFileName);
 
         assertNotNull(outputBundle);
+
         ValueSet dxtcValueSet = (ValueSet) outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource()
                         && x.getResource().fhirType().equals("ValueSet")
@@ -198,18 +194,49 @@ public class ErsdTransformerIT {
 
         assertNotNull(dxtcValueSet);
 
-        List<UsageContext> usageContexts = dxtcValueSet.getUseContext();
-        UsageContext usageContext = usageContexts.stream()
-                .filter(x -> x.hasCode()
-                        && x.getCode().getCode().equals("priority")
-                        && x.hasValueCodeableConcept()
-                        && x.getValueCodeableConcept()
-                                .getCodingFirstRep()
-                                .getCode()
-                                .equals("emergent"))
+        // ValueSet should no longer contain the priority useContext
+        boolean valueSetHasPriority = dxtcValueSet.getUseContext().stream()
+                .anyMatch(x -> x.hasCode() && "priority".equals(x.getCode().getCode()));
+
+        assertFalse(valueSetHasPriority);
+
+        // Find the CRMI manifest Library
+        Library manifestLibrary = (Library) outputBundle.getEntry().stream()
+                .filter(x -> x.hasResource()
+                        && x.getResource().fhirType().equals("Library")
+                        && ((Library) x.getResource()).getMeta().getProfile().stream()
+                                .anyMatch(p -> p.getValue().contains("crmi-manifestlibrary")))
                 .findFirst()
-                .get();
-        assertNotNull(usageContext);
+                .get()
+                .getResource();
+
+        assertNotNull(manifestLibrary);
+
+        // Find relatedArtifact referencing the DXTC ValueSet
+        RelatedArtifact relatedArtifact = manifestLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON
+                        && ra.hasResource()
+                        && ra.getResource().equals("http://hl7.org/fhir/us/ecr/ValueSet/dxtc"))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(relatedArtifact);
+
+        // Verify priority=emergent usageContext exists as CRMI extension
+        boolean priorityFound = relatedArtifact.getExtension().stream()
+                .filter(ext -> ext.getUrl()
+                        .equals("http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext"))
+                .filter(ext -> ext.getValue() instanceof UsageContext)
+                .map(ext -> (UsageContext) ext.getValue())
+                .anyMatch(uc -> uc.hasCode()
+                        && "priority".equals(uc.getCode().getCode())
+                        && uc.hasValueCodeableConcept()
+                        && "emergent"
+                                .equals(uc.getValueCodeableConcept()
+                                        .getCodingFirstRep()
+                                        .getCode()));
+
+        assertTrue(priorityFound);
 
         logger.info("Transform");
     }
@@ -226,41 +253,35 @@ public class ErsdTransformerIT {
         Bundle outputBundle = transformBundle(params, outputBundleFileName);
 
         assertNotNull(outputBundle);
-        Library manifestLibrary;
-        manifestLibrary = (Library) outputBundle.getEntry().stream()
+
+        Library manifestLibrary = (Library) outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource()
                         && x.getResource().fhirType().equals("Library")
-                        && x.getResource().getId().equals("Library/ersd-specification-library"))
+                        && ((Library) x.getResource())
+                                .getUrl()
+                                .equals("http://ersd.aimsplatform.org/fhir/Library/ersd-specification"))
                 .findFirst()
                 .get()
                 .getResource();
 
         assertNotNull(manifestLibrary);
 
-        List<UsageContext> useContexts = manifestLibrary.getUseContext();
-        UsageContext reportingUseContext = useContexts.stream()
-                .filter(x -> x.hasCode()
-                        && x.getCode().getCode().equals("reporting")
-                        && x.hasValueCodeableConcept()
-                        && x.getValueCodeableConcept()
-                                .getCodingFirstRep()
-                                .getCode()
-                                .equals("triggering"))
-                .findFirst()
-                .get();
-        assertNotNull(reportingUseContext);
+        // Verify at least one relatedArtifact contains reporting=triggering as CRMI intendedUsageContext
+        boolean reportingFound = manifestLibrary.getRelatedArtifact().stream()
+                .flatMap(ra -> ra.hasExtension() ? ra.getExtension().stream() : java.util.stream.Stream.empty())
+                .filter(ext -> ext.getUrl()
+                        .equals("http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext"))
+                .filter(ext -> ext.getValue() instanceof UsageContext)
+                .map(ext -> (UsageContext) ext.getValue())
+                .anyMatch(uc -> uc.hasCode()
+                        && "reporting".equals(uc.getCode().getCode())
+                        && uc.hasValueCodeableConcept()
+                        && "triggering"
+                                .equals(uc.getValueCodeableConcept()
+                                        .getCodingFirstRep()
+                                        .getCode()));
 
-        UsageContext specificationTypeUseContext = useContexts.stream()
-                .filter(x -> x.hasCode()
-                        && x.getCode().getCode().equals("reporting")
-                        && x.hasValueCodeableConcept()
-                        && x.getValueCodeableConcept()
-                                .getCodingFirstRep()
-                                .getCode()
-                                .equals("triggering"))
-                .findFirst()
-                .get();
-        assertNotNull(specificationTypeUseContext);
+        assertTrue(reportingFound);
 
         assertNotNull(manifestLibrary.getDate());
         assertNotNull(manifestLibrary.getEffectivePeriod());
