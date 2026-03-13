@@ -1,13 +1,13 @@
 package org.opencds.cqf.tooling.operation;
 
 import java.io.File;
+import java.nio.file.Paths;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
 import org.opencds.cqf.tooling.operations.spreadsheet.QICoreElementsToSpreadsheet;
 import org.testng.Assert;
 
 public class QICoreElementsToSpreadsheetTest {
-    public static final String separator = System.getProperty("file.separator");
     // TODO: Fails on Windows
     // @Test
     public void verifySpreadsheetWithDataElementsFromProfile() {
@@ -17,8 +17,8 @@ public class QICoreElementsToSpreadsheetTest {
         String operation = "QICoreElementsToSpreadsheet";
         String modelName = "QICore";
         String modelVersion = "4.1.0";
-        String outputPath = "target" + separator + "test-output" + separator + "profileToSpreadsheet" + separator
-                + "QI Core Element Analysis 11"; // "/Users/bryantaustin/Projects/QI Core Valueset Analysis4";
+        String outputPath = Paths.get("target", "test-output", "profileToSpreadsheet",
+                "QI Core Element Analysis 11").toString();
         String[] args = {
             "-" + operation,
             "-ip=" + inputPath,
@@ -29,7 +29,7 @@ public class QICoreElementsToSpreadsheetTest {
         };
         Operation qiCoreElementsToSpreadsheet = new ExecutableOperationAdapter(new QICoreElementsToSpreadsheet());
         qiCoreElementsToSpreadsheet.execute(args);
-        File spreadsheet = new File(outputPath + separator + modelName + modelVersion + ".xlsx");
+        File spreadsheet = Paths.get(outputPath, modelName + modelVersion + ".xlsx").toFile();
         Assert.assertTrue(spreadsheet.exists());
     }
 }

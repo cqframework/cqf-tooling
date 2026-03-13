@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.operation;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.Objects;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.operations.ExecutableOperationAdapter;
@@ -9,7 +10,6 @@ import org.opencds.cqf.tooling.operations.spreadsheet.ProfilesToSpreadsheet;
 import org.testng.Assert;
 
 public class ProfilesToSpreadsheetTest {
-    public static final String separator = System.getProperty("file.separator");
     // TODO: Fails on Windows...
     // @Test
     public void verifySpreadsheetFromProfile() throws URISyntaxException {
@@ -22,8 +22,8 @@ public class ProfilesToSpreadsheetTest {
         String operation = "ProfilesToSpreadsheet";
         String modelName = "QICore";
         String modelVersion = "4.1.1";
-        String outputPath = "target" + separator + "test-output" + separator + "profileToSpreadsheet" + separator
-                + "QI Core Valueset Analysis 11";
+        String outputPath = Paths.get("target", "test-output", "profileToSpreadsheet",
+                "QI Core Valueset Analysis 11").toString();
         String[] args = {
             "-" + operation,
             "-ip=" + inputPath,
@@ -34,7 +34,7 @@ public class ProfilesToSpreadsheetTest {
         };
         Operation profilesToSpreadsheet = new ExecutableOperationAdapter(new ProfilesToSpreadsheet());
         profilesToSpreadsheet.execute(args);
-        File spreadsheet = new File(outputPath + separator + modelName + modelVersion + ".xlsx");
+        File spreadsheet = Paths.get(outputPath, modelName + modelVersion + ".xlsx").toFile();
         Assert.assertTrue(spreadsheet.exists());
     }
 }

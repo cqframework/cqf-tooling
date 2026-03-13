@@ -5,9 +5,9 @@ import static org.testng.Assert.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Objects;
 import org.apache.commons.io.FileUtils;
@@ -31,7 +31,7 @@ public class CqlOptionsLibraryProcessorTest extends LibraryProcessorTest {
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
         ResourceDiscovery.clearDevicePaths();
-        File dir = new File("target" + separator + "refreshLibraries" + separator + "cqloptions");
+        var dir = Paths.get("target", "refreshLibraries", "cqloptions").toFile();
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -42,7 +42,7 @@ public class CqlOptionsLibraryProcessorTest extends LibraryProcessorTest {
     // the generated file includes CQL only
     void testCqlOptionsFormats() throws Exception {
         // create a output directory under target directory
-        File targetDirectory = new File("target" + separator + "refreshLibraries" + separator + resourceDirectory);
+        var targetDirectory = Paths.get("target", "refreshLibraries", resourceDirectory).toFile();
         if (!targetDirectory.exists()) {
             targetDirectory.mkdirs();
         }
@@ -50,14 +50,14 @@ public class CqlOptionsLibraryProcessorTest extends LibraryProcessorTest {
                 .getPath();
         assertEquals(Objects.requireNonNull(targetDirectory.listFiles()).length, 0);
 
-        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator
-                + "library-EXM124_FHIR4-8.2.000.json";
+        String libraryPath = Paths.get("input", "resources", "library", "library-EXM124_FHIR4-8.2.000.json")
+                .toString();
         runRefresh(
                 resourceDirPath,
-                resourceDirPath + libraryPath,
+                Paths.get(resourceDirPath, libraryPath).toString(),
                 targetDirectory.getAbsolutePath(),
-                resourceDirPath + separator + "input" + separator + "pagecontent" + separator + "cql" + separator
-                        + "EXM124_FHIR4-8.2.000.cql",
+                Paths.get(resourceDirPath, "input", "pagecontent", "cql", "EXM124_FHIR4-8.2.000.cql")
+                        .toString(),
                 false);
 
         assertTrue(Objects.requireNonNull(targetDirectory.listFiles()).length > 0);

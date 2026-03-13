@@ -48,7 +48,7 @@ public class IGProcessorTest extends RefreshTest {
     private final String MEASURE_TYPE = "Measure";
     private final String GROUP_TYPE = "Group";
 
-    private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
+    private final String INI_LOC = Paths.get("target", "refreshIG", "ig.ini").toString();
 
     public IGProcessorTest() {
         super(FhirContext.forCached(FhirVersionEnum.R4), "IGProcessorTest");
@@ -59,7 +59,7 @@ public class IGProcessorTest extends RefreshTest {
         IOUtils.resourceDirectories = new ArrayList<>();
         ResourceDiscovery.clearDevicePaths();
         System.setOut(new PrintStream(this.console));
-        File dir = new File("target" + separator + "refreshIG");
+        File dir = Paths.get("target", "refreshIG").toFile();
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -68,14 +68,14 @@ public class IGProcessorTest extends RefreshTest {
     @Test
     @SuppressWarnings("unchecked")
     void testRefreshIG() throws Exception {
-        String targetDirectory = "target" + separator + "refreshIG";
+        String targetDirectory = Paths.get("target", "refreshIG").toString();
         copyResourcesToTargetDir(targetDirectory, "testfiles/refreshIG");
 
         File iniFile = new File(INI_LOC);
         String iniFileLocation = iniFile.getAbsolutePath();
         IniFile ini = new IniFile(iniFileLocation);
 
-        String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
+        String bundledFilesLocation = Paths.get(iniFile.getParent(), "bundles", "measure").toString();
         RefreshIGParameters params = new RefreshIGParameters();
         params.ini = INI_LOC;
         params.outputEncoding = IOUtils.Encoding.JSON;
@@ -100,10 +100,10 @@ public class IGProcessorTest extends RefreshTest {
         for (String measureName : measures.keySet()) {
             // location of single bundled file:
             final String bundledFileResult =
-                    bundledFilesLocation + measureName + separator + measureName + "-bundle.json";
+                    Paths.get(bundledFilesLocation, measureName, measureName + "-bundle.json").toString();
             // multiple individual files in sub directory to loop through:
             final Path dir =
-                    Paths.get(bundledFilesLocation + separator + measureName + separator + measureName + "-files");
+                    Paths.get(bundledFilesLocation, measureName, measureName + "-files");
 
             // loop through each file, determine resourceType and treat accordingly
             Map<String, String> resourceTypeMap = new HashMap<>();

@@ -66,11 +66,11 @@ public class RefreshIGOperationTest extends RefreshTest {
         "USCoreTests.json"
     };
 
-    private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIG";
+    private static final String TARGET_OUTPUT_FOLDER_PATH = Paths.get("target", "NewRefreshIG").toString();
     private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH =
-            TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
+            Paths.get(TARGET_OUTPUT_FOLDER_PATH, "input", "cql").toString();
     private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH =
-            TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
+            Paths.get(TARGET_OUTPUT_FOLDER_PATH, "input", "resources", "library").toString();
 
     // Store the original standard out before changing it.
     private final PrintStream originalStdOut = System.out;
@@ -92,8 +92,8 @@ public class RefreshIGOperationTest extends RefreshTest {
         System.setOut(new PrintStream(this.console));
 
         // Delete directories
-        deleteDirectory("target" + File.separator + "refreshIG");
-        deleteDirectory("target" + File.separator + "NewRefreshIG");
+        deleteDirectory(Paths.get("target", "refreshIG").toString());
+        deleteDirectory(Paths.get("target", "NewRefreshIG").toString());
 
         deleteTempINI();
     }
@@ -124,7 +124,7 @@ public class RefreshIGOperationTest extends RefreshTest {
         RefreshIG newRefreshIGOperation = new RefreshIG();
         String[] args = new String[] {
             "-NewRefreshIG",
-            "-ini=" + TARGET_OUTPUT_FOLDER_PATH + separator + "ig.ini",
+            "-ini=" + Paths.get(TARGET_OUTPUT_FOLDER_PATH, "ig.ini"),
             "-rd=" + TARGET_OUTPUT_FOLDER_PATH,
             "-uv=" + "1.0.1",
             "-d",
@@ -243,13 +243,13 @@ public class RefreshIGOperationTest extends RefreshTest {
         }
 
         // Call the method under test, which should use HttpClientUtils.post
-        copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
+        copyResourcesToTargetDir(Paths.get("target", "refreshIG").toString(), "testfiles/refreshIG");
         // build ini object
         File iniFile = new File(INI_LOC);
         String iniFileLocation = iniFile.getAbsolutePath();
         IniFile ini = new IniFile(iniFileLocation);
 
-        String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
+        String bundledFilesLocation = Paths.get(iniFile.getParent(), "bundles", "measure").toString();
 
         String[] args;
         if (!fhirUri.isEmpty()) {
@@ -290,10 +290,10 @@ public class RefreshIGOperationTest extends RefreshTest {
         for (String measureName : measures.keySet()) {
             // location of single bundled file:
             final String bundledFileResult =
-                    bundledFilesLocation + measureName + separator + measureName + "-bundle.json";
+                    Paths.get(bundledFilesLocation, measureName, measureName + "-bundle.json").toString();
             // multiple individual files in sub directory to loop through:
             final Path dir =
-                    Paths.get(bundledFilesLocation + separator + measureName + separator + measureName + "-files");
+                    Paths.get(bundledFilesLocation, measureName, measureName + "-files");
 
             // loop through each file, determine resourceType and treat accordingly
             Map<String, String> resourceTypeMap = new HashMap<>();

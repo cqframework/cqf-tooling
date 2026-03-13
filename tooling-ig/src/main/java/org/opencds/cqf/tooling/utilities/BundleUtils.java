@@ -175,8 +175,6 @@ public class BundleUtils {
         }
     }
 
-    public static final String separator = System.getProperty("file.separator");
-
     public static Set<String> extractStu3Resources(
             org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
         Set<String> extractedResources = new HashSet<>();
@@ -189,10 +187,9 @@ public class BundleUtils {
                     ((org.hl7.fhir.dstu3.model.Measure) entryResource).setText(null);
                 }
 
-                String resourceFileLocation =
-                        outputPath + separator + entryResource.getIdElement().getResourceType()
-                                + "-" + entryResource.getIdElement().getIdPart() + "."
-                                + encoding;
+                String resourceFileName = entryResource.getIdElement().getResourceType()
+                        + "-" + entryResource.getIdElement().getIdPart() + "." + encoding;
+                String resourceFileLocation = Paths.get(outputPath, resourceFileName).toString();
                 extractedResources.add(resourceFileLocation);
 
                 ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
@@ -213,10 +210,9 @@ public class BundleUtils {
                 if (entryResource.fhirType().equals("Measure") && suppressNarrative) {
                     ((org.hl7.fhir.r4.model.Measure) entryResource).setText(null);
                 }
-                String resourceFileLocation =
-                        outputPath + separator + entryResource.getIdElement().getResourceType()
-                                + "-" + entryResource.getIdElement().getIdPart() + "."
-                                + encoding;
+                String resourceFileName = entryResource.getIdElement().getResourceType()
+                        + "-" + entryResource.getIdElement().getIdPart() + "." + encoding;
+                String resourceFileLocation = Paths.get(outputPath, resourceFileName).toString();
                 extractedResources.add(resourceFileLocation);
 
                 ResourceUtils.outputResource(entryResource, encoding, context, outputPath);

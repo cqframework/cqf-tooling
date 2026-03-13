@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.measure.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.io.File;
+import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.measure.MeasureProcessorTest;
 import org.testng.annotations.BeforeMethod;
@@ -19,7 +20,7 @@ public class R4MeasureProcessorTest extends MeasureProcessorTest {
     public void setUp() throws Exception {
         // IOUtils.resourceDirectories = new ArrayList<String>();
         // IOUtils.clearDevicePaths();
-        File dir = new File("target" + separator + "refreshMeasures" + separator + "r4");
+        File dir = Paths.get("target", "refreshMeasures", "r4").toFile();
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -27,16 +28,16 @@ public class R4MeasureProcessorTest extends MeasureProcessorTest {
 
     @Test
     public void testRefreshMeasures() throws Exception {
-        // String targetDirectory = "target" + separator + "refreshMeasures" + separator + "" + this.resourceDirectory;
+        // String targetDirectory = Paths.get("target", "refreshMeasures", this.resourceDirectory).toString();
         // copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
 
-        // String measurePath = separator + "input" + separator + "resources" + separator + "measure" + separator +
-        // "measure-EXM124_FHIR4-8.2.000.json";
+        // String measurePath = Paths.get("", "input", "resources", "measure",
+        //     "measure-EXM124_FHIR4-8.2.000.json").toString();
         // runRefresh(
         //     targetDirectory,
         //     targetDirectory + measurePath,
-        //     targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator +
-        // "EXM124_FHIR4-8.2.000.cql",
+        //     targetDirectory + Paths.get("", "input", "pagecontent", "cql",
+        //         "EXM124_FHIR4-8.2.000.cql").toString(),
         //     false
         // );
 
@@ -46,16 +47,16 @@ public class R4MeasureProcessorTest extends MeasureProcessorTest {
 
     @Test
     public void testRefreshMeasureContent() throws Exception {
-        // String targetDirectory = "target" + separator + "refreshMeasures" + separator + "" + this.resourceDirectory;
+        // String targetDirectory = Paths.get("target", "refreshMeasures", this.resourceDirectory).toString();
         // copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
 
-        // String measurePath = separator + "input" + separator + "resources" + separator + "measure" + separator +
-        // "measure-EXM124_FHIR4-8.2.000.json";
+        // String measurePath = Paths.get("", "input", "resources", "measure",
+        //     "measure-EXM124_FHIR4-8.2.000.json").toString();
         // runRefresh(
         //     targetDirectory,
         //     targetDirectory + measurePath,
-        //     targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator +
-        // "EXM124_FHIR4-8.2.000.cql",
+        //     targetDirectory + Paths.get("", "input", "pagecontent", "cql",
+        //         "EXM124_FHIR4-8.2.000.cql").toString(),
         //     false
         // );
 

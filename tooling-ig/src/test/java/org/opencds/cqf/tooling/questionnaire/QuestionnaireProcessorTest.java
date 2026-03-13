@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
@@ -17,9 +18,8 @@ import org.testng.annotations.BeforeMethod;
 public class QuestionnaireProcessorTest extends RefreshTest {
     private static final Logger logger = LoggerFactory.getLogger(QuestionnaireProcessorTest.class);
 
-    public static final String separator = System.getProperty("file.separator");
-    private final String TARGET_PATH = "target" + separator + "bundleQuestionnaires";
-    private final String INI_PATH = TARGET_PATH + separator + "ig.ini";
+    private final String TARGET_PATH = Paths.get("target", "bundleQuestionnaires").toString();
+    private final String INI_PATH = Paths.get(TARGET_PATH, "ig.ini").toString();
     private ByteArrayOutputStream console = new ByteArrayOutputStream();
     private QuestionnaireBundler questionnaireProcessor;
 
@@ -55,7 +55,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
     // the paths are still set to those from the first test.
     // @Test
     private void testBundleQuestionnairesR4() throws Exception {
-        copyResourcesToTargetDir(TARGET_PATH, "testfiles" + separator + "bundleQuestionnaires");
+        copyResourcesToTargetDir(TARGET_PATH, Paths.get("testfiles", "bundleQuestionnaires").toString());
 
         File iniFile = new File(INI_PATH);
         String iniFileLocation = iniFile.getAbsolutePath();
@@ -66,17 +66,17 @@ public class QuestionnaireProcessorTest extends RefreshTest {
         refreshedLibraryNames.add("LibraryEvaluationTestElements");
         refreshedLibraryNames.add("LibraryEvaluationTestConcepts");
         ArrayList<String> binaryPaths = new ArrayList<String>();
-        binaryPaths.add(TARGET_PATH + separator + "input" + separator + "cql");
+        binaryPaths.add(Paths.get(TARGET_PATH, "input", "cql").toString());
         Boolean includeDependencies = true;
         Boolean includeTerminology = true;
         Boolean includePatientScenarios = true;
         Boolean versioned = false;
         Boolean addBundleTimestamp = false;
 
-        IOUtils.resourceDirectories.add(TARGET_PATH + separator + "input" + separator + "resources");
-        IOUtils.resourceDirectories.add(TARGET_PATH + separator + "input" + separator + "vocabulary");
-        String outputBundleFilePath = TARGET_PATH + separator + "bundles" + separator + "questionnaire" + separator
-                + "libraryevaluationtest" + separator + "libraryevaluationtest-bundle.json";
+        IOUtils.resourceDirectories.add(Paths.get(TARGET_PATH, "input", "resources").toString());
+        IOUtils.resourceDirectories.add(Paths.get(TARGET_PATH, "input", "vocabulary").toString());
+        String outputBundleFilePath = Paths.get(TARGET_PATH, "bundles", "questionnaire",
+                "libraryevaluationtest", "libraryevaluationtest-bundle.json").toString();
 
         questionnaireProcessor.bundleResources(
                 refreshedLibraryNames,

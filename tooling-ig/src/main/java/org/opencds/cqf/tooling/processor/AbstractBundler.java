@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -26,7 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("checkstyle:MemberName")
 public abstract class AbstractBundler {
-    public static final String separator = System.getProperty("file.separator");
     public static final String NEWLINE_INDENT2 = "\n\t\t";
     public static final String NEWLINE_INDENT = "\r\n\t";
     public static final String INDENT = "\t";
@@ -552,7 +552,7 @@ public abstract class AbstractBundler {
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
 
         if (fhirUri != null && !fhirUri.isEmpty()) {
-            String resourceWriteLocation = bundleDestPath + separator + libraryName + "-bundle." + encoding;
+            String resourceWriteLocation = Paths.get(bundleDestPath, libraryName + "-bundle." + encoding).toString();
             HttpClientUtils.post(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, true);
         }
     }

@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.library;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.io.IOException;
+import java.nio.file.Paths;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
@@ -47,7 +48,7 @@ public abstract class LibraryProcessorTest extends RefreshTest {
         params.libraryPath = libraryResourcePath;
         params.libraryOutputDirectory = libraryOutputDirectoryPath;
         params.cqlContentPath = cqlResourcePath;
-        params.ini = targetDirectory + separator + "ig.ini";
+        params.ini = Paths.get(targetDirectory, "ig.ini").toString();
         params.versioned = versioned;
         params.shouldApplySoftwareSystemStamp = true;
         getLibraryProcessor().refreshLibraryContent(params);
@@ -67,7 +68,7 @@ public abstract class LibraryProcessorTest extends RefreshTest {
         params.libraryPath = libraryResourcePath;
         params.libraryOutputDirectory = libraryOutputDirectoryPath;
         params.cqlContentPath = cqlResourcePath;
-        params.ini = targetDirectory + separator + "ig.ini";
+        params.ini = Paths.get(targetDirectory, "ig.ini").toString();
         params.versioned = versioned;
         params.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
         getLibraryProcessor().refreshLibraryContent(params);

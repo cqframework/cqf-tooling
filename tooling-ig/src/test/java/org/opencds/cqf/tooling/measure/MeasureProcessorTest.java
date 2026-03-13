@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.measure;
 import ca.uhn.fhir.context.FhirContext;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
@@ -17,7 +18,7 @@ public abstract class MeasureProcessorTest extends RefreshTest {
     public void setUp() throws Exception {
         // IOUtils.resourceDirectories = new ArrayList<String>();
         // IOUtils.clearDevicePaths();
-        File dir = new File("target" + separator + "refreshMeasures");
+        File dir = Paths.get("target", "refreshMeasures").toFile();
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -51,7 +52,7 @@ public abstract class MeasureProcessorTest extends RefreshTest {
         params.measurePath = measurePath;
         params.measureOutputDirectory = measureOutputDirectory;
         params.cqlContentPath = cqlResourcePath;
-        params.ini = targetDirectory + separator + "ig.ini";
+        params.ini = Paths.get(targetDirectory, "ig.ini").toString();
         params.versioned = versioned;
         getMeasureProcessor().refreshMeasureContent(params);
     }

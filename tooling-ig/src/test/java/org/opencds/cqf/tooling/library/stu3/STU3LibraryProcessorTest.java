@@ -5,7 +5,7 @@ import static org.testng.Assert.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Objects;
 import org.apache.commons.io.FileUtils;
@@ -28,7 +28,7 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
         ResourceDiscovery.clearDevicePaths();
-        File dir = new File("target" + separator + "refreshLibraries" + separator + "stu3");
+        var dir = Paths.get("target", "refreshLibraries", "stu3").toFile();
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -36,25 +36,25 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
 
     @Test
     void testRefreshOverwriteLibraries() throws Exception {
-        String targetDirectory = "target" + separator + "refreshLibraries" + separator + this.resourceDirectory;
+        String targetDirectory = Paths.get("target", "refreshLibraries", this.resourceDirectory).toString();
         copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
 
-        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator
-                + "library-EXM105-FHIR3-8.0.000.json";
+        String libraryPath = Paths.get("input", "resources", "library", "library-EXM105-FHIR3-8.0.000.json")
+                .toString();
         runRefresh(
                 targetDirectory,
-                targetDirectory + libraryPath,
-                targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator
-                        + "EXM105_FHIR3-8.0.000.cql",
+                Paths.get(targetDirectory, libraryPath).toString(),
+                Paths.get(targetDirectory, "input", "pagecontent", "cql", "EXM105_FHIR3-8.0.000.cql")
+                        .toString(),
                 false);
 
-        validateSoftwareSystemExtension(targetDirectory + libraryPath);
+        validateSoftwareSystemExtension(Paths.get(targetDirectory, libraryPath).toString());
     }
 
     @Test
     void testRefreshOutputDirectory() throws Exception {
         // create a output directory under target directory
-        File targetDirectory = new File("target" + separator + "refreshLibraries" + separator + resourceDirectory);
+        var targetDirectory = Paths.get("target", "refreshLibraries", resourceDirectory).toFile();
         if (!targetDirectory.exists()) {
             targetDirectory.mkdirs();
         }
@@ -62,14 +62,14 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
                 .getPath();
         assertEquals(Objects.requireNonNull(targetDirectory.listFiles()).length, 0);
 
-        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator
-                + "library-EXM105-FHIR3-8.0.000.json";
+        String libraryPath = Paths.get("input", "resources", "library", "library-EXM105-FHIR3-8.0.000.json")
+                .toString();
         runRefresh(
                 resourceDirPath,
-                resourceDirPath + libraryPath,
+                Paths.get(resourceDirPath, libraryPath).toString(),
                 targetDirectory.getAbsolutePath(),
-                resourceDirPath + separator + "input" + separator + "pagecontent" + separator + "cql" + separator
-                        + "EXM105_FHIR3-8.0.000.cql",
+                Paths.get(resourceDirPath, "input", "pagecontent", "cql", "EXM105_FHIR3-8.0.000.cql")
+                        .toString(),
                 false);
 
         assertTrue(Objects.requireNonNull(targetDirectory.listFiles()).length > 0);

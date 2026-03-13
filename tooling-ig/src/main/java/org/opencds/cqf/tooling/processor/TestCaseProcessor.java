@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import jakarta.annotation.Nullable;
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
@@ -25,7 +26,6 @@ public class TestCaseProcessor {
     public static final String NEWLINE_INDENT2 = "\r\n\t\t";
     public static final String NEWLINE = "\r\n";
 
-    public static final String separator = System.getProperty("file.separator");
     public static final String TEST_ARTIFACT_URL = "http://hl7.org/fhir/StructureDefinition/artifact-testArtifact";
     public static final String MEASURE_URL = "http://ecqi.healthit.gov/ecqms/Measure/";
     public static final String PATIENT_TYPE = "Patient";
@@ -150,7 +150,7 @@ public class TestCaseProcessor {
                                 // try to delete any existing tests-* files that may have been created in previous
                                 // tests:
                                 File testCaseDeleteFile =
-                                        new File(testArtifactPath + separator + fileId + "-bundle.json");
+                                        Paths.get(testArtifactPath, fileId + "-bundle.json").toFile();
                                 if (testCaseDeleteFile.exists()) {
                                     try {
                                         testCaseDeleteFile.delete();
@@ -211,7 +211,7 @@ public class TestCaseProcessor {
                     // Need to output the Group if it exists
                     if (testGroup != null) {
                         String groupFileName = GROUP_FILE_SEPARATOR + measureName;
-                        String groupFileIdentifier = testArtifactPath + separator + groupFileName;
+                        String groupFileIdentifier = Paths.get(testArtifactPath, groupFileName).toString();
 
                         try {
                             IOUtils.writeResource(

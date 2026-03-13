@@ -1,6 +1,5 @@
 package org.opencds.cqf.tooling.operation;
 
-import static org.opencds.cqf.tooling.SoftwareSystemTest.separator;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -27,7 +26,7 @@ import org.testng.annotations.Test;
 
 public class DateRollerTest {
 
-    private final String testFilePathRoot = "target" + separator + "test-output" + separator + "dateRoller";
+    private final String testFilePathRoot = Paths.get("target", "test-output", "dateRoller").toString();
 
     @BeforeMethod
     public void setup() throws Exception {
