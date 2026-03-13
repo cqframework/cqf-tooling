@@ -131,7 +131,7 @@ public class ResourceDiscovery {
     private static final Map<String, IBaseResource> libraryUrlMap = new LinkedHashMap<>();
 
     public static Map<String, IBaseResource> getLibraryUrlMap(FhirContext fhirContext) {
-        if (libraryPathMap.isEmpty()) {
+        if (libraryUrlMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
         return libraryUrlMap;
@@ -404,7 +404,7 @@ public class ResourceDiscovery {
 
     public static Map<String, String> getActivityDefinitionPathMap(FhirContext fhirContext) {
         if (activityDefinitionPathMap.isEmpty()) {
-            setupQuestionnairePaths(fhirContext);
+            setupActivityDefinitionPaths(fhirContext);
         }
         return activityDefinitionPathMap;
     }
@@ -523,5 +523,7 @@ public class ResourceDiscovery {
         questionnairePathMap.clear();
         questionnaires.clear();
         activityDefinitionPaths.clear();
+        activityDefinitionPathMap.clear();
+        activityDefinitions.clear();
     }
 }

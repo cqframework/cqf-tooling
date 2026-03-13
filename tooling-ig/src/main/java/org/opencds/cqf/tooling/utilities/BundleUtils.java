@@ -292,14 +292,12 @@ public class BundleUtils {
         if (inputResource == null) return false;
 
         if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
-            return ((org.hl7.fhir.dstu3.model.Bundle) inputResource)
-                    .getType()
-                    .equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
+            return org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION
+                    .equals(((org.hl7.fhir.dstu3.model.Bundle) inputResource).getType());
 
         } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
-            return ((org.hl7.fhir.r4.model.Bundle) inputResource)
-                    .getType()
-                    .equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+            return org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION
+                    .equals(((org.hl7.fhir.r4.model.Bundle) inputResource).getType());
         }
         return false;
     }

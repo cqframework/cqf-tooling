@@ -825,20 +825,21 @@ public class ResourceUtils {
 
     public static boolean compareResourcePrimitiveElements(
             IBaseResource res1, IBaseResource res2, FhirContext fhirContext, String... elements) {
-        AtomicBoolean match = new AtomicBoolean(true);
-        if (res1 != null && res2 != null && res1.fhirType().equals(res2.fhirType())) {
-            Arrays.stream(elements).forEach(element -> {
-                IBase e1 = TerserUtil.getValueFirstRep(fhirContext, res1, element);
-                IBase e2 = TerserUtil.getValueFirstRep(fhirContext, res2, element);
-                if (e1 instanceof IPrimitiveType
-                        && e2 instanceof IPrimitiveType
-                        && !((IPrimitiveType<?>) e1)
-                                .getValueAsString()
-                                .equals(((IPrimitiveType<?>) e2).getValueAsString())) {
-                    match.set(false);
-                }
-            });
+        if (res1 == null || res2 == null || !res1.fhirType().equals(res2.fhirType())) {
+            return false;
         }
+        AtomicBoolean match = new AtomicBoolean(true);
+        Arrays.stream(elements).forEach(element -> {
+            IBase e1 = TerserUtil.getValueFirstRep(fhirContext, res1, element);
+            IBase e2 = TerserUtil.getValueFirstRep(fhirContext, res2, element);
+            if (e1 instanceof IPrimitiveType
+                    && e2 instanceof IPrimitiveType
+                    && !((IPrimitiveType<?>) e1)
+                            .getValueAsString()
+                            .equals(((IPrimitiveType<?>) e2).getValueAsString())) {
+                match.set(false);
+            }
+        });
         return match.get();
     }
 
