@@ -45,8 +45,10 @@ public class ElmUtils {
                     compiledLibrary.add(codeSystemDef);
                 }
             }
-            for (ValueSetDef valueSetDef : library.getValueSets().getDef()) {
-                compiledLibrary.add(valueSetDef);
+            if (library.getValueSets() != null && library.getValueSets().getDef() != null) {
+                for (ValueSetDef valueSetDef : library.getValueSets().getDef()) {
+                    compiledLibrary.add(valueSetDef);
+                }
             }
 
             if (library.getCodes() != null && library.getCodes().getDef() != null) {

@@ -87,10 +87,10 @@ public class ResourceUtilsTest {
     }
 
     @Test
-    public void getId_versionedWithNullVersion_throwsNpe() {
-        // BUG: when versioned is true but version is null, version.replace() throws NPE
-        assertThrows(NullPointerException.class,
-                () -> ResourceUtils.getId("my-lib", null, true));
+    public void getId_versionedWithNullVersion_omitsVersion() {
+        // Fixed: null version with versioned=true no longer throws NPE, just omits version
+        String result = ResourceUtils.getId("my-lib", null, true);
+        assertEquals(result, "my-lib");
     }
 
     @Test
@@ -312,24 +312,18 @@ public class ResourceUtilsTest {
     }
 
     @Test
-    public void compareResourcePrimitiveElements_oneHasValueOtherDoesNot_shouldReturnFalse() {
-        // BUG: When res1 has a value for an element but res2 doesn't (or vice versa),
-        // neither will be IPrimitiveType, so the comparison is skipped and match stays true.
-        // Intent: if one resource has a URL and the other doesn't, they should NOT match.
+    public void compareResourcePrimitiveElements_oneHasValueOtherDoesNot_returnsFalse() {
+        // Fixed: when one resource has a value and the other doesn't, returns false
         Library lib1 = new Library();
         lib1.setUrl("http://example.org/Library/test");
 
         Library lib2 = new Library();
         // url not set on lib2
 
-        // This SHOULD return false (one has url, the other doesn't)
-        // but the current implementation returns true because the comparison
-        // is only done when BOTH values are IPrimitiveType
         boolean result = ResourceUtils.compareResourcePrimitiveElements(
                 lib1, lib2, R4, "url");
-        // Documenting current behavior: returns true even though URLs differ
-        assertTrue(result,
-                "BUG: returns true when one resource has a value and the other doesn't — should be false");
+        assertFalse(result,
+                "Should return false when one resource has a value and the other doesn't");
     }
 
     @Test
@@ -436,10 +430,10 @@ public class ResourceUtilsTest {
     }
 
     @Test
-    public void getPrimaryLibraryName_r4NonMeasure_throwsClassCast() {
-        // BUG: getPrimaryLibraryName blindly casts to Measure without type checking
+    public void getPrimaryLibraryName_r4NonMeasure_throwsIllegalArgument() {
+        // Fixed: getPrimaryLibraryName now checks type before casting
         Library library = new Library();
-        assertThrows(ClassCastException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> ResourceUtils.getPrimaryLibraryName(library, R4));
     }
 

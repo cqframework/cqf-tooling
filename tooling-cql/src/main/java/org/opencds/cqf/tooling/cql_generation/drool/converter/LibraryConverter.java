@@ -87,10 +87,8 @@ public class LibraryConverter {
                         .replaceAll(",", "")
                         .replaceAll(":", "")
                         .replaceAll("#", "")
-                        .replaceAll("TEST", "")
-                        .replaceAll("TEST2", "")
-                        .replaceAll("TEST3", "")
                         .replaceAll("TESTExample-Daryl", "")
+                        .replaceAll("TEST[23]?", "")
                         .replaceAll("[()]", "");
             } else {
                 logger.info("Descriptive name was too long, generating library name for {}", libraryName);

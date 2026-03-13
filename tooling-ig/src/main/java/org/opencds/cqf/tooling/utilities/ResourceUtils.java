@@ -84,7 +84,7 @@ public class ResourceUtils {
     }
 
     public static String getId(String name, String version, boolean versioned) {
-        return name.replace("_", "-") + (versioned ? "-" + version.replace("_", ".") : "");
+        return name.replace("_", "-") + (versioned && version != null ? "-" + version.replace("_", ".") : "");
     }
 
     public static void setIgId(String baseId, IBaseResource resource, Boolean includeVersion) {
@@ -799,6 +799,10 @@ public class ResourceUtils {
     public static String getPrimaryLibraryName(IBaseResource resource, FhirContext fhirContext) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3: {
+                if (!(resource instanceof org.hl7.fhir.dstu3.model.Measure)) {
+                    throw new IllegalArgumentException(
+                            String.format("Expected Measure resource but got %s", resource.fhirType()));
+                }
                 org.hl7.fhir.dstu3.model.Measure measure = (org.hl7.fhir.dstu3.model.Measure) resource;
                 if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
                     throw new IllegalArgumentException("Measure is expected to have one and only one library");
@@ -806,6 +810,10 @@ public class ResourceUtils {
                 return getTail(measure.getLibrary().get(0).getReference());
             }
             case R4: {
+                if (!(resource instanceof org.hl7.fhir.r4.model.Measure)) {
+                    throw new IllegalArgumentException(
+                            String.format("Expected Measure resource but got %s", resource.fhirType()));
+                }
                 org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure) resource;
                 if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
                     throw new IllegalArgumentException("Measure is expected to have one and only one library");
@@ -832,11 +840,13 @@ public class ResourceUtils {
         Arrays.stream(elements).forEach(element -> {
             IBase e1 = TerserUtil.getValueFirstRep(fhirContext, res1, element);
             IBase e2 = TerserUtil.getValueFirstRep(fhirContext, res2, element);
-            if (e1 instanceof IPrimitiveType
-                    && e2 instanceof IPrimitiveType
-                    && !((IPrimitiveType<?>) e1)
-                            .getValueAsString()
-                            .equals(((IPrimitiveType<?>) e2).getValueAsString())) {
+            if (e1 instanceof IPrimitiveType && e2 instanceof IPrimitiveType) {
+                if (!((IPrimitiveType<?>) e1)
+                        .getValueAsString()
+                        .equals(((IPrimitiveType<?>) e2).getValueAsString())) {
+                    match.set(false);
+                }
+            } else if ((e1 instanceof IPrimitiveType) != (e2 instanceof IPrimitiveType)) {
                 match.set(false);
             }
         });
@@ -991,7 +1001,7 @@ public class ResourceUtils {
                 outputPath + separator + resource.getIdElement().getResourceType()
                         + "-" + resource.getIdElement().getIdPart() + "."
                         + encoding;
-        if (outputResourceTracker.containsKey(resource.getIdElement().getResourceType() + ":" + outputPath)) {
+        if (outputResourceTracker.containsKey(resourceFileLocation)) {
             LogUtils.info("This resource has already been processed: "
                     + resource.getIdElement().getResourceType());
             return;

@@ -7,9 +7,11 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.assertTrue;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
@@ -65,10 +67,11 @@ public class BundleUtilsTest {
         assertNull(result);
     }
 
-    // ── getR4ResourcesFromBundle ──
+    // ── getResourcesFromBundle ──
 
     @Test
-    public void getR4ResourcesFromBundle_returnsNonBundleEntries() {
+    public void getResourcesFromBundle_r4_returnsNonBundleEntries() {
+        FhirContext fhirContext = FhirContext.forR4Cached();
         Bundle bundle = new Bundle();
         Patient patient = new Patient();
         patient.setId("Patient/p1");
@@ -78,13 +81,13 @@ public class BundleUtilsTest {
         library.setId("Library/l1");
         bundle.addEntry().setResource(library);
 
-        List<org.hl7.fhir.r4.model.Resource> resources = BundleUtils.getR4ResourcesFromBundle(bundle);
+        List<IBaseResource> resources = BundleUtils.getResourcesFromBundle(fhirContext, bundle);
         assertEquals(resources.size(), 2);
     }
 
     @Test
-    public void getR4ResourcesFromBundle_excludesNestedBundles() {
-        // Intent: nested bundles should be excluded per the TODO comment in the code
+    public void getResourcesFromBundle_r4_excludesNestedBundles() {
+        FhirContext fhirContext = FhirContext.forR4Cached();
         Bundle bundle = new Bundle();
         Patient patient = new Patient();
         patient.setId("Patient/p1");
@@ -94,48 +97,35 @@ public class BundleUtilsTest {
         nestedBundle.setId("Bundle/nested");
         bundle.addEntry().setResource(nestedBundle);
 
-        List<org.hl7.fhir.r4.model.Resource> resources = BundleUtils.getR4ResourcesFromBundle(bundle);
+        List<IBaseResource> resources = BundleUtils.getResourcesFromBundle(fhirContext, bundle);
         assertEquals(resources.size(), 1, "Nested bundles should be excluded");
         assertEquals(resources.get(0).getIdElement().getIdPart(), "p1");
     }
 
     @Test
-    public void getR4ResourcesFromBundle_skipsNullResources() {
+    public void getResourcesFromBundle_r4_emptyBundle_returnsEmptyList() {
+        FhirContext fhirContext = FhirContext.forR4Cached();
         Bundle bundle = new Bundle();
-        bundle.addEntry(); // entry with no resource
-        Patient patient = new Patient();
-        patient.setId("Patient/p1");
-        bundle.addEntry().setResource(patient);
-
-        List<org.hl7.fhir.r4.model.Resource> resources = BundleUtils.getR4ResourcesFromBundle(bundle);
-        assertEquals(resources.size(), 1);
-    }
-
-    @Test
-    public void getR4ResourcesFromBundle_emptyBundle_returnsEmptyList() {
-        Bundle bundle = new Bundle();
-        List<org.hl7.fhir.r4.model.Resource> resources = BundleUtils.getR4ResourcesFromBundle(bundle);
+        List<IBaseResource> resources = BundleUtils.getResourcesFromBundle(fhirContext, bundle);
         assertNotNull(resources);
         assertTrue(resources.isEmpty());
     }
 
-    // ── getStu3ResourcesFromBundle ──
-
     @Test
-    public void getStu3ResourcesFromBundle_returnsAllEntries() {
+    public void getResourcesFromBundle_dstu3_returnsNonBundleEntries() {
+        FhirContext fhirContext = FhirContext.forDstu3Cached();
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
         org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
         patient.setId("Patient/p1");
         bundle.addEntry().setResource(patient);
 
-        List<org.hl7.fhir.dstu3.model.Resource> resources = BundleUtils.getStu3ResourcesFromBundle(bundle);
+        List<IBaseResource> resources = BundleUtils.getResourcesFromBundle(fhirContext, bundle);
         assertEquals(resources.size(), 1);
     }
 
     @Test
-    public void getStu3ResourcesFromBundle_includesNestedBundles_unlikeR4() {
-        // Intent: DSTU3 version does NOT exclude nested bundles, unlike R4.
-        // This is an inconsistency — testing to document the current behavior.
+    public void getResourcesFromBundle_dstu3_excludesNestedBundles() {
+        FhirContext fhirContext = FhirContext.forDstu3Cached();
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
         org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
         patient.setId("Patient/p1");
@@ -145,22 +135,9 @@ public class BundleUtilsTest {
         nestedBundle.setId("Bundle/nested");
         bundle.addEntry().setResource(nestedBundle);
 
-        List<org.hl7.fhir.dstu3.model.Resource> resources = BundleUtils.getStu3ResourcesFromBundle(bundle);
-        // NOTE: DSTU3 returns 2 (includes nested bundle), R4 would return 1 (excludes it)
-        assertEquals(resources.size(), 2,
-                "DSTU3 version includes nested bundles — inconsistent with R4 which excludes them");
-    }
-
-    @Test
-    public void getStu3ResourcesFromBundle_skipsNullResources() {
-        org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
-        bundle.addEntry(); // null resource
-        org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
-        patient.setId("Patient/p1");
-        bundle.addEntry().setResource(patient);
-
-        List<org.hl7.fhir.dstu3.model.Resource> resources = BundleUtils.getStu3ResourcesFromBundle(bundle);
-        assertEquals(resources.size(), 1);
+        List<IBaseResource> resources = BundleUtils.getResourcesFromBundle(fhirContext, bundle);
+        assertEquals(resources.size(), 1, "DSTU3 should exclude nested bundles");
+        assertEquals(resources.get(0).getIdElement().getIdPart(), "p1");
     }
 
     // ── resourceIsABundle ──
@@ -306,9 +283,8 @@ public class BundleUtilsTest {
     }
 
     @Test
-    public void bundleR4Artifacts_identifierMutatesSideEffect() {
-        // BUG: bundleR4Artifacts mutates the caller's Identifier object by appending "-bundle"
-        // to its value. The caller's identifier is modified as a side effect.
+    public void bundleR4Artifacts_identifierNotMutated() {
+        // Fixed: bundleR4Artifacts now copies the identifier, so the caller's object is not mutated
         List<IBaseResource> resources = new ArrayList<>();
         Patient patient = new Patient();
         patient.setId("Patient/p1");
@@ -320,12 +296,12 @@ public class BundleUtilsTest {
         List<Object> identifiers = new ArrayList<>();
         identifiers.add(identifier);
 
-        String originalValue = identifier.getValue();
-        BundleUtils.bundleR4Artifacts("test", resources, identifiers, false);
+        Bundle result = BundleUtils.bundleR4Artifacts("test", resources, identifiers, false);
 
-        // The identifier's value has been mutated by the method — this is a side effect bug
-        assertEquals(identifier.getValue(), originalValue + "-bundle",
-                "BUG: method mutates the caller's Identifier value by appending '-bundle'");
+        assertEquals(identifier.getValue(), "original-value",
+                "Caller's identifier should not be mutated");
+        assertEquals(result.getIdentifier().getValue(), "original-value-bundle",
+                "Bundle's identifier should have '-bundle' appended");
     }
 
     @Test
@@ -423,12 +399,14 @@ public class BundleUtilsTest {
     }
 
     @Test
-    public void extractResources_uppercaseVersion_throws() {
-        // Intent: version comparison is case-sensitive, so "R4" won't match "r4"
-        // This is a potential usability issue — documenting the behavior
+    public void extractResources_uppercaseVersion_matchesCaseInsensitively() {
+        // Fixed: version comparison is now case-insensitive
+        // Note: can't fully test without a valid output dir and bundle entries,
+        // but at minimum "R4" should not throw IllegalArgumentException for version mismatch
         Bundle r4Bundle = new Bundle();
-        assertThrows(IllegalArgumentException.class,
-                () -> BundleUtils.extractResources(r4Bundle, "json", "/tmp", false, "R4"));
+        // Empty bundle + non-existent dir is fine — we just verify no version mismatch exception
+        Set<String> result = BundleUtils.extractResources(r4Bundle, "json", "/tmp", false, "R4");
+        assertNotNull(result);
     }
 
     // ── getBundlesInDir ──

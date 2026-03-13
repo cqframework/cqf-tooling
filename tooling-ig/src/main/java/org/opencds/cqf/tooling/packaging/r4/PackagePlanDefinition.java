@@ -180,7 +180,7 @@ public class PackagePlanDefinition extends org.opencds.cqf.tooling.packaging.Pac
                         "Group-" + testPackage.getGroup().getIdElement().getIdPart());
             }
             testPackage.getTests().forEach(test -> {
-                dependencies.addAll(BundleUtils.getR4ResourcesFromBundle((Bundle) test));
+                dependencies.addAll(BundleUtils.getResourcesFromBundle(getFhirContext(), (Bundle) test));
                 IOUtils.writeBundle(
                         test,
                         planDefinitionFilesOutputPath,

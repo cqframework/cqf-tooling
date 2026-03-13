@@ -162,7 +162,7 @@ public class PackageMeasure extends Package<Measure> {
         if (isIncludeTests() && testPackage != null) {
             logger.info("Packaging {} Tests...", testPackage.getTests().size());
             testPackage.getTests().forEach(test -> {
-                dependencies.addAll(BundleUtils.getR4ResourcesFromBundle((Bundle) test));
+                dependencies.addAll(BundleUtils.getResourcesFromBundle(getFhirContext(), (Bundle) test));
                 IOUtils.writeBundle(
                         test,
                         measureFilesOutputPath,

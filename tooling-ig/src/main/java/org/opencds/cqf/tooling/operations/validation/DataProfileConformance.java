@@ -98,6 +98,8 @@ public class DataProfileConformance implements ExecutableOperation {
     public List<IBaseResource> validatePatientData(IBaseBundle patientData) {
         List<IBaseResource> validatedResources = new ArrayList<>();
 
+        // TODO: BundleUtil.toListOfResources includes nested bundles as opaque objects without recursing.
+        //  If a nested bundle is present, its inner resources will not be validated.
         for (var patientDataResource : BundleUtil.toListOfResources(fhirContext, patientData)) {
             ValidationOptions options = new ValidationOptions();
             String resourceType = patientDataResource.fhirType();

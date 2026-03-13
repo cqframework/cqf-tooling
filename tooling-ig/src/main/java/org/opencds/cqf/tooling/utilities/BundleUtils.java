@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.BundleUtil;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,8 +16,6 @@ import java.util.stream.Stream;
 import org.cqframework.fhir.utilities.exception.IGInitializationException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.tooling.common.SoftwareSystem;
 import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
 
@@ -87,10 +86,11 @@ public class BundleUtils {
         }
         if (identifiers != null && !identifiers.isEmpty()) {
             org.hl7.fhir.r4.model.Identifier identifier = (org.hl7.fhir.r4.model.Identifier) identifiers.get(0);
-            if (identifier.hasValue()) {
-                identifier.setValue(identifier.getValue() + "-bundle");
+            org.hl7.fhir.r4.model.Identifier bundleIdentifier = identifier.copy();
+            if (bundleIdentifier.hasValue()) {
+                bundleIdentifier.setValue(bundleIdentifier.getValue() + "-bundle");
             }
-            bundle.setIdentifier(identifier);
+            bundle.setIdentifier(bundleIdentifier);
         }
 
         for (IBaseResource resource : resources) {
@@ -229,10 +229,10 @@ public class BundleUtils {
     public static Set<String> extractResources(
             Object bundle, String encoding, String outputDir, boolean suppressNarrative, String version) {
         Set<String> extractedResources = new HashSet<>();
-        if (version.equals("stu3") && bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
+        if (version.equalsIgnoreCase("stu3") && bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
             extractedResources = new HashSet<>(BundleUtils.extractStu3Resources(
                     (org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative));
-        } else if (version.equals("r4") && bundle instanceof org.hl7.fhir.r4.model.Bundle) {
+        } else if (version.equalsIgnoreCase("r4") && bundle instanceof org.hl7.fhir.r4.model.Bundle) {
             extractedResources = new HashSet<>(BundleUtils.extractR4Resources(
                     (org.hl7.fhir.r4.model.Bundle) bundle, encoding, outputDir, suppressNarrative));
         } else {
@@ -241,28 +241,10 @@ public class BundleUtils {
         return extractedResources;
     }
 
-    public static List<Resource> getR4ResourcesFromBundle(Bundle bundle) {
-        ArrayList<Resource> resourceArrayList = new ArrayList<>();
-        for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-            org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
-            // TODO: How to handle nested bundles? Recursively or skip? Skipping for now...
-            if (entryResource != null && !(entryResource instanceof Bundle)) {
-                resourceArrayList.add(entryResource);
-            }
-        }
-        return resourceArrayList;
-    }
-
-    public static List<org.hl7.fhir.dstu3.model.Resource> getStu3ResourcesFromBundle(
-            org.hl7.fhir.dstu3.model.Bundle bundle) {
-        ArrayList<org.hl7.fhir.dstu3.model.Resource> resourceArrayList = new ArrayList<>();
-        for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-            org.hl7.fhir.dstu3.model.Resource entryResource = entry.getResource();
-            if (entryResource != null) {
-                resourceArrayList.add(entryResource);
-            }
-        }
-        return resourceArrayList;
+    public static List<IBaseResource> getResourcesFromBundle(FhirContext fhirContext, IBaseBundle bundle) {
+        return BundleUtil.toListOfResources(fhirContext, bundle).stream()
+                .filter(r -> !resourceIsABundle(r))
+                .collect(Collectors.toList());
     }
 
     public static IBaseBundle getBundleOfResourceTypeFromDirectory(

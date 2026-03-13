@@ -179,7 +179,7 @@ public class TestCaseProcessor {
                                 if ((resource.fhirType().equalsIgnoreCase(BUNDLE_TYPE))
                                         && (version.getVersion() == FhirVersionEnum.R4)) {
                                     org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
-                                    var bundleResources = BundleUtils.getR4ResourcesFromBundle(bundle);
+                                    var bundleResources = BundleUtils.getResourcesFromBundle(fhirContext, bundle);
                                     for (IBaseResource bundleResource : bundleResources) {
                                         if (bundleResource.fhirType().equalsIgnoreCase(PATIENT_TYPE)) {
                                             org.hl7.fhir.r4.model.Patient patient =

@@ -18,6 +18,7 @@ public class CqlTranslatorException extends Exception implements Serializable {
 
     public CqlTranslatorException(Exception e) {
         super("CQL Translation Error(s): " + e.getMessage());
+        this.errors.add(new CqlCompilerException(getMessage()));
     }
 
     public CqlTranslatorException(List<CqlCompilerException> errors) {
@@ -34,12 +35,10 @@ public class CqlTranslatorException extends Exception implements Serializable {
 
     public CqlTranslatorException(String message) {
         super("CQL Translation Error(s): " + message);
+        this.errors.add(new CqlCompilerException(getMessage()));
     }
 
     public List<CqlCompilerException> getErrors() {
-        if (errors.isEmpty()) {
-            errors.add(new CqlCompilerException(this.getMessage()));
-        }
         return errors;
     }
 }

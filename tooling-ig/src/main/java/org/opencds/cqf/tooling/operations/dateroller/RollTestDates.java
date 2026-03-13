@@ -139,6 +139,8 @@ public class RollTestDates implements ExecutableOperation {
 
     private IBaseBundle updateBundleDates(IBaseBundle bundle) {
         BundleBuilder builder = new BundleBuilder(fhirContext);
+        // TODO: BundleUtil.toListOfResources includes nested bundles as opaque objects without recursing.
+        //  If a nested bundle is present, its inner resources' dates will not be rolled.
         BundleUtil.toListOfResources(fhirContext, bundle).forEach(resource -> {
             getAllDateElements(fhirContext, resource, getDateClasses(fhirContext));
             builder.addCollectionEntry(resource);
