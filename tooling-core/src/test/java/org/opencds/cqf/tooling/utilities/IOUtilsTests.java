@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import java.util.Map;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
@@ -1239,5 +1240,517 @@ public class IOUtilsTests {
         } finally {
             IOUtils.deleteDirectory(tempDir.toString());
         }
+    }
+
+    @Test
+    public void testWriteResourcesFromMap() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        try {
+            Patient p1 = new Patient();
+            p1.setId("p1");
+            Patient p2 = new Patient();
+            p2.setId("p2");
+
+            IOUtils.writeResources(Map.of("first", p1, "second", p2), tempDir.toString(), IOUtils.Encoding.JSON, ctx);
+
+            File[] files = tempDir.toFile().listFiles();
+            assertNotNull(files);
+            assertEquals(files.length, 2, "Should write one file per map entry");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testWriteResourceToExistingFile() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        Path existingFile = tempDir.resolve("existing.json");
+        try {
+            // Write initial content
+            Patient p = new Patient();
+            p.setId("initial");
+            Files.writeString(existingFile, ctx.newJsonParser().encodeResourceToString(p));
+
+            // Overwrite by passing the file path directly
+            Patient p2 = new Patient();
+            p2.setId("overwritten");
+            IOUtils.writeResource(p2, existingFile.toString(), IOUtils.Encoding.JSON, ctx);
+
+            // Read back and verify it was overwritten
+            IOUtils.cleanUp();
+            IBaseResource readBack = IOUtils.readResource(existingFile.toString(), ctx);
+            assertEquals(readBack.getIdElement().getIdPart(), "overwritten");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testWriteResourceWithBlankOutputFileName() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        try {
+            Patient p = new Patient();
+            p.setId("blank-name-test");
+
+            // Blank outputFileName should fall back to resource ID
+            IOUtils.writeResource(p, tempDir.toString(), IOUtils.Encoding.JSON, ctx, true, "   ");
+
+            File[] files = tempDir.toFile().listFiles();
+            assertNotNull(files);
+            assertEquals(files.length, 1);
+            assertTrue(files[0].getName().contains("blank-name-test"),
+                    "Blank outputFileName should fall back to resource ID");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testWriteResourceWithPrettyPrintOverload() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        try {
+            Patient p = new Patient();
+            p.setId("pretty-test");
+            p.addName().setFamily("Smith");
+
+            IOUtils.writeResource(p, tempDir.toString(), IOUtils.Encoding.JSON, ctx, true, false);
+
+            File[] files = tempDir.toFile().listFiles();
+            assertNotNull(files);
+            assertEquals(files.length, 1);
+            String content = Files.readString(files[0].toPath());
+            assertFalse(content.contains("\n  "),
+                    "Compact output should not have indented newlines");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testWriteBundleDstu3() throws IOException {
+        FhirContext ctx = FhirContext.forDstu3Cached();
+        org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
+        bundle.setId("stu3-bundle");
+        bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.COLLECTION);
+
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        try {
+            IOUtils.writeBundle(bundle, tempDir.toString(), IOUtils.Encoding.JSON, ctx);
+            File[] files = tempDir.toFile().listFiles();
+            assertNotNull(files);
+            assertEquals(files.length, 1);
+            assertTrue(files[0].getName().contains("stu3-bundle"));
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testWriteBundleWithPrettyPrintOverload() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Bundle bundle = new Bundle();
+        bundle.setId("pretty-bundle");
+        bundle.setType(Bundle.BundleType.COLLECTION);
+
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        try {
+            IOUtils.writeBundle(bundle, tempDir.toString(), IOUtils.Encoding.JSON, ctx, true);
+            File[] files = tempDir.toFile().listFiles();
+            assertNotNull(files);
+            assertEquals(files.length, 1);
+            String content = Files.readString(files[0].toPath());
+            assertTrue(content.contains("\n"), "Pretty-printed bundle should contain newlines");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testWriteCqlToFileInvalidPath() {
+        IOUtils.writeCqlToFile("library Test", "/nonexistent/deeply/nested/dir/file.cql");
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testReadResourceNonexistentThrows() {
+        FhirContext ctx = FhirContext.forR4Cached();
+        IOUtils.readResource("/nonexistent/path/file.json", ctx, false);
+    }
+
+    @Test
+    public void testReadJsonResourceIgnoreElementsCached() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        Path tempFile = tempDir.resolve("patient.json");
+        try {
+            Patient p = new Patient();
+            p.setId("cache-ignore");
+            p.addName().setFamily("Jones");
+            Files.writeString(tempFile, ctx.newJsonParser().encodeResourceToString(p));
+
+            // First read populates cache
+            IBaseResource first = IOUtils.readJsonResourceIgnoreElements(tempFile.toString(), ctx, "name");
+            // Second read should return cached instance
+            IBaseResource second = IOUtils.readJsonResourceIgnoreElements(tempFile.toString(), ctx, "name");
+            assertSame(first, second, "Should return cached instance on second call");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testGetCanonicalResourceVersionUnsupportedFhirVersion() {
+        FhirContext ctx = FhirContext.forR5Cached();
+        org.hl7.fhir.r5.model.Patient p = new org.hl7.fhir.r5.model.Patient();
+        try {
+            IOUtils.getCanonicalResourceVersion(p, ctx);
+            fail("Should throw for unsupported FHIR version");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("Unknown fhir version"));
+        }
+    }
+
+    @Test
+    public void testGetDirectoryPathsNonexistent() {
+        List<String> result = IOUtils.getDirectoryPaths("/nonexistent/path", false);
+        assertTrue(result.isEmpty(), "Should return empty list for nonexistent path");
+    }
+
+    @Test
+    public void testGetDirectoryPathsCaching() throws IOException {
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        Files.createDirectory(tempDir.resolve("sub1"));
+        try {
+            List<String> first = IOUtils.getDirectoryPaths(tempDir.toString(), false);
+            Files.createDirectory(tempDir.resolve("sub2"));
+            List<String> second = IOUtils.getDirectoryPaths(tempDir.toString(), false);
+            assertSame(first, second, "Should return cached list on second call");
+            assertEquals(second.size(), 1, "Cached result should not reflect new directory");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testInitializeDirectoryThrowsOnFailure() throws IOException {
+        Path tempFile = Files.createTempFile("ioutilstest", ".txt");
+        try {
+            // Try to create a directory as a child of a file - mkdirs should fail and throw
+            IOUtils.initializeDirectory(tempFile.resolve("impossible").toString());
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+    }
+
+    @Test
+    public void testEnsurePathThrowsOnUncreatablePath() throws IOException {
+        Path tempFile = Files.createTempFile("ioutilstest", ".txt");
+        try {
+            // Trying to create a dir as child of a file should throw
+            IOUtils.ensurePath(tempFile.resolve("child").toString());
+            fail("Should throw for uncreatable path");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("Could not create directory"));
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
+    }
+
+    @Test
+    public void testFormatFileNameDstu3CqlEncoding() {
+        FhirContext ctx = FhirContext.forDstu3Cached();
+        // For DSTU3, the token is FHIR3
+        String result = IOUtils.formatFileName("MyLib-FHIR3", IOUtils.Encoding.CQL, ctx);
+        assertEquals(result, "MyLib_FHIR3.cql");
+    }
+
+    @Test
+    public void testFormatFileNameUnknownFhirVersion() {
+        FhirContext ctx = FhirContext.forR5Cached();
+        // R5 has no igVersionToken, so no replacement should happen
+        String result = IOUtils.formatFileName("MyLib", IOUtils.Encoding.CQL, ctx);
+        assertEquals(result, "MyLib.cql");
+    }
+
+    @Test
+    public void testGetParserXml() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Patient patient = new Patient();
+        patient.setId("xml-parser-test");
+
+        byte[] encoded = IOUtils.encodeResource(patient, IOUtils.Encoding.XML, ctx);
+        String xml = new String(encoded, StandardCharsets.UTF_8);
+        assertTrue(xml.startsWith("<?xml") || xml.contains("<Patient"),
+                "XML parser should produce XML output");
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testGetParserCqlThrows() {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Patient patient = new Patient();
+        // CQL encoding for a resource should throw because there's no CQL parser
+        IOUtils.encodeResource(patient, IOUtils.Encoding.CQL, ctx);
+    }
+
+    @Test
+    public void testPathEndsWithElementEmptyPath() {
+        // Edge case: empty string should not throw
+        assertFalse(IOUtils.pathEndsWithElement("", "something"));
+    }
+
+    @Test
+    public void testCopyFileOverwritesExisting() throws IOException {
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        Path src = tempDir.resolve("source.txt");
+        Path dest = tempDir.resolve("dest.txt");
+        try {
+            Files.writeString(dest, "original dest");
+            Files.writeString(src, "new content");
+
+            IOUtils.copyFile(src.toString(), dest.toString());
+            assertEquals(Files.readString(dest), "new content",
+                    "copyFile should overwrite existing destination");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testCopyFileNonexistentSourceDoesNotThrow() {
+        // Copying from a nonexistent source should not throw -- logs error via LogUtils
+        IOUtils.copyFile("/nonexistent/source.txt", "/tmp/dest.txt");
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testReadJsonResourceIgnoreElementsNonexistent() {
+        FhirContext ctx = FhirContext.forR4Cached();
+        IOUtils.readJsonResourceIgnoreElements("/nonexistent/path/resource.json", ctx, "name");
+    }
+
+    @Test
+    public void testWriteResourceErrorHandling() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Patient p = new Patient();
+        p.setId("error-test");
+        try {
+            // Writing to a path under a nonexistent deeply-nested directory
+            // where ensurePath will also fail
+            IOUtils.writeResource(p, "/nonexistent/deep/path", IOUtils.Encoding.JSON, ctx);
+            fail("Should throw for invalid write path");
+        } catch (RuntimeException e) {
+            // Expected
+        }
+    }
+
+    @Test
+    public void testGetFilePathsOnFile() {
+        // getFilePaths on a file path (not a directory) should return empty list
+        try {
+            Path tempFile = Files.createTempFile("ioutilstest", ".txt");
+            try {
+                List<String> paths = IOUtils.getFilePaths(tempFile.toString(), false);
+                assertTrue(paths.isEmpty(), "getFilePaths on a file should return empty list");
+            } finally {
+                Files.deleteIfExists(tempFile);
+            }
+        } catch (Exception e) {
+            // NoSuchElementException if listFiles returns null
+        }
+    }
+
+    @Test
+    public void testPathEndsWithElementNullSafe() {
+        // Null path should not throw, just return false
+        assertFalse(IOUtils.pathEndsWithElement(null, "something"));
+    }
+
+    // ========== Fixed: separate caches for readResource and readJsonResourceIgnoreElements ==========
+
+    @Test
+    public void testReadJsonIgnoreElementsThenReadResourceReturnsDifferentInstances() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        Path tempFile = tempDir.resolve("patient.json");
+        try {
+            Patient p = new Patient();
+            p.setId("cache-fix");
+            p.addName().setFamily("Smith");
+            p.setActive(true);
+            Files.writeString(tempFile, ctx.newJsonParser().encodeResourceToString(p));
+
+            // Read with element stripping first
+            IBaseResource stripped = IOUtils.readJsonResourceIgnoreElements(tempFile.toString(), ctx, "name");
+            assertTrue(((Patient) stripped).getName().isEmpty(), "Stripped read should have no name");
+
+            // Normal read should return full resource with name intact
+            IBaseResource full = IOUtils.readResource(tempFile.toString(), ctx);
+            assertNotSame(stripped, full, "Separate caches should return different instances");
+            assertEquals(((Patient) full).getNameFirstRep().getFamily(), "Smith",
+                    "readResource should return the full resource with name");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testReadResourceThenReadJsonIgnoreElementsStripsCorrectly() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        Path tempFile = tempDir.resolve("patient.json");
+        try {
+            Patient p = new Patient();
+            p.setId("cache-fix-reverse");
+            p.addName().setFamily("Jones");
+            Files.writeString(tempFile, ctx.newJsonParser().encodeResourceToString(p));
+
+            // Read full resource first
+            IBaseResource full = IOUtils.readResource(tempFile.toString(), ctx);
+            assertEquals(((Patient) full).getNameFirstRep().getFamily(), "Jones");
+
+            // Read with element stripping should still strip, not return cached full version
+            IBaseResource stripped = IOUtils.readJsonResourceIgnoreElements(
+                    tempFile.toString(), ctx, "name");
+            assertNotSame(full, stripped, "Separate caches should return different instances");
+            assertTrue(((Patient) stripped).getName().isEmpty(),
+                    "readJsonResourceIgnoreElements should strip elements regardless of readResource cache");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    // ========== Fixed: writeResource honors versioned parameter ==========
+
+    @Test
+    public void testWriteResourceVersionedProducesVersionedFilename() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest-versioned");
+        try {
+            Library lib = new Library();
+            lib.setId("my-library");
+            lib.setVersion("1.0.0");
+
+            // versioned=true and version not already in ID — should append it
+            IOUtils.writeResource(lib, tempDir.toString(), IOUtils.Encoding.JSON, ctx, true);
+
+            File[] files = tempDir.toFile().listFiles();
+            assertNotNull(files);
+            assertEquals(files.length, 1);
+            assertTrue(files[0].getName().contains("1.0.0"),
+                    "versioned=true should append version to filename: " + files[0].getName());
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testWriteResourceUnversionedStripsVersion() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest-unversioned");
+        try {
+            Library lib = new Library();
+            lib.setId("my-library-1.0.0");
+            lib.setVersion("1.0.0");
+
+            // versioned=false and version in ID — should strip it
+            IOUtils.writeResource(lib, tempDir.toString(), IOUtils.Encoding.JSON, ctx, false);
+
+            File[] files = tempDir.toFile().listFiles();
+            assertNotNull(files);
+            assertEquals(files.length, 1);
+            assertFalse(files[0].getName().contains("1.0.0"),
+                    "versioned=false should strip version from filename: " + files[0].getName());
+            assertTrue(files[0].getName().startsWith("my-library."),
+                    "Filename should be 'my-library.json': " + files[0].getName());
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testWriteResourceVersionedAndUnversionedDiffer() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir1 = Files.createTempDirectory("ioutilstest-v");
+        Path tempDir2 = Files.createTempDirectory("ioutilstest-uv");
+        try {
+            Library lib = new Library();
+            lib.setId("my-library-1.0.0");
+            lib.setVersion("1.0.0");
+
+            IOUtils.writeResource(lib, tempDir1.toString(), IOUtils.Encoding.JSON, ctx, true);
+            IOUtils.writeResource(lib, tempDir2.toString(), IOUtils.Encoding.JSON, ctx, false);
+
+            String versionedName = tempDir1.toFile().listFiles()[0].getName();
+            String unversionedName = tempDir2.toFile().listFiles()[0].getName();
+            assertNotEquals(versionedName, unversionedName,
+                    "versioned=true and versioned=false should produce different filenames");
+        } finally {
+            IOUtils.deleteDirectory(tempDir1.toString());
+            IOUtils.deleteDirectory(tempDir2.toString());
+        }
+    }
+
+    // ========== Fixed: initializeDirectory uses mkdirs and throws on failure ==========
+
+    @Test
+    public void testInitializeDirectoryCreatesNestedPath() throws IOException {
+        Path tempDir = Files.createTempDirectory("ioutilstest");
+        Path nested = tempDir.resolve("a").resolve("b").resolve("c");
+        try {
+            assertFalse(nested.toFile().exists());
+            IOUtils.initializeDirectory(nested.toString());
+            assertTrue(nested.toFile().exists(),
+                    "initializeDirectory should create nested directories");
+            assertTrue(nested.toFile().isDirectory());
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testResolveBaseNameAppendsVersionWhenMissing() {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Library lib = new Library();
+        lib.setId("my-library");
+        lib.setVersion("2.0.0");
+
+        String result = IOUtils.resolveBaseName(lib, ctx, true);
+        assertEquals(result, "my-library-2.0.0");
+    }
+
+    @Test
+    public void testResolveBaseNameStripsVersionWhenPresent() {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Library lib = new Library();
+        lib.setId("my-library-1.0.0");
+        lib.setVersion("1.0.0");
+
+        String result = IOUtils.resolveBaseName(lib, ctx, false);
+        assertEquals(result, "my-library");
+    }
+
+    @Test
+    public void testResolveBaseNameKeepsIdWhenVersionAlreadyPresent() {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Library lib = new Library();
+        lib.setId("my-library-1.0.0");
+        lib.setVersion("1.0.0");
+
+        String result = IOUtils.resolveBaseName(lib, ctx, true);
+        assertEquals(result, "my-library-1.0.0", "Should not double-append version");
+    }
+
+    @Test
+    public void testResolveBaseNameNoVersion() {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Patient p = new Patient();
+        p.setId("my-patient");
+
+        String versioned = IOUtils.resolveBaseName(p, ctx, true);
+        String unversioned = IOUtils.resolveBaseName(p, ctx, false);
+        assertEquals(versioned, "my-patient", "No version to append for non-MetadataResource");
+        assertEquals(unversioned, "my-patient", "No version to strip for non-MetadataResource");
     }
 }

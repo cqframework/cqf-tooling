@@ -141,7 +141,7 @@ public class IOUtils {
 
             String baseName;
             if (outputFileName == null || outputFileName.isBlank()) {
-                baseName = resource.getIdElement().getIdPart();
+                baseName = resolveBaseName(resource, fhirContext, Boolean.TRUE.equals(versioned));
             } else {
                 baseName = outputFileName;
             }
@@ -350,6 +350,8 @@ public class IOUtils {
         return resources;
     }
 
+    private static final Map<String, IBaseResource> cachedStrippedResources = new LinkedHashMap<>();
+
     public static IBaseResource readJsonResourceIgnoreElements(
             String path, FhirContext fhirContext, String... elements) {
         Encoding encoding = getEncoding(path);
@@ -357,8 +359,8 @@ public class IOUtils {
             return null;
         }
 
-        if (cachedResources.containsKey(path)) {
-            return cachedResources.get(path);
+        if (cachedStrippedResources.containsKey(path)) {
+            return cachedStrippedResources.get(path);
         }
 
         IParser parser = getParser(encoding, fhirContext);
@@ -366,7 +368,7 @@ public class IOUtils {
             JsonObject obj = JsonParser.parseReader(reader).getAsJsonObject();
             Arrays.stream(elements).forEach(obj::remove);
             IBaseResource resource = parser.parseResource(obj.toString());
-            cachedResources.put(path, resource);
+            cachedStrippedResources.put(path, resource);
             return resource;
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -455,13 +457,7 @@ public class IOUtils {
         return filePaths;
     }
 
-    public static String getResourceFileName(
-            String resourcePath,
-            IBaseResource resource,
-            Encoding encoding,
-            FhirContext fhirContext,
-            boolean versioned,
-            boolean prefixed) {
+    public static String resolveBaseName(IBaseResource resource, FhirContext fhirContext, boolean versioned) {
         String resourceVersion = IOUtils.getCanonicalResourceVersion(resource, fhirContext);
         String filename = resource.getIdElement().getIdPart();
         if (!versioned && resourceVersion != null) {
@@ -475,7 +471,17 @@ public class IOUtils {
                 filename = filename + "-" + resourceVersion;
             }
         }
+        return filename;
+    }
 
+    public static String getResourceFileName(
+            String resourcePath,
+            IBaseResource resource,
+            Encoding encoding,
+            FhirContext fhirContext,
+            boolean versioned,
+            boolean prefixed) {
+        String filename = resolveBaseName(resource, fhirContext, versioned);
         String resourceType = resource.fhirType().toLowerCase();
         return Paths.get(resourcePath, resourceType, (prefixed ? (resourceType + "-") : "") + filename)
                 + getFileExtension(encoding);
@@ -535,8 +541,8 @@ public class IOUtils {
             }
         }
 
-        if (!directory.mkdir()) {
-            logger.warn("Unable to initialize directory at {}", path);
+        if (!directory.mkdirs()) {
+            throw new RuntimeException("Unable to initialize directory at " + path);
         }
     }
 
@@ -675,6 +681,7 @@ public class IOUtils {
     public static void cleanUp() {
         alreadyCopied.clear();
         cachedResources.clear();
+        cachedStrippedResources.clear();
         cachedFilePaths.clear();
         cachedDirectoryPaths.clear();
     }
