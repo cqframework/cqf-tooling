@@ -474,4 +474,25 @@ public class CanonicalUtilsTest {
         assertEquals(vi.getId(), "my-lib");
         assertNull(vi.getVersion(), "Empty version string should be normalized to null");
     }
+
+    @Test
+    public void toVersionedIdentifier_trailingPipe_versionNormalizedToNull() {
+        // Trailing pipe means getVersion returns "" which should be normalized to null
+        VersionedIdentifier vi =
+                CanonicalUtils.toVersionedIdentifier("http://example.com/fhir/Library/my-lib|");
+        assertEquals(vi.getId(), "my-lib");
+        assertNull(vi.getVersion(), "Empty version after pipe should normalize to null");
+        assertEquals(vi.getSystem(), "http://example.com/fhir");
+    }
+
+    @Test
+    public void toVersionedIdentifierAnyResource_rootRelativeUrl_emptyBaseNormalizedToNull() {
+        // URL like "/Measure/my-measure|1.0" — getHead returns "/Measure",
+        // then getHead("/Measure") returns "" which should normalize to null
+        VersionedIdentifier vi =
+                CanonicalUtils.toVersionedIdentifierAnyResource("/Measure/my-measure|1.0");
+        assertEquals(vi.getId(), "my-measure");
+        assertEquals(vi.getVersion(), "1.0");
+        assertNull(vi.getSystem(), "Empty base URL should normalize to null");
+    }
 }

@@ -115,15 +115,13 @@ public class ExecutableOperationAdapter extends org.opencds.cqf.tooling.Operatio
     }
 
     private Method findSetter(String name, Class<?> paramType) {
+        // getDeclaredMethod is consistent with OperationUtils.getParamType, which uses
+        // getDeclaredMethods() to validate the method exists before this is called.
         try {
-            return delegate.getClass().getMethod(name, paramType);
+            return delegate.getClass().getDeclaredMethod(name, paramType);
         } catch (NoSuchMethodException e) {
-            try {
-                return delegate.getClass().getDeclaredMethod(name, paramType);
-            } catch (NoSuchMethodException ex) {
-                throw new InvalidOperationArgs(
-                        String.format("Setter method %s(%s) not found", name, paramType.getSimpleName()));
-            }
+            throw new InvalidOperationArgs(
+                    String.format("Setter method %s(%s) not found", name, paramType.getSimpleName()));
         }
     }
 }

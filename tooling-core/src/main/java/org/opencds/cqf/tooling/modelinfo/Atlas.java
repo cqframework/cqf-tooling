@@ -129,30 +129,6 @@ public class Atlas {
         }
     }
 
-    private String urlToId(String url) {
-        int index = url.lastIndexOf("/StructureDefinition/");
-        if (index > -1) {
-            return url.substring(index + 21, url.length());
-        }
-
-        return url;
-    }
-
-    @SuppressWarnings("unused")
-    private Map<String, StructureDefinition> indexResources(List<StructureDefinition> resources) {
-        Map<String, StructureDefinition> resourcesById = new HashMap<String, StructureDefinition>();
-        for (StructureDefinition sd : resources) {
-            String id = urlToId(sd.getUrl());
-            if (!resourcesById.containsKey(id)) {
-                resourcesById.put(id, sd);
-            } else {
-                logger.info("Duplicate url found for: {}", sd.getUrl());
-            }
-        }
-
-        return resourcesById;
-    }
-
     private void indexCapabilityStatement(CapabilityStatement capabilityStatement) {
         if (!resources.containsKey(capabilityStatement.getUrl())) {
             resources.put(capabilityStatement.getUrl(), capabilityStatement);

@@ -270,6 +270,100 @@ public class ExecutableOperationAdapterTest {
                 "Value containing '=' should be preserved fully");
     }
 
+    // Setter not found on delegate — exercises findSetter error path
+
+    @Operation(name = "BadSetterOp")
+    static class BadSetterOperation implements ExecutableOperation {
+        @OperationParam(
+                alias = {"input", "i"},
+                setter = "setNonExistentMethod",
+                required = true,
+                description = "Input with bad setter")
+        private String input;
+
+        @Override
+        public void execute() {}
+    }
+
+    @Test
+    public void execute_missingSetterMethod_throws() {
+        BadSetterOperation op = new BadSetterOperation();
+        ExecutableOperationAdapter adapter = new ExecutableOperationAdapter(op);
+
+        assertThrows(InvalidOperationArgs.class, () -> adapter.execute(new String[] {"-input=hello"}));
+    }
+
+    // Protected setter — exercises findSetter getDeclaredMethod fallback path
+    // getMethod() only finds public methods, so it misses protected setters.
+    // getDeclaredMethod() finds them.
+
+    @Operation(name = "ProtectedSetterOp")
+    static class ProtectedSetterOperation implements ExecutableOperation {
+        @OperationParam(
+                alias = {"input", "i"},
+                setter = "setInput",
+                required = true,
+                description = "Input with protected setter")
+        private String input;
+
+        private boolean executed = false;
+
+        protected void setInput(String value) {
+            this.input = value;
+        }
+
+        String getInput() {
+            return input;
+        }
+
+        boolean isExecuted() {
+            return executed;
+        }
+
+        @Override
+        public void execute() {
+            executed = true;
+        }
+    }
+
+    @Test
+    public void execute_protectedSetter_foundViaDeclaredMethod() {
+        ProtectedSetterOperation op = new ProtectedSetterOperation();
+        ExecutableOperationAdapter adapter = new ExecutableOperationAdapter(op);
+
+        adapter.execute(new String[] {"-input=hello"});
+
+        assertEquals(op.getInput(), "hello", "Protected setter should be found via getDeclaredMethod");
+        assertTrue(op.isExecuted());
+    }
+
+    // Setter that throws during invocation — exercises invokeSetter catch block
+
+    @Operation(name = "ThrowingSetterOp")
+    static class ThrowingSetterOperation implements ExecutableOperation {
+        @OperationParam(
+                alias = {"input", "i"},
+                setter = "setInput",
+                required = true,
+                description = "Input with throwing setter")
+        private String input;
+
+        public void setInput(String value) {
+            throw new RuntimeException("setter deliberately fails");
+        }
+
+        @Override
+        public void execute() {}
+    }
+
+    @Test
+    public void execute_setterThrows_wrapsAsInvalidOperationArgs() {
+        ThrowingSetterOperation op = new ThrowingSetterOperation();
+        ExecutableOperationAdapter adapter = new ExecutableOperationAdapter(op);
+
+        assertThrows(InvalidOperationArgs.class, () -> adapter.execute(new String[] {"-input=hello"}));
+    }
+
     // Value with spaces
 
     @Test

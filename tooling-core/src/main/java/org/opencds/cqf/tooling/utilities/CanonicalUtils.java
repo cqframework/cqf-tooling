@@ -229,10 +229,9 @@ public class CanonicalUtils {
         if (resourceName == null || !resourceName.equals("Library")) {
             throw new InvalidCanonical("Cannot extract versioned identifier from a non-library canonical");
         }
+        // getHead(head) cannot return "" here: that would require head to start with "/",
+        // which would make getTail(head) return "" above, triggering the InvalidCanonical throw.
         String base = getHead(head);
-        if ("".equals(base)) {
-            base = null;
-        }
 
         return new VersionedIdentifier().withSystem(base).withId(id).withVersion(version);
     }

@@ -1753,4 +1753,64 @@ public class IOUtilsTests {
         assertEquals(versioned, "my-patient", "No version to append for non-MetadataResource");
         assertEquals(unversioned, "my-patient", "No version to strip for non-MetadataResource");
     }
+
+    @Test
+    public void testResolveBaseNameUnversionedButVersionNotInId() {
+        // When !versioned and version exists but is NOT in the ID string,
+        // the filename should be left unchanged (indexOf returns -1)
+        FhirContext ctx = FhirContext.forR4Cached();
+        Library lib = new Library();
+        lib.setId("my-library");
+        lib.setVersion("1.0.0");
+
+        String result = IOUtils.resolveBaseName(lib, ctx, false);
+        assertEquals(result, "my-library", "Version not in ID, so nothing to strip");
+    }
+
+    @Test
+    public void testGetResourcesOfTypeInDirectoryFilters() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest-type-filter");
+        try {
+            // Write a Patient — then request only Library resources
+            Patient p = new Patient();
+            p.setId("test-patient");
+            p.addName().setFamily("Smith");
+            Files.writeString(tempDir.resolve("patient.json"),
+                    ctx.newJsonParser().encodeResourceToString(p));
+
+            List<IBaseResource> libraries = IOUtils.getResourcesOfTypeInDirectory(
+                    tempDir.toString(), ctx, Library.class, false);
+            assertTrue(libraries.isEmpty(), "Patient should not match Library filter");
+
+            List<IBaseResource> patients = IOUtils.getResourcesOfTypeInDirectory(
+                    tempDir.toString(), ctx, Patient.class, false);
+            assertEquals(patients.size(), 1, "Patient should match Patient filter");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
+
+    @Test
+    public void testGetResourcesInDirectoryReturnsAll() throws IOException {
+        FhirContext ctx = FhirContext.forR4Cached();
+        Path tempDir = Files.createTempDirectory("ioutilstest-all-resources");
+        try {
+            Patient p = new Patient();
+            p.setId("pt1");
+            Files.writeString(tempDir.resolve("patient.json"),
+                    ctx.newJsonParser().encodeResourceToString(p));
+
+            Library lib = new Library();
+            lib.setId("lib1");
+            Files.writeString(tempDir.resolve("library.json"),
+                    ctx.newJsonParser().encodeResourceToString(lib));
+
+            List<IBaseResource> all = IOUtils.getResourcesInDirectory(
+                    tempDir.toString(), ctx, false);
+            assertEquals(all.size(), 2, "Should return all resources regardless of type");
+        } finally {
+            IOUtils.deleteDirectory(tempDir.toString());
+        }
+    }
 }
