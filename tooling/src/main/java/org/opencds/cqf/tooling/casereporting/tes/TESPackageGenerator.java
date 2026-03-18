@@ -1088,20 +1088,6 @@ public class TESPackageGenerator extends Operation {
                 rowCounter++;
             }
         }
-        //        for (Coding coding : baseList) {
-        //            String code = coding.getCode().trim();
-        //            if (comparisonList.stream().noneMatch(rscoding ->
-        // rscoding.getCode().trim().equalsIgnoreCase(code))) {
-        //                Row row = sheet.createRow(rowCounter);
-        //                Cell systemCell = row.createCell(0);
-        //                systemCell.setCellValue(coding.getSystem());
-        //                Cell codeCell = row.createCell(1);
-        //                codeCell.setCellValue(coding.getCode());
-        //                Cell displayCell = row.createCell(2);
-        //                displayCell.setCellValue(coding.getDisplay());
-        //                rowCounter++;
-        //            }
-        //        }
     }
 
     // Model
@@ -1125,10 +1111,6 @@ public class TESPackageGenerator extends Operation {
     }
 
     private static class ConditionGrouperEntry extends TESGrouperEntry {
-        //        private String conditionGroupingName;
-        //        public String getConditionGroupingName() {
-        //            return conditionGroupingName;
-        //        }
 
         private String reportingSpecificationGrouperTitle;
 
