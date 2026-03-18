@@ -13,7 +13,6 @@ public class CaseReporting {
     public static final String MANIFESTCANONICALTAIL = "tes-content-library";
     public static final String MANIFESTURL = CANONICALBASE + "/" + MANIFESTCANONICALTAIL;
     public static final String VSMUSAGECONTEXTTYPESYSTEMURL = "http://aphl.org/fhir/vsm/CodeSystem/usage-context-type";
-    public static final String USAGECONTEXTTYPESYSTEMURL = "http://terminology.hl7.org/CodeSystem/usage-context-type";
     public static final String USPHUSAGECONTEXTURL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
     public static final String SEARCHPARAMSYSTEMLIBRARYDEPENDSON =
             "http://hl7.org/fhir/Library#relatedArtifact.dependsOn";
@@ -25,7 +24,6 @@ public class CaseReporting {
     // Condition Groupers Sheet Layout
     public static final int CONDITIONGROUPINGSSHEETINDEX = 1;
     public static final int CONDITIONGROUPINGURLCOLINDEX = 1;
-    public static final int CONDITIONGROUPINGGENERATEDNAMECOLINDEX = 2;
     public static final int CONDITIONGROUPINGTITLECOLINDEX = 3;
     public static final int REPORTINGSPECIFICATIONTITLECOLINDEX = 4;
     public static final int REPORTINGSPECIFICATIONCONDITIONCODECOLINDEX = 5;
@@ -50,7 +48,7 @@ public class CaseReporting {
     public static final int ADDITIONALCONTEXTGROUPERTITLECOLINDEX = 4;
     public static final int ADDITIONALCONTEXTGROUPERVALUESETURLCOLINDEX = 5;
     public static final int ADDITIONALCONTEXTGROUPERVALUESETTITLECOLINDEX = 6;
-    public static final int ADDITIONALCONTEXTGGROUPERVALUESETSYSTEMURLCOLINDEX = 7;
+    public static final int ADDITIONALCONTEXTGROUPERVALUESETSYSTEMURLCOLINDEX = 7;
     public static final int ADDITIONALCONTEXTGROUPERCODECOLINDEX = 8;
     public static final int ADDITIONALCONTEXTGROUPERCODEDISPLAYCOLINDEX = 9;
     public static final int ADDITIONALCONTEXTGROUPERCODESYSTEMURLCOLINDEX = 10;

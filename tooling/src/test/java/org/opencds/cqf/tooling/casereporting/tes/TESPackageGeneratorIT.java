@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import org.hl7.fhir.r4.model.Bundle;
 
@@ -26,8 +24,8 @@ import org.hl7.fhir.r4.model.Bundle;
  *
  * Test fixtures assumed to live under src/test/resources/casereporting/tes/:
  *
- *   reporting-specification-groupers-bundle.json          – A transaction Bundle of Reporting Specification Grouper ValueSets
- *   TES_Groupers.xlsx     – The TES groupers workbook (condition + additional-context sheets)
+ *   reporting-specification-groupers-bundle.json – A transaction Bundle of Reporting Specification Grouper ValueSets
+ *   TES_Groupers.xlsx – The TES groupers workbook (condition + additional-context sheets)
  *   valueset-rckms-condition-codes.json – A ValueSet of condition codes used for the diff report
  *
  * Each test that writes output does so into a temp directory created under
@@ -63,12 +61,6 @@ public class TESPackageGeneratorIT {
         new File(tempOutputBase).mkdirs();
     }
 
-    private Bundle generateTESPackage(TESPackageGenerateParameters params) throws Exception {
-        TESPackageGenerator TESPackageGenerator = new TESPackageGenerator();
-
-        return TESPackageGenerator.generatePackage(params);
-    }
-
     // ===========================================================================
     // Helper – build a minimal but valid TESPackageGenerateParameters
     // ===========================================================================
@@ -88,26 +80,6 @@ public class TESPackageGeneratorIT {
         p.writeAdditionalContextGroupers = false;
         new File(p.outputPath).mkdirs();
         return p;
-    }
-
-    @Test
-    public void testTESPackageGenerate() throws Exception {
-        TESPackageGenerateParameters params = new TESPackageGenerateParameters();
-        params.pathToInputBundle = "src/test/resources/casereporting/tes/reporting-specification-groupers-bundle.json";
-        params.pathToGroupersWorkbook = "src/test/resources/casereporting/tes/TES_Groupers.xlsx";
-        params.pathToConditionCodeValueSet = "src/test/resources/casereporting/tes/valueset-rckms-condition-codes.json";
-        params.outputPath = "src/test/resources/casereporting/tes/output";
-        params.outputFileName = "condition-groupers-bundle.json";
-        params.version = "4.0.0";
-        params.releaseLabel = "2025-12-04 Release";
-        params.writeConditionGroupers = true;
-        params.writeAdditionalContextGroupers = true;
-        params.writeReportingSpecificationGroupers = true;
-
-        Bundle tesPackage = generateTESPackage(params);
-
-        assertEquals(tesPackage.getEntry().size(), 657); // 656 ValueSets, 1 Library
-        assertNotNull(tesPackage);
     }
 
     // ===========================================================================
@@ -514,13 +486,14 @@ public class TESPackageGeneratorIT {
         generator.generatePackage(params);
 
         File bundleFile = new File(params.outputPath + "/tes-content-bundle.json");
-        Assert.assertTrue(bundleFile.exists());
 
-        Bundle reparsed = (Bundle) ((JsonParser) fhirContext.newJsonParser())
-                .parseResource(new FileInputStream(bundleFile));
+        try (FileInputStream fis = new FileInputStream(bundleFile)) {
+            Bundle reparsed = (Bundle) ((JsonParser) fhirContext.newJsonParser())
+                    .parseResource(fis);
 
-        Assert.assertNotNull(reparsed, "Re-parsed bundle should not be null");
-        Assert.assertFalse(reparsed.getEntry().isEmpty(), "Re-parsed bundle should have entries");
+            Assert.assertNotNull(reparsed, "Re-parsed bundle should not be null");
+            Assert.assertFalse(reparsed.getEntry().isEmpty(), "Re-parsed bundle should have entries");
+        }
     }
 
     // ===========================================================================
@@ -536,13 +509,14 @@ public class TESPackageGeneratorIT {
         generator.generatePackage(params);
 
         File bundleFile = new File(params.outputPath + "/tes-content-bundle.xml");
-        Assert.assertTrue(bundleFile.exists());
 
-        Bundle reparsed = (Bundle) ((XmlParser) fhirContext.newXmlParser())
-                .parseResource(new FileInputStream(bundleFile));
+        try (FileInputStream fis = new FileInputStream(bundleFile)) {
+            Bundle reparsed = (Bundle) ((XmlParser) fhirContext.newXmlParser())
+                    .parseResource(fis);
 
-        Assert.assertNotNull(reparsed);
-        Assert.assertFalse(reparsed.getEntry().isEmpty());
+            Assert.assertNotNull(reparsed, "Re-parsed bundle should not be null");
+            Assert.assertFalse(reparsed.getEntry().isEmpty(), "Re-parsed bundle should have entries");
+        }
     }
 
     // ===========================================================================

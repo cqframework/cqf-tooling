@@ -120,7 +120,7 @@ public class TESPackageGenerator extends Operation {
                     writeReportingSpecificationGroupers = Boolean.parseBoolean(value);
                     break; // -writeReportingSpecificationGroupers (-wrsg)
                 case "writeadditionalcontextgroupers":
-                case "wgrsg":
+                case "wacg":
                     writeAdditionalContextGroupers = Boolean.parseBoolean(value);
                     break; // -writeadditionalcontextgroupers (-wacg)
                 default:
@@ -545,7 +545,7 @@ public class TESPackageGenerator extends Operation {
             String additionalContextGrouperValueSetTitle = SpreadsheetHelper.getCellAsStringEmptyForNull(
                     row, CaseReporting.ADDITIONALCONTEXTGROUPERVALUESETTITLECOLINDEX, evaluator);
             String additionalContextGrouperValueSetCodeSystem = SpreadsheetHelper.getCellAsStringEmptyForNull(
-                    row, CaseReporting.ADDITIONALCONTEXTGGROUPERVALUESETSYSTEMURLCOLINDEX, evaluator);
+                    row, CaseReporting.ADDITIONALCONTEXTGROUPERVALUESETSYSTEMURLCOLINDEX, evaluator);
 
             // Codes
             //            row.getCell(CaseReporting.ADDITIONALCONTEXTGROUPERCODECOLINDEX).setCellType(CellType.STRING);
@@ -610,7 +610,7 @@ public class TESPackageGenerator extends Operation {
                     canonicalUrl = CaseReporting.CANONICALBASE + "/ValueSet/"
                             + UUID.randomUUID().toString();
                     logger.info(
-                            "Reporting Specification Grouper '{}' did not have an identifier specified and has been assigned: {}",
+                            "Additional Context Grouper '{}' did not have an identifier specified and has been assigned: {}",
                             additionalContextGrouperEntry.getAdditionalContextGrouperTitle(),
                             canonicalUrl);
                 }
@@ -990,9 +990,7 @@ public class TESPackageGenerator extends Operation {
                             "Unsupported input file encoding. Currently, only .json and .xml supported for the input file.");
                 }
             } catch (FileNotFoundException e) {
-                if (logger.isInfoEnabled()) {
-                    logger.error("Error reading condition code value set file: '{}'.", e.getMessage());
-                }
+                logger.error("Error reading condition code value set file: '{}'.", valueSetFile.getAbsolutePath(), e);
             }
         }
         return conditionCodeValueSet;
