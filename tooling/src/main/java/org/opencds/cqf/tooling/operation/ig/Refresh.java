@@ -66,12 +66,32 @@ public abstract class Refresh {
       resource.getExtension().removeAll(resource.getExtensionsByUrl(CqfmConstants.LOGIC_DEFINITION_EXT_URL));
       resource.getExtension().removeAll(resource.getExtensionsByUrl(CqfmConstants.EFFECTIVE_DATA_REQS_EXT_URL));
 
+      Set<String> logicDefinitionKeys = new HashSet<>();
       for (Extension extension : moduleDefinitionLibrary.getExtension()) {
          if (extension.hasUrl() && extension.getUrl().equals(CqfmConstants.DIRECT_REF_CODE_EXT_URL)) {
             continue;
          }
+         if (extension.hasUrl() && extension.getUrl().equals(CqfmConstants.LOGIC_DEFINITION_EXT_URL)) {
+            String key = getLogicDefinitionKey(extension);
+            if (key != null && !logicDefinitionKeys.add(key)) {
+               continue;
+            }
+         }
          resource.addExtension(extension);
       }
+   }
+
+   private String getLogicDefinitionKey(Extension logicDefinition) {
+      String libraryName = null;
+      String name = null;
+      for (Extension sub : logicDefinition.getExtension()) {
+         if ("libraryName".equals(sub.getUrl()) && sub.hasValue()) {
+            libraryName = sub.getValue().primitiveValue();
+         } else if ("name".equals(sub.getUrl()) && sub.hasValue()) {
+            name = sub.getValue().primitiveValue();
+         }
+      }
+      return (libraryName != null && name != null) ? libraryName + "|" + name : null;
    }
 
    public void attachModuleDefinitionLibrary(MetadataResource resource, Library moduleDefinitionLibrary) {

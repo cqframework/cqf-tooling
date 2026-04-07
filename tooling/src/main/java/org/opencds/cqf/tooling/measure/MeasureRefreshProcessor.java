@@ -20,6 +20,7 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StringType;
+import org.opencds.cqf.tooling.utilities.constants.CqfConstants;
 import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
 
 public class MeasureRefreshProcessor {
@@ -39,6 +40,7 @@ public class MeasureRefreshProcessor {
 
     	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, compiledLibrary, options);
         removeModelInfoDependencies(moduleDefinitionLibrary);
+        deduplicateLogicDefinitions(moduleDefinitionLibrary);
         measureToUse.setDate(new Date());
         // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
         setMeta(measureToUse, moduleDefinitionLibrary);
@@ -100,6 +102,30 @@ public class MeasureRefreshProcessor {
             groupMember.getStratifier().forEach(stratifier-> expressionSet.add(stratifier.getCriteria().getExpression()));
         });
         return expressionSet;
+    }
+
+    private void deduplicateLogicDefinitions(Library moduleDefinitionLibrary) {
+        Set<String> seen = new HashSet<>();
+        moduleDefinitionLibrary.getExtension().removeIf(ext -> {
+            if (ext.hasUrl() && ext.getUrl().equals(CqfConstants.LOGIC_DEFINITION_EXT_URL)) {
+                String key = getLogicDefinitionKey(ext);
+                return key != null && !seen.add(key);
+            }
+            return false;
+        });
+    }
+
+    private String getLogicDefinitionKey(Extension logicDefinition) {
+        String libraryName = null;
+        String name = null;
+        for (Extension sub : logicDefinition.getExtension()) {
+            if ("libraryName".equals(sub.getUrl()) && sub.hasValue()) {
+                libraryName = sub.getValue().primitiveValue();
+            } else if ("name".equals(sub.getUrl()) && sub.hasValue()) {
+                name = sub.getValue().primitiveValue();
+            }
+        }
+        return (libraryName != null && name != null) ? libraryName + "|" + name : null;
     }
 
     private void clearMeasureExtensions(Measure measure, String extensionUrl) {
