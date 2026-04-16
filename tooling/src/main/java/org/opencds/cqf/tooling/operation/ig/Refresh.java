@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.LogicDefinitionUtils;
 import org.opencds.cqf.tooling.utilities.constants.CqfmConstants;
 import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
 import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
@@ -71,27 +72,14 @@ public abstract class Refresh {
          if (extension.hasUrl() && extension.getUrl().equals(CqfmConstants.DIRECT_REF_CODE_EXT_URL)) {
             continue;
          }
-         if (extension.hasUrl() && extension.getUrl().equals(CqfmConstants.LOGIC_DEFINITION_EXT_URL)) {
-            String key = getLogicDefinitionKey(extension);
+         if (LogicDefinitionUtils.isLogicDefinition(extension)) {
+            String key = LogicDefinitionUtils.getLogicDefinitionKey(extension);
             if (key != null && !logicDefinitionKeys.add(key)) {
                continue;
             }
          }
          resource.addExtension(extension);
       }
-   }
-
-   private String getLogicDefinitionKey(Extension logicDefinition) {
-      String libraryName = null;
-      String name = null;
-      for (Extension sub : logicDefinition.getExtension()) {
-         if ("libraryName".equals(sub.getUrl()) && sub.hasValue()) {
-            libraryName = sub.getValue().primitiveValue();
-         } else if ("name".equals(sub.getUrl()) && sub.hasValue()) {
-            name = sub.getValue().primitiveValue();
-         }
-      }
-      return (libraryName != null && name != null) ? libraryName + "|" + name : null;
    }
 
    public void attachModuleDefinitionLibrary(MetadataResource resource, Library moduleDefinitionLibrary) {

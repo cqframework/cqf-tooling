@@ -5,6 +5,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.hl7.fhir.r5.model.*;
+import org.opencds.cqf.tooling.utilities.LogicDefinitionUtils;
 import org.opencds.cqf.tooling.utilities.constants.CqfConstants;
 import org.opencds.cqf.tooling.utilities.constants.CqfmConstants;
 import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
@@ -23,6 +24,7 @@ public class PlanDefinitionRefreshProcessor {
         var dqReqTrans = new DataRequirementsProcessor();
         var moduleDefinitionLibrary = dqReqTrans.gatherDataRequirements(libraryManager, compiledLibrary,
                 options, expressions, true);
+        LogicDefinitionUtils.deduplicate(moduleDefinitionLibrary.getExtension());
 
         // Clear all existing CQFM extensions
         // These extensions are now deprecated, but may be in use for older artifacts
