@@ -20,6 +20,7 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StringType;
+import org.opencds.cqf.tooling.utilities.LogicDefinitionUtils;
 import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
 
 public class MeasureRefreshProcessor {
@@ -39,6 +40,7 @@ public class MeasureRefreshProcessor {
 
     	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, compiledLibrary, options);
         removeModelInfoDependencies(moduleDefinitionLibrary);
+        LogicDefinitionUtils.deduplicate(moduleDefinitionLibrary.getExtension());
         measureToUse.setDate(new Date());
         // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
         setMeta(measureToUse, moduleDefinitionLibrary);

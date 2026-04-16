@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.LogicDefinitionUtils;
 import org.opencds.cqf.tooling.utilities.constants.CqfmConstants;
 import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
 import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
@@ -66,9 +67,16 @@ public abstract class Refresh {
       resource.getExtension().removeAll(resource.getExtensionsByUrl(CqfmConstants.LOGIC_DEFINITION_EXT_URL));
       resource.getExtension().removeAll(resource.getExtensionsByUrl(CqfmConstants.EFFECTIVE_DATA_REQS_EXT_URL));
 
+      Set<String> logicDefinitionKeys = new HashSet<>();
       for (Extension extension : moduleDefinitionLibrary.getExtension()) {
          if (extension.hasUrl() && extension.getUrl().equals(CqfmConstants.DIRECT_REF_CODE_EXT_URL)) {
             continue;
+         }
+         if (LogicDefinitionUtils.isLogicDefinition(extension)) {
+            String key = LogicDefinitionUtils.getLogicDefinitionKey(extension);
+            if (key != null && !logicDefinitionKeys.add(key)) {
+               continue;
+            }
          }
          resource.addExtension(extension);
       }
