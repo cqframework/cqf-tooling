@@ -9,6 +9,7 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public class ClassInfoSettings {
     public String modelName;
+    public String modelVersion;
     public String modelPrefix;
     public String helpersLibraryName;
     public boolean useCQLPrimitives = false;

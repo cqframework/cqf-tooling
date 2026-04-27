@@ -18,6 +18,11 @@ public class ModelInfoBuilder {
         this.typeInfos = typeInfos;
     }
 
+    protected ModelInfoBuilder(Collection<TypeInfo> typeInfos, ModelInfoSettings settings) {
+        this.typeInfos = typeInfos;
+        this.settings = settings;
+    }
+
     public ModelInfo build()
     {
         this.beforeBuild();

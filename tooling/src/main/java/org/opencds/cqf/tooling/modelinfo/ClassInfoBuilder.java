@@ -71,7 +71,37 @@ public abstract class ClassInfoBuilder {
         }
     }
 
+    private String stripVersion(String url) {
+        int index = url.lastIndexOf("|");
+        if (index == -1) {
+            return url;
+        } else if (index > 0) {
+            return url.substring(0, index);
+        } else {
+            return "";
+        }
+    }
+
+    private String getVersion(String url) {
+        if (url == null) {
+            return null;
+        }
+
+        int index = url.lastIndexOf("|");
+        if (index == -1) {
+            return url;
+        } else if (index > 0) {
+            return url.substring(index + 1);
+        } else {
+            return "";
+        }
+    }
+
     private String getTail(String url) {
+        if (url == null) {
+            return null;
+        }
+
         int index = url.lastIndexOf("/");
         if (index == -1) {
             return null;
@@ -114,8 +144,11 @@ public abstract class ClassInfoBuilder {
 
     private String getTypeNameFromUrl(String url) {
         if (url != null) {
-            String typeId = getTail(url);
+            String typeId = stripVersion(getTail(url));
             StructureDefinition sd = structureDefinitions.get(typeId);
+            if (sd == null) {
+                return null;
+            }
             return getTypeName(sd);
         }
 
@@ -347,7 +380,7 @@ public abstract class ClassInfoBuilder {
 
     @SuppressWarnings("unused")
     private Boolean isExtension(StructureDefinition sd) {
-        return getTail(sd.getId()).equals("Extension") || (sd.getBaseDefinition() != null && getTail(sd.getBaseDefinition()).equals("Extension"));
+        return getTail(sd.getId()).equals("Extension") || (sd.getBaseDefinition() != null && stripVersion(getTail(sd.getBaseDefinition())).equals("Extension"));
     }
 
     // Returns true if the ElementDefinition describes an Extension
@@ -376,7 +409,7 @@ public abstract class ClassInfoBuilder {
         if (typeCode != null) {
             TypeRefComponent typeRef = ed.getType().get(0);
             if (typeRef.hasProfile() && typeRef.getProfile().size() == 1) {
-                String typeId = getTail(typeRef.getProfile().get(0).asStringValue());
+                String typeId = stripVersion(getTail(typeRef.getProfile().get(0).asStringValue()));
                 StructureDefinition sd = structureDefinitions.get(typeId);
                 if (sd != null) {
                     return sd.getUrl();
@@ -805,7 +838,7 @@ public abstract class ClassInfoBuilder {
                 List<CanonicalType> extensionProfile = ed.getType().get(0).getProfile();
                 if (extensionProfile.size() == 1) {
                     //set targetPath here
-                    typeId = getTail(extensionProfile.get(0).asStringValue());
+                    typeId = stripVersion(getTail(extensionProfile.get(0).asStringValue()));
                     StructureDefinition sd = this.structureDefinitions.get(typeId);
                     typeName = getTypeName(sd);
                     String qualifiedTypeName = this.getTypeName(modelName, typeName);
@@ -1467,7 +1500,7 @@ public abstract class ClassInfoBuilder {
         }
 
         if (baseTypeName != null && !this.typeInfos.containsKey(baseTypeName)) {
-            StructureDefinition baseSd = this.structureDefinitions.get(getTail(baseDefinition));
+            StructureDefinition baseSd = this.structureDefinitions.get(stripVersion(getTail(baseDefinition)));
             buildClassInfo(modelName, baseSd);
         }
 
@@ -1504,7 +1537,7 @@ public abstract class ClassInfoBuilder {
 
     @SuppressWarnings("unused")
     private StructureDefinition getBaseDefinitionStructureDef(String model, StructureDefinition sd) {
-        String baseSd = (sd.getBaseDefinition() == null) ? null : getTail(sd.getBaseDefinition());
+        String baseSd = (sd.getBaseDefinition() == null) ? null : stripVersion(getTail(sd.getBaseDefinition()));
         if (baseSd != null && !baseSd.equals("ElementDefinition") && !baseSd.equals("Element")
                 && !baseSd.equals("BackboneElement") && !baseSd.equals("Resource") && !baseSd.equals("DomainResource")
                 && !this.settings.primitiveTypeMappings.containsKey(model + "." + baseSd)

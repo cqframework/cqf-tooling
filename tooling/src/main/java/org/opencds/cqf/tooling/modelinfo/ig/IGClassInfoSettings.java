@@ -1,4 +1,6 @@
 package org.opencds.cqf.tooling.modelinfo.ig;
 
-public class IGClassInfoSettings {
+import org.opencds.cqf.tooling.modelinfo.ClassInfoSettings;
+
+public class IGClassInfoSettings extends ClassInfoSettings {
 }

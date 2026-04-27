@@ -9,9 +9,13 @@ import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.modelinfo.fhir.FHIRClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.fhir.FHIRModelInfoBuilder;
+import org.opencds.cqf.tooling.modelinfo.ig.IGClassInfoBuilder;
+import org.opencds.cqf.tooling.modelinfo.ig.IGModelInfoBuilder;
+import org.opencds.cqf.tooling.modelinfo.ig.IGModelInfoSettings;
 import org.opencds.cqf.tooling.modelinfo.qicore.QICoreClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.qicore.QICoreModelInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.quick.QuickClassInfoBuilder;
@@ -243,14 +247,30 @@ public class StructureDefinitionToModelInfo extends Operation {
                 miBuilder = new QuickModelInfoBuilder(modelVersion, typeInfos.values());
                 mi = miBuilder.build();
             } else {
-                //should blowup
-                ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
+                // This is an implementation guide...
+                ImplementationGuide ig = atlas.getImplementationGuides().get("us-quality-core");
+                IGClassInfoBuilder ciBuilder = new IGClassInfoBuilder(ig, atlas.getStructureDefinitions());
+                ciBuilder.settings.modelName = this.modelName;
                 ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
                 ciBuilder.settings.includeMetaData = this.includeMetadata;
                 ciBuilder.settings.createSliceElements = this.createSliceElements;
                 ciBuilder.settings.flatten = this.flatten;
+                // TODO: Should be a general reverse index based on model dependencies
+                ciBuilder.settings.urlToModel.putIfAbsent("http://fhir.org/guides/astp/us-quality-core", this.modelName);
                 Map<String, TypeInfo> typeInfos = ciBuilder.build();
-                miBuilder = new ModelInfoBuilder(typeInfos.values());
+                miBuilder = new IGModelInfoBuilder(
+                        new IGModelInfoSettings(
+                            this.modelName,
+                            this.modelVersion,
+                            "http://fhir.org/guides/astp/us-quality-core",
+                            null,
+                            null,
+                            "usqualitycore",
+                            "http://hl7.org/fhir"
+                        ),
+                        typeInfos,
+                        atlas
+                );
                 mi = miBuilder.build();
             }
 
