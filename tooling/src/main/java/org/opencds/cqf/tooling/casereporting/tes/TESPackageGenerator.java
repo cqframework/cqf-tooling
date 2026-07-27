@@ -768,6 +768,7 @@ public class TESPackageGenerator extends Operation {
         );
         manifest.addExtension(expansionParametersExtension);
         manifest.setUrl(CaseReporting.MANIFESTURL);
+        // Intentionally producing a draft manifest. It will be released and packaged downstream in the workflow.
         manifest.setVersion(this.version + "-draft");
         manifest.setName("TESContentLibrary");
         manifest.setTitle("TES Content Library");
