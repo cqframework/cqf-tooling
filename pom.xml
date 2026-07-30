@@ -88,19 +88,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>support.hln.com-release</id>
-            <name>support.hln.com-release</name>
-            <url>https://hlnconsulting.jfrog.io/artifactory/libs-release-local/</url>
-        </repository>
-        <repository>
-            <id>support.hln.com-snapshot</id>
-            <name>support.hln.com-snapshot</name>
-            <url>https://hlnconsulting.jfrog.io/artifactory/libs-snapshot-local/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
     </repositories>
 
     <dependencyManagement>
