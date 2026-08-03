@@ -159,10 +159,6 @@ class OperationFactory {
                 return new IgBundler();
 //            case "PackageIG":
 //                return new PackageOperation();
-            case "GenerateCQLFromDrool":
-                return new GenerateCQLFromDroolOperation();
-            case "VmrToFhir":
-                return new VmrToFhirOperation();
             case "NewRefreshIG":
                 return new NewRefreshIGOperation();
             case "RefreshIG":
