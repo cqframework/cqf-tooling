@@ -122,11 +122,13 @@ public class CodeSystemLookupDictionary {
             case "RoleCode": return "http://terminology.hl7.org/CodeSystem/v3-RoleCode";
             case "RoleStatus": return "http://terminology.hl7.org/CodeSystem/v3-RoleStatus";
             case "SNOMEDCT": return "http://snomed.info/sct";
+            case "SNOMED CT US Edition": return "http://snomed.info/sct";
             case "UBREV": return "http://terminology.hl7.org/CodeSystem/nubc-UB92";
             case "UBTOB": return "http://terminology.hl7.org/CodeSystem/nubc-UB92";
             case "POS": return "http://terminology.hl7.org/CodeSystem/POS";
             case "PYXIS": return "http://content.alphora.com/fhir/dqm/CodeSystem/Pyxis";
             case "CDCREC": return "urn:oid:2.16.840.1.113883.6.238";
+            case "CDC Race and Ethnicity": return "urn:oid:2.16.840.1.113883.6.238";
             case "Modifier": return "http://www.ama-assn.org/go/cpt";
             case "CDT": return "http://www.ada.org/cdt";
             case "mediaType": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
