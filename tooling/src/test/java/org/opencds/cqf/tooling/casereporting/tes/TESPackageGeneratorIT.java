@@ -135,7 +135,7 @@ public class TESPackageGeneratorIT {
                 .orElse(null);
 
         Assert.assertNotNull(manifest, "Manifest Library must be present");
-        Assert.assertEquals(manifest.getVersion(), "1.0.0", "Library version should match input version");
+        Assert.assertEquals(manifest.getVersion(), "1.0.0-draft", "Library version should match input version");
         Assert.assertEquals(manifest.getName(), "TESContentLibrary", "Library name should be TESContentLibrary");
         Assert.assertFalse(
                 manifest.getRelatedArtifact().isEmpty(),
