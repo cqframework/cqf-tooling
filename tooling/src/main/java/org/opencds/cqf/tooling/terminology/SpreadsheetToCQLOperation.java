@@ -111,24 +111,33 @@ public class SpreadsheetToCQLOperation extends Operation {
                 }
 
                 result.append("  { ");
-                Iterator<Cell> cells = row.cellIterator();
+                int f = row.getFirstCellNum();
+                int l = row.getLastCellNum();
+                //result.append(String.format("/* %d %d */", f, l));
                 boolean firstCell = true;
-                while (cells.hasNext()) {
+                //Iterator<Cell> cells = row.cellIterator();
+                //while (cells.hasNext()) { }
+                for (int i = f; i <= l; i++) {
                     if (firstCell) {
                         firstCell = false;
                     }
                     else {
                         result.append(", ");
                     }
-                    Cell cell = cells.next();
-                    SpreadsheetHelper.getCellAsString(cell);
+                    //Cell cell = cells.next();
+                    Cell cell = row.getCell(i, Row.MissingCellPolicy.RETURN_NULL_AND_BLANK);
                     result.append("\"");
-                    result.append(getHeader(header, cell.getColumnIndex()));
+                    result.append(getHeader(header, i));
                     result.append("\"");
                     result.append(": ");
-                    result.append("'");
-                    result.append(StringEscapeUtils.escapeCql(SpreadsheetHelper.getCellAsString(cell)));
-                    result.append("'");
+                    if (cell != null) {
+                        result.append("'");
+                        result.append(StringEscapeUtils.escapeCql(SpreadsheetHelper.getCellAsString(cell)));
+                        result.append("'");
+                    }
+                    else {
+                        result.append("null");
+                    }
                 }
                 result.append(" }");
             }
