@@ -29,18 +29,11 @@ public class CaseReporting {
     public static final int REPORTINGSPECIFICATIONCONDITIONCODECOLINDEX = 5;
     public static final int REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONCOLINDEX = 6;
 
-    // Additional Context Groupers Sheet Layout
-    //    public static final int ADDITIONALCONTEXTGROUPERSHEETINDEX = 2;
-    //    public static final int ADDITIONALCONTEXTGROUPERTARGETCONDITIONGROUPERURLCOLINDEX = 0;
-    //    public static final int ADDITIONALCONTEXTGROUPERTARGETCONDITIONGROUPERTITLECOLINDEX = 1;
-    //    public static final int ADDITIONALCONTEXTGROUPERURLCOLINDEX = 2;
-    //    public static final int ADDITIONALCONTEXTGROUPERTITLECOLINDEX = 3;
-    //    public static final int ADDITIONALCONTEXTGROUPERVALUESETTITLEINDEX = 4;
-    //    public static final int ADDITIONALCONTEXTGROUPERVALUESETURLINDEX = 5;
-    //    public static final int ADDITIONALCONTEXTGROUPERVALUESETSYSTEMINDEX = 6;
+    // Condition Grouper Curation Coverage Level
+    public static final int CONDITIONGROUPERCURATIONCOVERAGELEVELSHEETINDEX = 2;
 
-    // Additional Context Groupers Codes Sheet Layout
-    public static final int ADDITIONALCONTEXTGROUPERSHEETINDEX = 2;
+    // Additional Context Groupers Sheet Layout
+    public static final int ADDITIONALCONTEXTGROUPERSHEETINDEX = 3;
     public static final int ADDITIONALCONTEXTGROUPERTARGETCONDITIONGROUPERURLCOLINDEX = 0;
     public static final int ADDITIONALCONTEXTGROUPERTARGETCONDITIONGROUPERTITLECOLINDEX = 1;
     public static final int ADDITIONALCONTEXTGROUPERGENERATEDURLCOLINDEX = 2;
@@ -52,4 +45,7 @@ public class CaseReporting {
     public static final int ADDITIONALCONTEXTGROUPERCODECOLINDEX = 8;
     public static final int ADDITIONALCONTEXTGROUPERCODEDISPLAYCOLINDEX = 9;
     public static final int ADDITIONALCONTEXTGROUPERCODESYSTEMURLCOLINDEX = 10;
+
+    // Additional Context Grouper Curation Coverage Level
+    public static final int ADDITIONALCONTEXTGROUPERCURATIONCOVERAGELEVELSHEETINDEX = 4;
 }

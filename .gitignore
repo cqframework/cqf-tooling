@@ -138,3 +138,4 @@ core.*
 javacore.*
 jitdump.*
 Snap.*
+tooling/src/test/resources/casereporting/tes/output400/*

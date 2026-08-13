@@ -1,11 +1,17 @@
 {
   "resourceType": "ValueSet",
-  "id": "example",
+  "id": "rckms-condition-codes",
+  "url": "http://ersd.aimsplatform.org/fhir/ValueSet/rckms-condition-codes",
+  "version": "20260227",
+  "name": "RCKMSConditionCodes",
+  "title": "RCKMS Condition Codes",
   "status": "active",
+  "publisher": "RCKMS",
+  "description": "The Reportable Condition Knowledge Management System (RCKMS) associates a standardized code with each condition available for authoring. This workbook contains condition codes included in the June 2023 content release. Please note that while there may be overlap with concepts referenced in RCKMS reporting logic, this value set is not intended to serve as a 'trigger' for case reporting.  When implementing trigger codes for electronic case reporting, use the Reportable Condition Trigger Codes (RCTC) file.",
   "compose": {
     "include": [ {
       "system": "http://snomed.info/sct",
-      "version": "2025-03",
+      "version": "2025-09",
       "concept": [ {
         "code": "49649001",
         "display": "Infection caused by Acanthamoeba (disorder)",
@@ -2865,6 +2871,28 @@
             "display": "Synonym"
           },
           "value": "X-linked Adrenoleukodystrophy"
+        } ]
+      }, {
+        "code": "1001411000124108",
+        "display": "Death associated with disease caused by severe acute respiratory syndrome coronavirus 2 (event)",
+        "designation": [ {
+          "use": {
+            "system": "http://snomed.info/sct",
+            "code": "synonym",
+            "display": "Synonym"
+          },
+          "value": "COVID-19-Associated Pediatric Mortality"
+        } ]
+      }, {
+        "code": "1382227005",
+        "display": "Infection caused by soil transmitted helminth (disorder)",
+        "designation": [ {
+          "use": {
+            "system": "http://snomed.info/sct",
+            "code": "synonym",
+            "display": "Synonym"
+          },
+          "value": "Soil-Transmitted Helminth Infections"
         } ]
       } ]
     } ]
