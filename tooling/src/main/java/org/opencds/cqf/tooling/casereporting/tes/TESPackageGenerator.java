@@ -595,7 +595,7 @@ public class TESPackageGenerator extends Operation {
         List<ValueSet> additionalContextGroupers = new ArrayList<>();
 
         for (AdditionalContextGrouperEntry additionalContextGrouperEntry : additionalContextGrouperEntries) {
-            // Get the existing RS Grouper if it exists
+            // Get the existing AC Grouper if it exists
             // If it does not exist, create it
             // Check the compose for the code being added and add it if it's not already there.
             var relevantAdditionalContextGrouper = additionalContextGroupers.stream()
@@ -802,20 +802,6 @@ public class TESPackageGenerator extends Operation {
             componentRelatedArtifact.setResource(component.getUrl() + "|" + component.getVersion());
             relatedArtifactsToAdd.add(componentRelatedArtifact);
         }
-
-//        for (ValueSet component : components) {
-//            var dependencyRelatedArtifact =
-//                    new RelatedArtifact().setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
-//            dependencyRelatedArtifact.setResource(component.getUrl() + "|" + component.getVersion());
-//            relatedArtifactsToAdd.add(dependencyRelatedArtifact);
-//        }
-//
-//        for (ValueSet dependency : dependencies) {
-//            var dependencyRelatedArtifact =
-//                    new RelatedArtifact().setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
-//            dependencyRelatedArtifact.setResource(dependency.getUrl() + "|" + dependency.getVersion());
-//            relatedArtifactsToAdd.add(dependencyRelatedArtifact);
-//        }
 
         manifest.setRelatedArtifact(relatedArtifactsToAdd);
 
